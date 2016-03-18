@@ -1,4 +1,14 @@
 <!-- Footer -->
+<!-- jQuery -->
+<script src="{{ "/js/jquery.min.js " | prepend: site.baseurl }}"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="{{ "/js/bootstrap.min.js " | prepend: site.baseurl }}"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="{{ "/js/hux-blog.min.js " | prepend: site.baseurl }}"></script>
+
+
 <footer>
     <div class="container">
         <div class="row">
@@ -72,27 +82,35 @@
                 <p class="copyright text-muted">
                     Copyright &copy; {{ site.title }} {{ site.time | date: '%Y' }}
                     <br>
-                    Theme © <a href="http://huangxuan.me">Hux</a> |
+                    Theme © <a href="http://xiaoh.me">Xiaoh</a> |
                     <iframe
                         style="margin-left: 2px; margin-bottom:-5px;"
                         frameborder="0" scrolling="0" width="91px" height="20px"
-                        src="https://ghbtns.com/github-btn.html?user=huxpro&repo=huxpro.github.io&type=star&count=true" >
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
                     </iframe>
                 </p>
             </div>
         </div>
     </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
 </footer>
-
-<!-- jQuery -->
-<script src="{{ "/js/jquery.min.js " | prepend: site.baseurl }}"></script>
-
-<!-- Bootstrap Core JavaScript -->
-<script src="{{ "/js/bootstrap.min.js " | prepend: site.baseurl }}"></script>
-
-<!-- Custom Theme JavaScript -->
-<script src="{{ "/js/hux-blog.min.js " | prepend: site.baseurl }}"></script>
-
 
 <!-- async load function -->
 <script>

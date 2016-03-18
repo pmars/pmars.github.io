@@ -1,0 +1,114 @@
+---
+layout:     post
+title:      "小但有用的知识点"
+subtitle:   "收集一些平时用到的不喜欢记忆的点"
+date:       2016-02-17 13:45:21
+author:     "xiaoh"
+header-img: "img/post-bg-default.jpg"
+tags:
+    - Tips
+---
+
+### 目录
+
+0. [VIMDIFF操作](#vimdiffvimdiff)
+0. [Nginx Body Size](#nginx-body-sizengxbodysize)
+0. [令人惊艳的正则](#amazingregex)
+0. [Unix/Linux快捷键](#unixlinuxhotkey)
+0. [Linux同步时间](#linuxlinuxntpdate)
+
+---
+
+> 这篇博客里面记录一些平时能够用到的，比较小的知识点
+
+---
+
+### [VIMDIFF操作](#vimdiff)
+
+You can use the following basic commands to merge:
+
+* `do` Get changes from other window into the current window.
+* `dp` Put the changes from current window into the other window.
+* `]c` Jump to the next change.
+* `[c` Jump to the previous change.
+* `zo` open folded lines.
+* `zc` close folded lines.
+* `Ctrl+w,w` change window.
+* `:only | wq` quit other windows, write and quit.
+
+See more details at: <http://amjith.blogspot.com/2008/08/quick-and-dirty-vimdiff-tutorial.html>
+
+---
+
+### [Nginx Body Size](#ngxbodysize)
+
+在用Nginx处理上传数据时，可以指定最大的Post Body的大小:
+
+    client_max_body_size 50k;
+    client_body_buffer_size 50k;
+
+我在使用 lua 去处理 body 的时候，通过 `ngx.req.read_body();local body = ngx.req.get_body_data()` 来读取内容，这个时候 buffer 的大小尤为关键，默认只能读取11k多一些的内容，所以需要指定一下。
+
+---
+
+### [令人惊艳的正则](#amazingregex)
+
+* 判断一个数字是否可以被3整除
+
+```
+^([0369]+|[147]([0369]*[147][0369]*[258])*([0369]*[258]|[0369]*[147][0369]*[147])|[258]([0369]*[258][0369]*[147])*([0369]*[147]|[0369]*[258][0369]*[258]))+$
+```
+
+* 判断一个数字是否是素数
+
+    ^(?!(xx+?)\1+$)
+
+---
+
+### [Unix/Linux快捷键](#hotkey)
+
+* Ctrl-a : 行首
+* Ctrl-e : 行尾
+* Ctrl-b : 光标前移
+* Ctrl-f : 光标后移
+* Ctrl-l : clear, 清屏
+* Ctrl-p : 上一个命令
+* Ctrl-n : 下一个命令
+* Ctrl-c : SIGINT中断程序
+* Ctrl-\ : 发送SIGQUIT信号中断程序
+* Ctrl-h : 删除光标前的一个字符
+* Ctrl-d : 删除光标后的一个字符
+* Ctrl-w : 删除光标前的一个词
+* Ctrl-u : 删除行首到光标的所有内容
+* Ctrl-k : 删除光标到行尾的所有内容
+* Ctrl-y : 粘贴刚才删除的所有字符
+* Ctrl-r : 在历史命令中查找
+* Ctrl-z : 转入后台运行(不过，由Ctrl + z转入后台运行的进程在当前用户退出后就会终止，所以用这个不如用nohup命令&，因为nohup命令的作用就是用户退出之后进程仍然继续运行，而现在许多脚本和命令都要求在root退出时仍然有效)
+* !!  重复执行最后一条命令
+* history 显示你所有执行过的编号+历史命令。这个可以配合!编辑来执行某某命令
+* !$ 显示系统最近的一条参数
+
+---
+
+### [Linux同步时间](#linuxntpdate)
+
+    sudo ntpdate time.nist.gov
+
+上面的命令就可以同步时间了，如果想做成自动的，如下：
+
+    */10 * * * * ntpdate time.nist.gov   #域名或IP  
+
+每隔十分钟同步一次。推荐几个时间服务器。
+
+    time.nist.gov
+    time.nuri.net
+    0.asia.pool.ntp.org
+    1.asia.pool.ntp.org
+    2.asia.pool.ntp.org
+    3.asia.pool.ntp.org
+
+---
+
+### END
+
+
