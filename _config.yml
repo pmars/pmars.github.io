@@ -3,7 +3,7 @@
 # site settings
 title: Xiaoh's Blogs
 SEOTitle: Xiaoh写文章的地方 | Xiaoh's Blogs
-header-img: img/home-bg.jpg
+header-img: /img/home-bg.jpg
 email: xiaoh@about.me
 description: "死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目"
 keyword: "兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品"
