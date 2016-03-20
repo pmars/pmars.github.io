@@ -16,6 +16,7 @@ tags:
 0. [令人惊艳的正则](#amazingregex)
 0. [Unix/Linux快捷键](#unixlinuxhotkey)
 0. [Linux同步时间](#linuxlinuxntpdate)
+0. [Merge fork 的项目](#merge-fork-mergefork)
 
 ---
 
@@ -106,6 +107,14 @@ See more details at: <http://amjith.blogspot.com/2008/08/quick-and-dirty-vimdiff
     1.asia.pool.ntp.org
     2.asia.pool.ntp.org
     3.asia.pool.ntp.org
+
+---
+
+### [Merge fork 的项目](#mergefork)
+
+    git remote add remote_xx xx_url
+    git fetch remote_xx
+    git merge remote_xx/master
 
 ---
 
