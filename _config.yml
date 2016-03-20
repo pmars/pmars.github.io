@@ -7,7 +7,7 @@ header-img: img/home-bg.jpg
 email: xiaoh@about.me
 description: "死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目"
 keyword: "兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品"
-url: "http://xiaoh.me"              # your host, for absolute URL
+url: "http://www.xiaoh.me"              # your host, for absolute URL
 baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
 # sns settings
@@ -48,7 +48,7 @@ kramdown:
 ba_track_id: eb09bda7042f7733bd1bcba14d69d750
 # Google Analytics
 ga_track_id: 'UA-73800419-1'            # Format: UA-xxxxxx-xx
-ga_domain: xiaoh.me
+ga_domain: www.xiaoh.me
 
 # sidebar settings
 sidebar: true                           # whether or not using Sidebar.
