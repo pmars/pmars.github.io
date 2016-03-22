@@ -25,7 +25,7 @@ anchorjs: true
 
 # gems
 # from PR#40, to support local preview for Jekyll 3.0
-gems: [jekyll-paginate]
+# gems: [jekyll-paginate]
 
 # markdown settings
 # replace redcarpet to kramdown,
@@ -53,7 +53,7 @@ ga_domain: www.xiaoh.me
 # sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "写写代码，玩玩游戏，交交朋友。世界那么大，带媳妇去看看。^V^"
-sidebar-avatar: /img/avatar-xiaoh.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: img/avatar-xiaoh.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # featured Tags
 featured-tags: true                     # whether or not using Feature-Tags
