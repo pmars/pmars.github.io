@@ -9,11 +9,8 @@ tags:
     - Python
 ---
 
-> 这是一个开源项目，旨在将一些Python开发的相关组件集合到一起，作为一个工具箱，大家可以从这里查找各种技术的工具。
 
----
-
-# [Awesome Python](https://github.com/sindresorhus/awesome)
+# Awesome Python [![Awesome](https://cdn.rawgit.com/sindresorhus/awesome/d7305f38d29fed78fa85652e3a63e154dd8e8829/media/badge.svg)](https://github.com/sindresorhus/awesome)
 
 A curated list of awesome Python frameworks, libraries, software and resources.
 
