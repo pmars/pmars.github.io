@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "Hadoop集群的的安装使用"
+title:      "Hadoop集群的安装使用"
 subtitle:   "大数据开发之--Hadoop,Hbase,Zookeeper总结"
 date:       2016-03-10 21:21:59
 author:     "xiaoh"
