@@ -25,7 +25,7 @@ anchorjs: true
 
 # gems
 # from PR#40, to support local preview for Jekyll 3.0
-# gems: [jekyll-paginate]
+gems: [jekyll-paginate]
 
 # markdown settings
 # replace redcarpet to kramdown,
