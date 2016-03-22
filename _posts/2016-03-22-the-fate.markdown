@@ -2,7 +2,7 @@
 layout:     post
 title:      "性格决定命运"
 subtitle:   "这就是生活"
-date:       2016-03-22 21:30:30
+date:       2016-03-22 12:30:30
 author:     "xiaoh"
 header-img: "img/post-bg-default.jpg"
 tags:
