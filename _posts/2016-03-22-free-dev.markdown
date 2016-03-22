@@ -535,6 +535,7 @@ Table of Contents
    * [expensify.com](https://expensify.com/) — Expense reporting, free personal reporting approval workflow
 
 ## International Mobile Number Verification API and SDK
+
   * [cognalys.com](https://cognalys.com/) — Freemium mobile number verification through an innovative and reliable method than using SMS gateway. Free accounts will have 70 tries and 50 verifications/day. {[Signup](https://www.cognalys.com/signup/1)}
   * [numverify.com](https://numverify.com/) — Global Phone Number Validation & Lookup JSON API. 250 API requests/month
   * [sumome.com](https://sumome.com/) — Heat map and conversion enhancement tools, free without few advanced features
@@ -552,6 +553,7 @@ Table of Contents
   * [screenshotlayer.com](https://screenshotlayer.com/) — Capture highly customizable snapshots of any website. Free 100 snapshots/month
 
 ## Docker Related
+
 ### Alternate Container Hosting
 
   * [quay.io](https://quay.io/) — Unlimited free public repositories
@@ -561,20 +563,24 @@ Table of Contents
   * [tutum.co](https://tutum.co/) — The Docker Platform for Dev and Ops, build, deploy, and manage your apps across any cloud, free while in beta and free developer plan when tutum will be production ready
 
 ## Vagrant Related
+
 ### Vagrant Box Indexes
 
   * [atlas.hashicorp.com](https://atlas.hashicorp.com/boxes/search) — HashiCorp's index of boxes
   * [vagrantbox.es](http://vagrantbox.es/) — An alternative public box index
 
 ## Technology Watch
+
   * [apichangelog.com](https://apichangelog.com/) — Subscribe to be notified each time API Documentation is updated (Facebook, Twitter, Google,...)
 
 ## Data Mining
+
   * [monkeylearn.com](http://monkeylearn.com/) — Text analysis with Machine Learning, free 100,000 queries/month
   * [wit.ai](https://wit.ai/) — NLP for developers
   * [wolfram.com](https://wolfram.com/language/) — Built-in knowledge based algorithms in the cloud
 
 ## Other Lists
+
   * [github.com - FOSS for Dev](https://github.com/httpsGithubParty/FOSS-for-Dev) — A hub of free and Open Source software for developers
   * [github.com - Free for nonprofit](https://github.com/pborreli/free-for-nonprofit) — List of free services for nonprofit organizations
   * [fullcontact.com](https://fullcontact.com/developer/pricing/) — Help your users know more about their contacts by adding social profile into your app. 500 free Person API matches/month
