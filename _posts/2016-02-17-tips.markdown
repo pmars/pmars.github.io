@@ -17,6 +17,7 @@ tags:
 0. [Unix/Linux快捷键](#unixlinuxhotkey)
 0. [Linux同步时间](#linuxlinuxntpdate)
 0. [Merge fork 的项目](#merge-fork-mergefork)
+0. [Github Pages Jekyll Tips](#github-pages-jekyll-tipsgithubjekyll)
 
 ---
 
@@ -115,6 +116,14 @@ See more details at: <http://amjith.blogspot.com/2008/08/quick-and-dirty-vimdiff
     git remote add remote_xx xx_url
     git fetch remote_xx
     git merge remote_xx/master
+
+---
+
+### [Github Pages Jekyll Tips](#githubjekyll)
+
+如果出现更新的博客在 Jekyll 生成之后不能显示，试着给博客的时间减去8个小时
+
+如果还是不能显示，则需要查看一下是否修改后的时间和其他的博客的时间有冲突，比如 ，他们最好是一个顺序的关系（后生成的博客最好不要比之前的时间早）等等。
 
 ---
 
