@@ -1,7 +1,7 @@
 ---
 layout:     post
 title:      "Free For DEV"
-subtitle:   "A list of SaaS, PaaS and IaaS offerings that have free tiers of interest to devops and infradev"
+subtitle:   "A list of SaaS, PaaS and IaaS offerings ..."
 date:       2016-03-22 13:26:17
 author:     "xiaoh"
 header-img: "img/post-bg-default.jpg"
@@ -20,4 +20,3 @@ This is list of software (SaaS, PaaS, IaaS, etc.) and other offerings that have 
 The scope of this particular list is limited to things infrastructure developers (System Administrator, DevOps Practitioners, etc.) are likely to find useful. We love all the free services out there, but it would be good to keep it on topic. It's a bit of a grey line at times so this is a bit opinionated; do not be offended if I do not accept your contribution.
 
 You can help by sending Pull Requests to add more services. Once I have a good set of links in this README file, I'll look into a better layout for the information and links (help with that is appreciated too).
-
