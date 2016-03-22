@@ -10,9 +10,6 @@ tags:
     - 开发
 ---
 
-> 这是一个开源项目，旨在将一些开发的相关组件集合到一起，作为一个工具箱，大家可以从这里查找各种技术的工具。
-
----
 
 # free-for-dev
 Developers and Open Source authors now have a massive amount of services offering free tiers, but it can be hard to find them all in order to make informed decisions.
