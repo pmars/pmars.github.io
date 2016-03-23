@@ -11,6 +11,39 @@ tags:
 
 ### 目录
 
+0. [Awk是什么](#awkwhatisawk)
+0. [命令行语法](#commandusing)
+0. [脚本（Script）组成](#scriptscript)
+0. [模式（Pattern）](#patternpattern)
+0. [正则表达式（Regular Expression）](#regular-expressionregex)
+0. [表达式（Expressions）](#expressionsexpressions)
+0. [数组](#array)
+0. [内置变量](#innervalue)
+    0. [ARGV与ARGC](#argvargcargvargc)
+        0. [删除ARGV元素](#argvdeleteargv)
+        0. [增加ARGV元素](#argvaddingargv)
+    0. [CONVFMT与OFMT](#convfmtofmtconvfmtofmt)
+    0. [ENVIRON](#environenviron)
+    0. [RLENGTH与RSTART](#rlengthrstartrlengthrstart)
+0. [运算符](#yunsuanfu)
+0. [语句（Statement）](#statementstatement)
+0. [数学函数](#mathfunction)
+0. [字符串函数](#string)
+    0. [sub](#subsub)
+    0. [gsub](#gsubgsub)
+    0. [index](#indexindex)
+    0. [length](#lengthlength)
+    0. [match](#matchmatch)
+    0. [split](#splitsplit)
+    0. [sprintf](#sprintfsprintf)
+    0. [substr](#substrsubstr)
+    0. [tolower](#tolowertolower)
+    0. [toupper](#touppertoupper)
+0. [I/O处理函数](#ioio)
+    0. [getline](#getlinegetline)
+    0. [close](#closeclose)
+    0. [system](#systemsystem)
+
 ---
 
 > 作为另一篇关于 [Awk的文章](http://www.xiaoh.me/2016/01/29/awk-summary/#array) 的姐妹篇，这篇文章也是简述了Awk的使用方法。更多的内容实则是从以前的 [博客](http://www.cnblogs.com/pmars/archive/2013/01/08/2851004.html) 摘抄过来的。记载在这里，方便学习。
