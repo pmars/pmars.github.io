@@ -217,6 +217,10 @@ export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
 
 ##### [启动停止状态](#hadoopcommand)
 
+使用Hadoop之前我们需要先format一下，实则就是清理下数据
+
+`hdfs namenode -format`
+
 Hadoop 的启动可以通过 `start-all.sh` 来启动，其实际上是调用了一下两条命令：
 
 ```shell
