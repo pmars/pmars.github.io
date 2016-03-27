@@ -3,7 +3,7 @@
 # site settings
 title: Xiaoh's Blog
 SEOTitle: Xiaoh写文字的地方 | Xiaoh's Blog
-header-img: img/home-bg.jpg
+header-img: /img/home-bg.jpg
 email: xiaoh@about.me
 description: "死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目"
 keyword: "兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品"
@@ -53,7 +53,7 @@ ga_domain: www.xiaoh.me
 # sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "写写代码，玩玩游戏，交交朋友。世界那么大，带媳妇去看看。^V^"
-sidebar-avatar: img/avatar-xiaoh.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/avatar-xiaoh.jpg      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # featured Tags
 featured-tags: true                     # whether or not using Feature-Tags
