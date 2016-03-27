@@ -560,7 +560,7 @@ def reverse_string(string):
 
 ---
 
-### 参考链接
+### [参考链接](#links)
 
 <http://stackoverflow.com/questions/739654/how-can-i-make-a-chain-of-function-decorators-in-python/1594484#1594484>
 <http://www.wklken.me/posts/2013/07/19/python-translate-decorator.html>
@@ -568,7 +568,7 @@ def reverse_string(string):
 
 ---
 
-### 学习资料
+### [学习资料](#learningmore)
 
 [python decorator library](https://wiki.python.org/moin/PythonDecoratorLibrary)
 [source code of flask](http://flask.pocoo.org/docs/0.10/)
