@@ -23,6 +23,8 @@ tags:
 0. [装饰器的使用场景与缺点](#usingplaceandshort)
     0. [装饰器的使用场景](#usingplace)
     0. [缺点](#short)
+0. [参考链接](#links)
+0. [学习资料](#learningmore)
 
 ---
 
