@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "python装饰器入门与提高"
+title:      "Python装饰器入门与提高"
 subtitle:   "理解PYTHON中的装饰器"
 date:       2016-03-27 12:59:36
 author:     "xiaoh"
