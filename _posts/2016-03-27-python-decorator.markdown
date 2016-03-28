@@ -564,18 +564,18 @@ def reverse_string(string):
 
 ### [参考链接](#links)
 
-<http://stackoverflow.com/questions/739654/how-can-i-make-a-chain-of-function-decorators-in-python/1594484#1594484>
-<http://www.wklken.me/posts/2013/07/19/python-translate-decorator.html>
-<http://mingxinglai.com/cn/2015/08/python-decorator/>
+0. <http://stackoverflow.com/questions/739654/how-can-i-make-a-chain-of-function-decorators-in-python/1594484#1594484>
+0. <http://www.wklken.me/posts/2013/07/19/python-translate-decorator.html>
+0. <http://mingxinglai.com/cn/2015/08/python-decorator/>
 
 ---
 
 ### [学习资料](#learningmore)
 
-[python decorator library](https://wiki.python.org/moin/PythonDecoratorLibrary)
-[source code of flask](http://flask.pocoo.org/docs/0.10/)
-[Magic decorator syntax for asynchronous code in Python](https://github.com/lalor/Tomorrow)
-[A Python decorator that helps ensure that a Python Process is running only once](https://github.com/chriscannon/highlander)
+0. [python decorator library](https://wiki.python.org/moin/PythonDecoratorLibrary)
+0. [source code of flask](http://flask.pocoo.org/docs/0.10/)
+0. [Magic decorator syntax for asynchronous code in Python](https://github.com/lalor/Tomorrow)
+0. [A Python decorator that helps ensure that a Python Process is running only once](https://github.com/chriscannon/highlander)
 
 ---
 
