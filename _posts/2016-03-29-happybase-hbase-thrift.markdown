@@ -31,6 +31,7 @@ tags:
 ### [HBase的表结构](#hbasetablestructure)
 
 详细的HBase文档参见 [官方文档](https://hbase.apache.org/book.html)
+如果英文不够好的话，可以看看这篇 <http://abloz.com/hbase/book.html>
 
 ##### [Row Key](#rowkey)
 
