@@ -249,6 +249,9 @@ yarn node -list
 
 HBase 作为Hadoop集群的一员，官方的说法为 *A scalable, distributed database that supports structured data storage for large tables.*，具体的内容可以查看 [官方文档](http://hbase.apache.org/)
 
+* 这里有一份关于HBase的中文文档：<http://abloz.com/hbase/book.html>
+* 关于HBase的扩展阅读：<http://www.daxixiong.com/?/article/20>
+
 ##### [安装方法](#installhbase)
 
 可以到 [这里](http://www.apache.org/dyn/closer.cgi/hbase/) 选择一个地址，之后进去找到对应的下载链接，下载一个tar包即可。
