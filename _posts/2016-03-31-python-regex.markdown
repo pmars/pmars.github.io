@@ -17,6 +17,7 @@ tags:
     0. [match](#matchmatch)
     0. [findall](#findallfindall)
     0. [sub](#subsub)
+0. [参考资料](#links)
 
 ---
 
@@ -106,6 +107,14 @@ def my_replace(match):
     return "[" + match.group(1) + "]"
 m = re.sub(r"(\d+)", my_replace, example)
 ```
+
+---
+
+### [参考资料](#links)
+
+<https://docs.python.org/2/library/re.html>
+<https://docs.python.org/2/howto/regex.html>
+<https://docs.python.org/2.7/library/re.html>
 
 ---
 
