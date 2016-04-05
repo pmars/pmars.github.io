@@ -18,6 +18,7 @@ tags:
 0. [Linux同步时间](#linuxlinuxntpdate)
 0. [Merge fork 的项目](#merge-fork-mergefork)
 0. [Github Pages Jekyll Tips](#github-pages-jekyll-tipsgithubjekyll)
+0. [Shell Default Params](#shell-default-paramsshellparams)
 
 ---
 
@@ -124,6 +125,18 @@ See more details at: <http://amjith.blogspot.com/2008/08/quick-and-dirty-vimdiff
 如果出现更新的博客在 Jekyll 生成之后不能显示，试着给博客的时间减去8个小时
 
 如果还是不能显示，则需要查看一下是否修改后的时间和其他的博客的时间有冲突，比如 ，他们最好是一个顺序的关系（后生成的博客最好不要比之前的时间早）等等。
+
+---
+
+### [Shell Default Params](#shellparams)
+
+* `$#` 是传给脚本的参数个数 
+* `$0` 是脚本本身的名字 
+* `$1` 是传递给该shell脚本的第一个参数 $2 是传递给该shell脚本的第二个参数 
+* `$@` 是传给脚本的所有参数的列表 
+* `$*` 是以一个单字符串显示所有向脚本传递的参数，与位置变量不同，参数可超过9个 
+* `$$` 是脚本运行的当前进程ID号 
+* `$?` 是显示最后命令的退出状态，0表示没有错误，其他表示有错误
 
 ---
 
