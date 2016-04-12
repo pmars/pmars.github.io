@@ -10,6 +10,20 @@ tags:
     - Ubuntu
 ---
 
+### 目录
+
+0. [安装测试](#test)
+0. [Tips](#tipstips)
+0. [CLI工具制作](#clicli)
+    0. [CLI命令行工具介绍](#cliclicommand)
+    0. [CLI制作](#cliclisetup)
+    0. [制作PyPI](#pypiclipypi)
+    0. [安装测试](#clitest)
+0. [setup.py](#setuppysetuppy)
+0. [记FCON模块的pypi打包过程](#fconpypifcon)
+
+---
+
 > 最近项目组在写项目的 CLI 工具，已经接近尾声，想做成 pip 的安装包，所以才有了这篇文章
 > 1，文章介绍了如何生成 Python Egg ，上传 PyPI 及其 pip 的安装测试
 > 2，在后面的进阶部分会介绍简单的生成cli工具的方法
@@ -19,9 +33,9 @@ tags:
 
 ---
 
-# 制作
+# [制作] (#make)
 
-#### 整理项目
+#### [整理项目] (#project)
 
 先创建一个项目的文件夹
 
@@ -65,7 +79,7 @@ tags:
         print 'http://xiaoh.me'
 
 
-#### 制作PyPI包
+#### [制作PyPI包] (#pypi)
 
 现在项目逻辑已经完成，那么开始做 PyPI 的包了。
 
@@ -138,7 +152,7 @@ OK，看一下现在目录的结构：
 
 更多的帮助信息你可以查看 [这篇文档](https://wiki.python.org/moin/CheeseShopTutorial#Package_Meta-Data)
 
-#### 打包
+#### [打包] (#package)
 
 打包这一步我认为比较简单，目前比较流行的2中打包的方式:
 
@@ -153,9 +167,9 @@ OK，看一下现在目录的结构：
 
 ---
 
-# 部署到PyPI
+# [部署到PyPI] (#deploy)
 
-#### 注册PyPI包
+#### [注册PyPI包] (#register)
 
 我是直接在 SSH 下面进行操作的，你也可以通过 [网页](http://pypi.python.org/pypi?%3Aaction=submit_form) 来做，SSH 步骤：
 
@@ -185,7 +199,7 @@ OK，看一下现在目录的结构：
 
 关于 register 更详细的内容可以看 [PackageIndex](http://docs.python.org/distutils/packageindex.html)
 
-#### 上传到PyPI
+#### [上传到PyPI] (#upload)
 
 上传文件也是有 SSH 和 网页两种方法。
 
@@ -199,7 +213,7 @@ SSH:
 
 这个又是一堆的输出信息，我就不罗列了。
 
-#### 安装测试
+#### [安装测试](#test)
 
 用 pip 安装：
 
@@ -223,7 +237,7 @@ OK, 现在这个 sdk 大家都可以用到了~~~~~
 
 ---
 
-# Tips
+# [Tips](#tips)
 
 ###### setup.py 中调用当前目录的文件一定要加 MANIFEST.in 并将调用文件 include 进来
 
@@ -242,15 +256,15 @@ OK, 现在这个 sdk 大家都可以用到了~~~~~
 
 ---
 
-# CLI工具制作
+# [CLI工具制作](#cli)
 
-#### CLI命令行工具介绍
+#### [CLI命令行工具介绍](#clicommand)
 
 CLI（command-line interface，命令行界面）是指可在用户提示符下键入可执行指令的界面，它通常不支持鼠标，用户通过键盘输入指令，计算机接收到指令后，予以执行。
 
 就我直观的理解就是，这就是给程序员使用的，可以在终端即使装XX的美妙工具。
 
-#### CLI制作
+#### [CLI制作](#clisetup)
 
 由于是 CLI 的命令行工具，所以程序一定要有一个入口的位置，所以我在 help.py 里面添加了 main 函数：
 
@@ -306,7 +320,7 @@ CLI（command-line interface，命令行界面）是指可在用户提示符下�
 
 等号前面指明了工具包的名称，等号后面的内容指明了程序的入口地址，当然，这个可以有多条记录，这样一个项目就可以制作多个命令行工具了
 
-#### 制作PyPI
+#### [制作PyPI](#clipypi)
 
 制作包的过程和上面的是一样的
 
@@ -314,7 +328,7 @@ CLI（command-line interface，命令行界面）是指可在用户提示符下�
     $ python setup.py register
     $ python setup.py sdist upload
 
-#### 安装测试
+#### [安装测试](#clitest)
 
 通过 pip 更新一下包：
 
@@ -330,7 +344,51 @@ OK，方法已经找到了，CLI 工具也就好弄了。
 
 ---
 
-### 记FCON模块的pypi打包过程
+# [setup.py](#setuppy)
+
+这里讲解一下 Setup.py 中的一些参数
+
+* `packages` 告诉Distutils需要处理那些包（包含`__init__.py`的文件夹）
+* `package_dir` 告诉Distutils哪些目录下的文件被映射到哪个源码包，感觉好像是一个相对路径的定义。一个例子：`package_dir = {'': 'lib'}`，表示以lib为主目录。
+* `ext_modules` 是一个包含Extension实例的列表，Extension的定义也有一些参数。
+* `ext_package` 定义extension的相对路径
+* `requires` 定义依赖哪些模块
+* `provides` 定义可以为哪些模块提供依赖
+* `scripts` 指定python源码文件，可以从命令行执行。在安装时指定--install-script
+* `package_data` 通常包含与包实现相关的一些数据文件或类似于readme的文件。
+
+    package_data = {'': ['*.txt'], 'mypkg': ['data/*.dat'],}
+
+表示包含所有目录下的txt文件和mypkg/data目录下的所有dat文件。
+
+* `data_files` 指定其他的一些文件（如配置文件）
+
+    setup(...,
+          data_files=[('bitmaps', ['bm/b1.gif', 'bm/b2.gif']),
+                      ('config', ['cfg/data.cfg']),
+                      ('/etc/init.d', ['init-script'])]
+         )
+
+规定了哪些文件被安装到哪些目录中。如果目录名是相对路径，则是相对于 `sys.prefix` 或 `sys.exec_prefix` 的路径。如果没有提供模板，会被添加到MANIFEST文件中。
+
+#### 执行sdist命令时，默认会打包哪些东西呢？
+
+* 所有由`py_modules`或`packages`指定的源码文件
+* 所有由`ext_modules`或`libraries`指定的C源码文件
+* 由scripts指定的脚本文件
+* 类似于`test/test*.py`的文件
+* `README.txt`或`README`，`setup.py`，`setup.cfg`
+* 所有`package_data`或`data_files`指定的文件
+
+还有一种方式是写一个manifest template，名为MANIFEST.in，定义如何生成MANIFEST文件，内容就是需要包含在分发包中的文件。一个MANIFEST.in文件如下：
+
+    include *.txt
+    recursive-include examples *.txt *.py
+    prune examples/sample?/build
+
+---
+
+# [记FCON模块的pypi打包过程](#fcon)
 
 `fcon` 是刚刚完成的一个python模块，他可以查找指定目录下的符合一定规则文件名的内容中包含一定规则的行，并打印出来。说起来比较拗口，就是三个参数，文件目录，文件正则，字符正则，三个一综合就是输出结果了。
 
