@@ -312,6 +312,7 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
     * [percol](https://github.com/mooz/percol) - Adds flavor of interactive selection to the traditional pipe concept on UNIX.
     * [SAWS](https://github.com/donnemartin/saws) - A Supercharged AWS CLI.
     * [thefuck](https://github.com/nvbn/thefuck) - Correcting your previous console command.
+    * [try](https://github.com/timofurrer/try) - A dead simple CLI to try out python packages - It's never been easier.
     * [mycli](https://github.com/dbcli/mycli) - A Terminal Client for MySQL with AutoCompletion and Syntax Highlighting.
     * [pgcli](https://github.com/dbcli/pgcli) - Postgres CLI with autocompletion and syntax highlighting.
 
@@ -559,7 +560,7 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
 
 *Libraries and tools for templating and lexing.*
 
-* [Jinja2](https://github.com/mitsuhiko/jinja2) - A modern and designer friendly templating language.
+* [Jinja2](https://github.com/pallets/jinja) - A modern and designer friendly templating language.
 * [Chameleon](https://chameleon.readthedocs.org/en/latest/) - An HTML/XML template engine. Modeled after ZPT, optimized for speed.
 * [Genshi](https://genshi.edgewall.org/) - Python templating toolkit for generation of web-aware output.
 * [Mako](http://www.makotemplates.org/) - Hyperfast and lightweight templating for the Python platform.
@@ -656,12 +657,12 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
 
 *Libraries for working with HTML and XML.*
 
-* [BeautifulSoup](http://www.crummy.com/software/BeautifulSoup/bs4/doc/) - Providing Pythonic idioms for iterating, searching, and modifying HTML or XML.
+* [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) - Providing Pythonic idioms for iterating, searching, and modifying HTML or XML.
 * [bleach](http://bleach.readthedocs.org/en/latest/) - A whitelist-based HTML sanitization and text linkification library.
 * [cssutils](https://pypi.python.org/pypi/cssutils/) - A CSS library for Python.
 * [html5lib](https://github.com/html5lib/html5lib-python) - A standards-compliant library for parsing and serializing HTML documents and fragments.
 * [lxml](http://lxml.de/) - A very fast, easy-to-use and versatile library for handling HTML and XML.
-* [MarkupSafe](https://github.com/mitsuhiko/markupsafe) - Implements a XML/HTML/XHTML Markup safe string for Python.
+* [MarkupSafe](https://github.com/pallets/markupsafe) - Implements a XML/HTML/XHTML Markup safe string for Python.
 * [pyquery](https://github.com/gawel/pyquery) - A jQuery-like library for parsing HTML.
 * [untangle](https://github.com/stchris/untangle) - Converts XML documents to Python objects for easy access.
 * [xhtml2pdf](https://github.com/xhtml2pdf/xhtml2pdf) - HTML/CSS to PDF converter.
@@ -712,13 +713,13 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
 
 *Libraries for validating data. Used for forms in many cases.*
 
-* [Cerberus](http://docs.python-cerberus.org/en/stable/) - A mappings-validator with a variety of rules, normalization-features and simple customization that uses a pythonic schema-definition.
-* [colander](http://docs.pylonsproject.org/projects/colander/en/latest/) - A system for validating and deserializing data obtained via XML, JSON, an HTML form post or any other equally simple data serialization.
-* [kmatch](https://github.com/ambitioninc/kmatch) - A language for matching/validating/filtering Python dictionaries.
-* [schema](https://github.com/keleshev/schema) - A library for validating Python data structures.
 * [Schematics](https://github.com/schematics/schematics) - Data Structure Validation.
+* [schema](https://github.com/keleshev/schema) - A library for validating Python data structures.
+* [jsonschema](https://github.com/Julian/jsonschema) - An implementation of [JSON Schema](http://json-schema.org/) for Python.
+* [Cerberus](https://github.com/nicolaiarocci/cerberus/) - A lightweight and extensible data validation library.
+* [colander](http://docs.pylonsproject.org/projects/colander/en/latest/) - Validating and deserializing data obtained via XML, JSON, an HTML form post.
+* [voluptuous](https://github.com/alecthomas/voluptuous) - A Python data validation library.
 * [valideer](https://github.com/podio/valideer) - Lightweight extensible data validation and adaptation library.
-* [voluptuous](https://github.com/alecthomas/voluptuous) - A Python data validation library. It is primarily intended for validating data coming into Python as JSON, YAML, etc.
 
 ## Anti-spam
 
@@ -1034,7 +1035,7 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
 * [apache-libcloud](https://libcloud.apache.org/) - One Python library for all clouds.
 * [boto](https://github.com/boto/boto) - Python interface to Amazon Web Services.
 * [django-wordpress](https://github.com/sunlightlabs/django-wordpress/) - WordPress models and views for Django.
-* [facebook-sdk](https://github.com/pythonforfacebook/facebook-sdk) - Facebook Platform Python SDK.
+* [facebook-sdk](https://github.com/mobolic/facebook-sdk) - Facebook Platform Python SDK.
 * [facepy](https://github.com/jgorset/facepy) - Facepy makes it really easy to interact with Facebook's Graph API
 * [gmail](https://github.com/charlierguo/gmail) - A Pythonic interface for Gmail.
 * [google-api-python-client](https://github.com/google/google-api-python-client) - Google APIs Client Library for Python.
@@ -1134,7 +1135,7 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
 *Useful libraries or tools that don't fit in the categories above.*
 
 * [blinker](https://github.com/jek/blinker) - A fast Python in-process signal/event dispatching system.
-* [itsdangerous](https://github.com/mitsuhiko/itsdangerous) - Various helpers to pass trusted data to untrusted environments.
+* [itsdangerous](https://github.com/pallets/itsdangerous) - Various helpers to pass trusted data to untrusted environments.
 * [pluginbase](https://github.com/mitsuhiko/pluginbase) - A simple but flexible plugin system for Python.
 * [Pychievements](https://github.com/PacketPerception/pychievements) - A framework for creating and tracking achievements.
 * [Tryton](http://www.tryton.org/) - A general purpose business framework.
