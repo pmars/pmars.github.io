@@ -345,7 +345,7 @@ Command-line Options
 
 PhantomJS提供的命令行选项有：
 
-```
+```javascript
 –help or -h lists all possible command-line options. Halts immediately, will not run a script passed as argument. ［帮助列表］
 
 –version or -v prints out the version of PhantomJS. Halts immediately, will not run a script passed as argument. ［查看版本］
@@ -395,7 +395,7 @@ PhantomJS提供的命令行选项有：
 
 注：JSON文件配置格式
 
-```
+```javascript
 {
   /* Same as: --ignore-ssl-errors=true */
   "ignoreSslErrors": true,
