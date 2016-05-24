@@ -255,8 +255,8 @@ class HtmlOutputer():
 
 本博客内容主要学习了网络视频教程的总结和练习，详细内容可以查看以下链接
 
-<http://www.imooc.com/learn/563>
-<https://www.crummy.com/software/BeautifulSoup/bs4/doc/index.zh.html>
+* <http://www.imooc.com/learn/563>
+* <https://www.crummy.com/software/BeautifulSoup/bs4/doc/index.zh.html>
 
 ### END
 
