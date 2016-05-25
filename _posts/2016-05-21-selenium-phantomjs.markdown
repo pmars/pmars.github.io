@@ -62,92 +62,189 @@ PhantomJS可以理解为一个没有前端的文字浏览器，他仅需要Webki
 #-*- coding:utf-8 -*-
 
 #############################################
-# File Name: weixin_czzj.py
+# File Name: weixin.py
 # Author: xiaoh
 # Mail: xiaoh@about.me
 # Created Time:  2016-05-18 22:21:01
 #############################################
 
-###########################################################
-#                                                         #
-#                         _oo8oo_                         #
-#                        o8888888o                        #
-#                        88" . "88                        #
-#                        (| -_- |)                        #
-#                        0\  =  /0                        #
-#                      ___/'==='\___                      #
-#                    .' \\|     |// '.                    #
-#                   / \\|||  :  |||// \                   #
-#                  / _||||| -:- |||||_ \                  #
-#                 |   | \\\  -  /// |   |                 #
-#                 | \_|  ''\---/''  |_/ |                 #
-#                 \  .-\__  '-'  __/-.  /                 #
-#               ___'. .'  /--.--\  '. .'___               #
-#            ."" '<  '.___\_<|>_/___.'  >' "".            #
-#           | | :  `- \`.:`\ _ /`:.`/ -`  : | |           #
-#           \  \ `-.   \_ __\ /__ _/   .-` /  /           #
-#       =====`-.____`.___ \_____/ ___.`____.-`=====       #
-#                         `=---=`                         #
-#                                                         #
-#                佛祖保佑         永无BUG                 #
-#                                                         #
-########################################################### 
-
+import Queue
+import selenium, requests, urlparse
 from selenium import webdriver
-import time, pymysql
+import time, pymysql, sys, random, traceback
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
+que = Queue.Queue()
+conn = pymysql.connect(
+        host = 'bs.xiaoh.me',
+        user = 'root',
+        password = 'password',
+        db = 'test',
+        charset = 'utf8mb4',
+        cursorclass = pymysql.cursors.DictCursor)
+
+'''CREATE DATABASE `test` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;'''
+'''create table weixin ( 
+        id varchar(50) not null, 
+        name varchar(50) not null, 
+        title varchar(200) not null, 
+        url varchar(200) not null, 
+        date varchar(50) not null, 
+        summary varchar(300) not null, 
+        content text not null,
+        primary key(id, title, data)
+    );'''
 class Item():
-    def __init__(self, title, url, postdate, summary):
+    def __init__(self, id, name, title, url, date, summary, content):
+        self.id = id
+        self.name = name
         self.title = title
         self.url = url
-        self.postdate = postdate
+        self.date = date
         self.summary = summary
+        self.content = content
 
     def print_exc(self):
+        #print 'id      :' + self.id
+        print 'name    :' + self.name
         print 'title   :' + self.title
-        print 'url     :' + self.url
-        print 'postdate:' + self.postdate
-        print 'summary :' + self.summary
+        #print 'url     :' + self.url
+        print 'date    :' + self.date
+        #print 'summary :' + self.summary
+        #print 'content :' + self.content
 
+    def save(self):
+        try:
+            sql = 'insert into weixin values (%s, %s, %s, %s, %s, %s, %s)'
+            data = (self.id, self.name, self.title, self.url, self.date, self.summary, self.content)
+            with conn.cursor() as cur:
+                cur.execute(sql, data)
+            conn.commit()
+        except pymysql.err.IntegrityError:
+            print 'item has existed in database'
+        except Exception as e:
+            print type(e)
+            print e.message
 
-def weixin_load(app_name):
-    driver=webdriver.PhantomJS(executable_path="./phantomjs") #在这里设置你的phantomjs路径
+def article_content(url):
+    req = requests.get(url)
+    return req.content if req.status_code == 200 else ''
 
-    driver.set_window_size(1920,1080) #设置浏览器的大小，弄得比较大，显示内容全啊
+def create_driver():
+    dcap = dict(DesiredCapabilities.PHANTOMJS)
+#    dcap["phantomjs.page.settings.userAgent"] = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36"
+
+    return webdriver.PhantomJS(
+        executable_path = "/home/xingming/bin/phantomjs",
+        desired_capabilities = dcap,
+#        service_args = [
+#            "--cookies-file={}".format("/tmp/cookies.txt")
+#            ]
+        )
+
+def weixin_load():
+    driver = create_driver()
+    driver.maximize_window()
+
+    # start load search page
     driver.get('http://weixin.sogou.com/')
-    driver.find_element_by_id("upquery").send_keys(app_name)
-    driver.find_element_by_class_name("swz2").click()
 
-    now_handle=driver.current_window_handle
-    driver.find_element_by_xpath('/html/body/div[2]/div[3]/div[1]/div[1]/div/div[2]/div/div[1]').click()
+    while not que.empty():
+        app_name = que.get()
+        if not isinstance(app_name, unicode):
+            app_name = unicode(app_name, 'utf-8')
+        print u'start crawl app name: %s' % app_name
+        try:
+            # input search words and click search button
+            driver.find_element_by_id("upquery").clear()
+            driver.find_element_by_id("upquery").send_keys(app_name)
+            driver.find_element_by_class_name("swz2").click()
 
-    time.sleep(10)
+            # delay 3 second, loading the result
+            time.sleep(3)
 
-    all_handle=driver.window_handles
+            text = driver.find_element_by_xpath('/html/body').text
+            error_ip = u'您的访问过于频繁，为确认本次访问为正常用户行为，需要您协助验证'
+            error_exist= u'无与“%s”相关的官方认证订阅号。' % app_name
+            if text.find(error_ip) >= 0:
+                print 'IP受限，请更换IP进行搜索，此次搜索即将退出'
+                return
+            elif text.find(error_exist) > 0:
+                print '账号不存在，请更新查询关键词, 此次搜索即将退出'
+                continue
 
-    try:
-        for handle in all_handle:
-            if handle!=now_handle:
+            # get name and wechat id
+            name = driver.find_element_by_xpath('//div[@class="results mt7"]/div[1]/div[2]/h3').text
+            weid = driver.find_element_by_xpath('//label[@name="em_weixinhao"]').text
+
+            # save current handle
+            start_handle = driver.current_window_handle
+
+            # click for articles
+            app_node = driver.find_element_by_xpath('//div[@class="results mt7"]/div[1]')
+            if app_node is None:
+                print '没有找到对应的公众号节点，请检查xpath或搜索词'
+                return
+            app_node.click()
+
+            # delay 5 second, loading the result
+            time.sleep(5)
+
+            # check new handle for message and save it
+            for handle in driver.window_handles:
+                if handle == start_handle:
+                    continue
+
                 driver.switch_to_window(handle)
-                driver.set_window_size(1920, 1080) #设置浏览器的大小，弄得比较大，显示内容全啊
+                driver.maximize_window()
 
-                div =  driver.find_elements_by_xpath('//div[@class="weui_media_box appmsg"]')
+                try:
+                    # get article list div node
+                    div_list =  driver.find_elements_by_xpath('//div[@class="weui_media_bd"]')
 
-                for node in div:
-                    h4 = node.find_element_by_xpath('div[1]/h4[@class="weui_media_title"]')
-                    p1 = node.find_element_by_xpath('div[1]/p[@class="weui_media_desc"]')
-                    p2 = node.find_element_by_xpath('div[1]/p[@class="weui_media_extra_info"]')
+                    for node in div_list:
+                        try:
+                            h4 = node.find_element_by_xpath('h4[@class="weui_media_title"]')
+                            p1 = node.find_element_by_xpath('p[@class="weui_media_desc"]')
+                            p2 = node.find_element_by_xpath('p[@class="weui_media_extra_info"]')
 
-                    url = 'http://mp.weixin.qq.com' + h4.get_attribute('hrefs')
-                    item = Item(h4.text, url, p2.text, p1.text)
-                    item.print_exc()
-    except Exception as e:
-        print e.message
-    finally:
-        driver.quit()
+                            title = h4.text
+                            url = urlparse.urljoin('http://mp.weixin.qq.com', h4.get_attribute('hrefs'))
+                            date = p2.text
+                            summary = p1.text
+                            content = article_content(url)
+
+                            item = Item(weid, name, title, url, date, summary, content)
+                            item.print_exc()
+                            item.save()
+                        except Exception as e:
+                            print type(e)
+                            print e.message
+                except Exception as e:
+                    print type(e)
+                    print driver.page_source
+                    print e.message
+                finally:
+                    driver.close()
+        except Exception as e:
+            print type(e)
+            print e.message
+            traceback.print_exc()
+
+        driver.switch_to_window(start_handle)
+        time.sleep(10)
+    driver.quit()
 
 def main():
-    weixin_load(u"你的公众号名称")
+    f = open('words.csv')
+    words = f.readlines()
+    f.close()
+
+    [que.put(word[:-1]) for word in words]
+    times = 5
+    while times:
+        times = times - 1
+        weixin_load()
 
 if __name__ == "__main__":
     main()
