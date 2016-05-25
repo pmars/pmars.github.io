@@ -128,6 +128,8 @@ Python对SMTP支持有smtplib和email两个模块，email负责构造邮件，sm
     
     def send(msg):
         server = smtplib.SMTP(smtp_serv, 25) # 25为SMTP协议的默认端口
+        server.ehlo()
+        server.starttls()
         server.set_debuglevel(1)
         server.login(from_addr, password)
         server.sendmail(from_addr, [to_addr], msg.as_string())
