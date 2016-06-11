@@ -2,7 +2,7 @@
 layout:     post
 title:      "记几件有趣的事"
 subtitle:   "写下几件孩子有趣的事情"
-date:       2016-06-12 00:13:47
+date:       2016-06-11 00:13:47
 author:     "xiaoh"
 header-img: "img/post-bg-my-son.jpg"
 tags:

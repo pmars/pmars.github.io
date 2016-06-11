@@ -289,9 +289,9 @@ def log(text):
 
 这个3层嵌套的decorator用法如下：
 
-@log('execute')
-def now():
-    print '2016-02-03'
+    @log('execute')
+    def now():
+        print '2016-02-03'
 
 执行结果如下：
 

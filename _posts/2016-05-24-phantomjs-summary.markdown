@@ -425,7 +425,9 @@ There are some keys that do not translate directly:
 
 ### [实例](#examples)
 
-在此提供官方文档实例，多对照实例练习，使用起来会更得心应手。<http://phantomjs.org/examples/index.html>
+在此提供官方文档实例，多对照实例练习，使用起来会更得心应手。
+
+* <http://phantomjs.org/examples/index.html>
 
 ---
 
