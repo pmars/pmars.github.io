@@ -19,6 +19,7 @@ tags:
 0. [Merge fork 的项目](#merge-fork-mergefork)
 0. [Github Pages Jekyll Tips](#github-pages-jekyll-tipsgithubjekyll)
 0. [Shell Default Params](#shell-default-paramsshellparams)
+0. [Python Logging](#python-loggingpythonlogging)
 
 ---
 
@@ -137,6 +138,26 @@ See more details at: <http://amjith.blogspot.com/2008/08/quick-and-dirty-vimdiff
 * `$*` 是以一个单字符串显示所有向脚本传递的参数，与位置变量不同，参数可超过9个 
 * `$$` 是脚本运行的当前进程ID号 
 * `$?` 是显示最后命令的退出状态，0表示没有错误，其他表示有错误
+
+---
+
+### [Python Logging](#pythonlogging)
+
+Python的日志输出模块：
+
+    import logging, logging.handlers
+    
+    logging.basicConfig(format='%(asctime)s %(levelname)s %(lineno)d] %(message)s', datefmt='%m-%d %H:%M')
+    logger = logging.getLogger('class_name')
+    handler = logging.handlers.RotatingFileHandler(
+            filename='/dev/null',
+            maxBytes=10 * 1024 * 1024,
+            backupCount=5)
+    logger.setLevel(logging.DEBUG)
+    logger.addHandler(handler)
+    
+    for i in range(1000000):
+        logger.debug('alksdf;laksdf;laksdf;lkasd;flasd;fl%d' % i)
 
 ---
 
