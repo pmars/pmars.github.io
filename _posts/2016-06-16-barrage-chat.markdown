@@ -116,6 +116,8 @@ Websocket只需要一次HTTP握手，所以说整个通讯过程是建立在一�
 
 代码详见 <https://github.com/pmars/barchat>
 
+弹幕聊天页面 <http://chat.xiaoh.me>
+
 ---
 
 ### END
