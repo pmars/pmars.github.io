@@ -12,6 +12,16 @@ tags:
 
 ### 目录
 
+0. [简介](#summary)
+0. [排序](#sort)
+0. [事物](#transaction)
+0. [管道](#pipeline)
+0. [发布|订阅](#subpub)
+0. [持久化](#persistence)
+0. [主从复制](#master-slave)
+0. [虚拟内存](#swapmemory)
+0. [文档](#documents)
+
 ---
 
 > 关于Redis的简述可以查看以前的博客 <http://www.xiaoh.me/2015/12/17/redis-summary/>
@@ -557,12 +567,12 @@ Pub/Sub是可适用于可扩展要求高、松散耦合系统的分布式交互�
 
 `redis`没有使用`os`提供的虚拟内存机制而是自己在用户态实现了自己的虚拟内存机制,作者在自己的`blog`专门解释了其中原因。<http://antirez.com/post/redis-virtual-memory-story.html>
 
-###### 主要的理由有两点
+##### 主要的理由有两点
 
 1. `os`的虚拟内存是已4k页面为最小单位进行交换的。而`redis`的大多数对象都远小于4k，所以一个os页面上可能有多个`redis`对象。另外`redis`的集合对象类型如`list`,`set`可能存在与多个os页面上。最终可能造成只有10%key被经常访问，但是所有`os`页面都会被`os`认为是活跃的，这样只有内存真正耗尽时os才会交换页面。
 2. 相比于os的交换方式。`redis`可以将被交换到磁盘的对象进行压缩,保存到磁盘的对象可以去除指针和对象元数据信息。一般压缩后的对象会比内存中的对象小10倍。这样`redis`的vm会比os vm能少做很多io操作。
 
-###### 下面是vm相关配置
+##### 下面是vm相关配置
 
 * vm-enabled yes                    #开启vm功能
 * vm-swap-file /tmp/redis.swap      #交换出来的value保存的文件路径/tmp/redis.swap
@@ -583,9 +593,9 @@ Pub/Sub是可适用于可扩展要求高、松散耦合系统的分布式交互�
 
 vm-max-threads`表示用做交换任务的线程数量。如果大于0推荐设为服务器的`cpu core`的数量。如果是0则交换过程在主线程进行。
 
-###### 参数配置讨论完后，在来简单介绍下vm是如何工作的，
+##### 参数配置讨论完后，在来简单介绍下vm是如何工作的，
 
-* 当`vm-max-threads`设为0时(`Blocking VM`)
+###### 当`vm-max-threads`设为0时(`Blocking VM`)
 
 ** 换出 **
 
@@ -599,7 +609,7 @@ vm-max-threads`表示用做交换任务的线程数量。如果大于0推荐设�
 
 当有`client`请求`value`被换出的`key`时。主线程会以阻塞的方式从文件中加载对应的`value`对象，加载时此时会阻塞所以`client`。然后处理`client`的请求
 
-* 当`vm-max-threads`大于0(`Threaded VM`)
+###### 当`vm-max-threads`大于0(`Threaded VM`)
 
 ** 换出 **
 
