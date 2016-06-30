@@ -10,13 +10,13 @@ tags:
     - 数据库
 ---
 
-> 最近在看 `celery` 的时候，用到了 `Redis`，就先了解了一下 `Redis`，所及就先写一个Redis的学习笔记
+> 最近在看 `celery` 的时候，用到了 `Redis`，就先了解了一下 `Redis`，所以就先写一个Redis的学习笔记
 
 ---
 
 ### 目录
 
-0. [优势](#good)
+0. [优势](#advantage)
 0. [安装](#install)
     0. [启动](#start)
 0. [数据类型](#data)
@@ -40,12 +40,12 @@ tags:
 
 ---
 
-### [优势](#good)
+### [优势](#advantage)
 
 * 异常快速：Redis的速度非常快，每秒能执行约11万集合，每秒约81000+条记录。
 * 支持丰富的数据类型：Redis支持最大多数开发人员已经知道像列表，集合，有序集合，散列数据类型。这使得它非常容易解决各种各样的问题，因为我们知道哪些问题是可以处理通过它的数据类型更好。
 * 操作都是原子性：所有Redis操作是原子的，这保证了如果两个客户端同时访问的Redis服务器将获得更新后的值。
-* 多功能实用工具：Redis是一个多实用的工具，可以在多个用例如缓存，消息，队列使用(Redis原生支持发布/订阅)，任何短暂的数据，应用程序，如Web应用程序会话，网页命中计数等。
+* 多功能实用工具：Redis是一个多功能实用的工具，可以在例如缓存，消息，队列使用(Redis原生支持发布/订阅)，任何短暂的数据，应用程序，如Web应用程序会话，网页命中计数等。
 
 ---
 
@@ -105,7 +105,7 @@ $ sudo apt-get install redis-server
 
 在上面的例子中的哈希数据类型，用于存储其中包含的用户的基本信息用户的对象。
 
-这里 `hmset`，`hgetall` 作为命令，`user` 是键。
+这里 `hmset`，`hgetall` 作为命令，`user`,`pass`,`add` 是键。
 
 ##### [列表](#list)
 
@@ -121,15 +121,22 @@ $ sudo apt-get install redis-server
     1) "huo"
     2) "xingming"
     3) "xiaoh"
-    127.0.0.1:6379> lrange l 0 1
+    127.0.0.1:6379> rpush l me
+    (integer) 4
+    127.0.0.1:6379> rpush l blogs
+    (integer) 5
+    127.0.0.1:6379> lrange l 0 10
     1) "huo"
     2) "xingming"
+    3) "xiaoh"
+    4) "me"
+    5) "blogs"
 
-列表的最大长度为 232 - 1 元素（4294967295，每个列表中可容纳超过4十亿的元素）。
+列表的最大长度为 2^32 - 1 元素（4294967295，每个列表中可容纳超过4十亿的元素）。
 
 ##### [集合](#set)
 
-`Redis` 的集合是字符串的无序集合。在 `Redis` 您可以添加，删除和测试文件是否存在，在成员O（1）的时间复杂度。
+`Redis` 的集合是字符串的无序集合。在 `Redis` 您可以添加，删除和测试文件是否存在，操作均在O（1）的时间复杂度。
 
     127.0.0.1:6379> sadd s xiaoh xingming
     (integer) 2
@@ -142,9 +149,9 @@ $ sudo apt-get install redis-server
     2) "huo"
     3) "xiaoh"
 
-**在上面的例子中 rabitmq 集合添加加两次，但由于集合元素具有唯一属性。**
+**在上面的例子中 我们向 s 集合添加 'xiaoh' 两次，但由于集合元素具有唯一属性。**
 
-集合中的元素最大数量为 232 - 1 （4294967295，可容纳超过4十亿元素）。
+集合中的元素最大数量为 2^32 - 1 （4294967295，可容纳超过4十亿元素）。
 
 ##### [有序集合](#listset)
 
@@ -205,20 +212,44 @@ Redis的事务由指令多重发起，然后需要传递在事务，而且整个
     QUEUED
     127.0.0.1:6379> exec
     (error) EXECABORT Transaction discarded because of previous errors.
+
+中间有一次的实验失败了，结果就都没有执行, 下面一次中间有条命令错误，另一个是正常执行的。
+
     127.0.0.1:6379> multi
     OK
     127.0.0.1:6379> set name xiaoh
     QUEUED
     127.0.0.1:6379> get name
     QUEUED
+    127.0.0.1:6379> incr name
+    QUEUED
     127.0.0.1:6379> del name
+    QUEUED
+    127.0.0.1:6379> get name
     QUEUED
     127.0.0.1:6379> exec
     1) OK
     2) "xiaoh"
-    3) (integer) 1
+    3) (error) ERR value is not an integer or out of range
+    4) (integer) 1
+    5) (nil)
 
-中间有一次的实验失败了，结果就都没有执行
+    127.0.0.1:6379> multi
+    OK
+    127.0.0.1:6379> set num 9
+    QUEUED
+    127.0.0.1:6379> get num
+    QUEUED
+    127.0.0.1:6379> incr num
+    QUEUED
+    127.0.0.1:6379> get num
+    QUEUED
+    127.0.0.1:6379> exec
+    1) OK
+    2) "9"
+    3) (integer) 10
+    4) "10"
+    127.0.0.1:6379>
 
 ---
 
