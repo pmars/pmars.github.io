@@ -88,6 +88,7 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
     - [MapReduce](#mapreduce)
     - [Third-party APIs](#third-party-apis)
     - [DevOps Tools](#devops-tools)
+    - [ChatOps Tools](#chatops-tools)
     - [Job Scheduler](#job-scheduler)
     - [Foreign Function Interface](#foreign-function-interface)
     - [High Performance](#high-performance)
@@ -105,6 +106,7 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
     - [Websites](#websites)
     - [Weekly](#weekly)
     - [Twitter](#twitter)
+    - [Podcasts](#podcasts)
 - [Other Awesome Lists](#other-awesome-lists)
 - [Contributing](#contributing)
 
@@ -673,6 +675,7 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
 * [pyquery](https://github.com/gawel/pyquery) - A jQuery-like library for parsing HTML.
 * [untangle](https://github.com/stchris/untangle) - Converts XML documents to Python objects for easy access.
 * [xhtml2pdf](https://github.com/xhtml2pdf/xhtml2pdf) - HTML/CSS to PDF converter.
+* [xmldataset](https://xmldataset.readthedocs.io) - Simple XML Parsing.
 * [xmltodict](https://github.com/martinblech/xmltodict) - Working with XML feel like you are working with JSON.
 
 ## Web Crawling
@@ -897,7 +900,7 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
     * [doublex](https://pypi.python.org/pypi/doublex) - Powerful test doubles framework for Python.
     * [freezegun](https://github.com/spulec/freezegun) - Travel through time by mocking the datetime module.
     * [httmock](https://github.com/patrys/httmock) - A mocking library for requests for Python 2.6+ and 3.2+.
-    * [httpretty](http://falcao.it/HTTPretty/) - HTTP request mock tool for Python.
+    * [httpretty](https://github.com/gabrielfalcao/HTTPretty) - HTTP request mock tool for Python.
     * [responses](https://github.com/getsentry/responses) - A utility library for mocking out the requests Python library.
     * [VCR.py](https://github.com/kevin1024/vcrpy) - Record and replay HTTP interactions on your tests.
 * Object Factories
@@ -1011,7 +1014,7 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
 * [Pylearn2](https://github.com/lisa-lab/pylearn2) - A Machine Learning library based on [Theano](https://github.com/Theano/Theano).
 * [python-recsys](https://github.com/ocelma/python-recsys) - A Python library for implementing a Recommender System.
 * [scikit-learn](http://scikit-learn.org/) - A Python module for machine learning built on top of SciPy.
-* [pydeep](https://github.com/andersbll/deeppy)-Deep learning in python
+* [pydeep](https://github.com/andersbll/deeppy) - Deep learning in python
 * [vowpal_porpoise](https://github.com/josephreisinger/vowpal_porpoise) - A lightweight Python wrapper for [Vowpal Wabbit](https://github.com/JohnLangford/vowpal_wabbit/).
 * [skflow](https://github.com/tensorflow/skflow) - A simplified interface for [TensorFlow](https://github.com/tensorflow/tensorflow) (mimicking scikit-learn).
 
@@ -1065,6 +1068,12 @@ Inspired by [awesome-php](https://github.com/ziadoz/awesome-php).
 * [pexpect](https://github.com/pexpect/pexpect) - Controlling interactive programs in a pseudo-terminal like GNU expect.
 * [psutil](https://github.com/giampaolo/psutil) - A cross-platform process and system utilities module.
 * [supervisor](https://github.com/Supervisor/supervisor) - Supervisor process control system for UNIX.
+
+## ChatOps Tools
+
+*Libraries for chatbot development.*
+
+* [Errbot](http://errbot.io/) - The easiest and most popular chatbot to implement ChatOps.
 
 ## Job Scheduler
 
@@ -1214,6 +1223,7 @@ Where to discover new Python libraries.
 * [Python ZEEF](https://python.zeef.com/alan.richmond)
 * [Trending Python repositories on GitHub today](https://github.com/trending?l=python)
 * [PyPI Ranking](http://pypi-ranking.info/alltime)
+* [Awesome Python @LibHunt](http://python.libhunt.com)
 
 ## Weekly
 
@@ -1232,6 +1242,11 @@ Where to discover new Python libraries.
 * [@pypi](https://twitter.com/pypi)
 * [@pythontrending](https://twitter.com/pythontrending)
 * [@PythonWeekly](https://twitter.com/PythonWeekly)
+ 
+## Podcasts
+
+* [Podcast.init](http://podcastinit.com/)
+* [Talk Python To Me](https://talkpython.fm/)
 
 # Other Awesome Lists
 
