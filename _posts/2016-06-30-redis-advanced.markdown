@@ -16,7 +16,6 @@ tags:
 
 > 关于Redis的简述可以查看以前的博客 <http://www.xiaoh.me/2015/12/17/redis-summary/>
 
-> 这篇博客会引用 python的redis库 <https://github.com/andymccurdy/redis-py>
 
 ---
 
@@ -254,5 +253,281 @@ GET 可以多次使用，上面就是一个例子，获取新的对应值的时�
 
 ---
 
+### [事物](#transaction)
+
+`redis`对事务的支持目前还比较简单。`redis`只能保证一个`client`发起的事务中的命令可以连续的执行，而中间不会插入其他`client`的命令。由于`redis`是单线程来处理所有`client`的请求的所以做到这点是很容易的。
+
+##### multi
+
+一般情况下`redis`在接受到一个`client`发来的命令后会立即处理并返回处理结果，但是当一个`client`在一个连接中发出`multi`命令，这个连接会进入一个事务上下文，该连接后续的命令并不是立即执行，而是先放到一个队列中。当从此连接受到`exec`命令后，`redis`会顺序的执行队列中的所有命令。并将所有命令的运行结果打包到一起返回给`client`.然后此连接就结束事务上下文.
+
+    127.0.0.1:6379> multi
+    OK
+    127.0.0.1:6379> incr a
+    QUEUED
+    127.0.0.1:6379> incr a
+    QUEUED
+    127.0.0.1:6379> incr b
+    QUEUED
+    127.0.0.1:6379> exec
+    1) (integer) 1
+    2) (integer) 2
+    3) (integer) 1
+    127.0.0.1:6379>
+
+例子中已经说明，当执行`incr a` `incr b` 的时候，是放到了队列里面，当`exec`时，执行了队列中的命令。
+
+当事物写到一半，可以用`discard`来取消事物
+
+    127.0.0.1:6379> multi
+    OK
+    127.0.0.1:6379> incr a
+    QUEUED
+    127.0.0.1:6379> incr b
+    QUEUED
+    127.0.0.1:6379> discard
+    OK
+    127.0.0.1:6379> get a
+    "2"
+    127.0.0.1:6379> get b
+    "1"
+    127.0.0.1:6379>
+
+可以发现这次`incr a` `incr b`都没被执行。`discard`命令其实就是清空事务的命令队列并退出事务上下文
+
+##### watch
+
+`Watch` 监视一个(或多个) key ，如果在事务执行之前这个(或这些) key 被其他命令所改动，那么事务将被打断。
+
+    127.0.0.1:6379> watch a
+    OK
+    127.0.0.1:6379> get a
+    "5"
+    127.0.0.1:6379> set a 6
+    OK
+    127.0.0.1:6379> incr a
+    (integer) 7
+    127.0.0.1:6379> get a
+    "7"
+    127.0.0.1:6379> multi
+    OK
+    127.0.0.1:6379> set a 2
+    QUEUED
+    127.0.0.1:6379> exec
+    (nil)
+    127.0.0.1:6379> get a
+    "7"
+    127.0.0.1:6379>
+
+`exec` `discard` `unwatch` 会清除 `watch` 的监听
+
+##### 缺点
+
+`redis`的事务实现是如此简单，当然会存在一些问题。第一个问题是`redis`只能保证事务的每个命令连续执行，但是如果事务中的一个命令失败了，并不回滚其他命令，比如使用的命令类型不匹配。
+
+    127.0.0.1:6379> set b 1
+    OK
+    127.0.0.1:6379> set a e
+    OK
+    127.0.0.1:6379> multi
+    OK
+    127.0.0.1:6379> incr a
+    QUEUED
+    127.0.0.1:6379> incr b
+    QUEUED
+    127.0.0.1:6379> exec
+    1) (error) ERR value is not an integer or out of range
+    2) (integer) 2
+    127.0.0.1:6379>
+
+可以发现，虽然执行中间有问题，但并没有回滚，其他命令还是执行了。
+
+最后一个十分罕见的问题是，当事务的执行过程中，如果`redis`意外的挂了。很遗憾只有部分命令执行了，后面的也就被丢弃了。当然如果我们使用的`append-only file`方式持久化，`redis`会用单个`write`操作写入整个事务内容。即是是这种方式还是有可能只部分写入了事务到磁盘。发生部分写入事务的情况下，`redis`重启时会检测到这种情况，然后失败退出。可以使用`redis-check-aof`工具进行修复，修复会删除部分写入的事务内容。修复完后就能够重新启动了。
+
+---
+
+### [管道](#pipeline)
+
+`redis`是一个`cs`模式的`tcp server`，使用和`http`类似的请求响应协议。
+
+一个`client`可以通过一个`socket`连接发起多个请求命令。每个请求命令发出后`client`通常会阻塞并等待`redis`服务处理，`redis`处理完后请求命令后会将结果通过响应报文返回给`client`。基本的通信过程如下
+
+    Client: INCR X
+    Server: 1
+    Client: INCR X
+    Server: 2
+    Client: INCR X
+    Server: 3
+    Client: INCR X
+    Server: 4
+
+基本上四个命令需要8个`tcp`报文才能完成。由于通信会有网络延迟,假如从`client`和`server`之间的包传输时间需要0.125秒。那么上面的四个命令8个报文至少会需要1秒才能完成。这样即使`redis`每秒能处理100个命令，而我们的`client`也只能一秒钟发出四个命令。这显示没有充分利用`redis`的处理能力。除了可以利用`mget`,`mset`之类的单条命令处理多个`key`的命令外我们还可以利用`pipeline`的方式从`client`打包多条命令一起发出，不需要等待单条命令的响应返回，而`redis`服务端会处理完多条命令后会将多条命令的处理结果打包到一起返回给客户端。通信过程如下
+
+    Client: INCR X
+    Client: INCR X
+    Client: INCR X
+    Client: INCR X
+    Server: 1
+    Server: 2
+    Server: 3
+    Server: 4
+
+假设不会因为`tcp`报文过长而被拆分。可能两个`tcp`报文就能完成四条命令,`client`可以将四个`incr`命令放到一个`tcp`报文一起发送，`server`则可以将四条命令的处理结果放到一个`tcp`报文返回。
+
+通过`pipeline`方式当有大批量的操作时候。我们可以节省很多原来浪费在网络延迟的时间。需要注意到是用`pipeline`方式打包命令发送，`redis`必须在处理完所有命令前先缓存起所有命令的处理结果。打包的命令越多，缓存消耗内存也越多。所以并是不是打包的命令越多越好。具体多少合适需要根据具体情况测试。
+
+下面是我测试是否使用pipeline的代码：
+
+    from redis import Redis
+    import time
+
+    r = Redis()
+
+    def without_pipeline(times=100000):
+        r.set('a', 0)
+        for i in range(times):
+            r.incr('a')
+
+    def use_pipeline(times=100000):
+        r.set('a', 0)
+        r.set('a', 0)
+        pip = r.pipeline()
+        for i in range(times):
+            pip.incr('a')
+        pip.execute()
+
+    start = time.time()
+    without_pipeline()
+    end = time.time()
+    print 'without pipeline spendtime:%f' % (end-start)
+
+    start = time.time()
+    use_pipeline()
+    end = time.time()
+    print 'use pipeline spendtime:%f' % (end-start)
+
+结果为：
+
+without pipeline spendtime:4.221240
+use pipeline spendtime:1.572646
+
+看起来对效果提升还是很明显的。
+
+---
+
+### [发布|订阅](#subpub)
+
+发布订阅(`pub/sub`)是一种消息通信模式，主要的目的是解耦消息发布者和消息订阅者之间的耦合，这点和设计模式中的观察者模式比较相似。
+
+`pub/sub`不仅仅解决发布者和订阅者直接代码级别耦合也解决两者在物理部署上的耦合。`redis`作为一个`pub/sub server`，在订阅者和发布者之间起到了消息路由的功能。订阅者可以通过`subscribe`和`psubscribe`命令向`redis server`订阅自己感兴趣的消息类型，`redis`将消息类型称为通道(`channel`)。当发布者通过`publish`命令向`redis server`发送特定类型的消息时。订阅该消息类型的全部`client`都会收到此消息。这里消息的传递是多对多的。一个`client`可以订阅多个`channel`,也可以向多个`channel`发送消息。
+
+`Pub/Sub`功能（`means Publish`, `Subscribe`）即发布及订阅功能。基于事件的系统中，`Pub/Sub`是目前广泛使用的通信模型，它采用事件作为基本的通信机制，提供大规模系统所要求的松散耦合的交互模式：订阅者(如客户端)以事件订阅的方式表达出它有兴趣接收的一个事件或一类事件；发布者(如服务器)可将订阅者感兴趣的事件随时通知相关订阅者。
+
+Pub/Sub是可适用于可扩展要求高、松散耦合系统的分布式交互模型
+
+在抽象层中，它的时间非耦合、空间非耦合和同步非耦合性可允许参与者不依赖另一个而独立操作，具有一定的可扩展性；然而在实现层，可扩展性仍受其他原因的牵制。
+
+* 灵活的订阅要求复杂的过滤和路由算法
+* 高可用性开销（事件侦听、日志重传）；
+* 消息认可带来的网络流量消耗；
+* 庞大的订阅者数据带来的系统开销；
+
+基于事件的Pub/Sub中间件的开发与利用在一定程度上可以提高系统的效率。
+
+以下是我的测试：
+
+    # code
+    import time, redis
+    
+    r = redis.StrictRedis()
+    p = r.pubsub()
+    channel = 'channel'
+    
+    def handler(message):
+        print 'Receive msg:%s' % message['data']
+    
+    p.subscribe(**{channel:handler})
+    
+    thread = p.run_in_thread(sleep_time=0.01)
+    
+    time.sleep(60)
+    thread.stop()
+    
+    # running script
+    python pubsub.py
+    
+    # ipython
+    In [2]: import redis
+    In [3]: r = redis.StrictRedis()
+    In [5]: r.publish('channel', 'xiaoh.me')
+    Out[5]: 1L
+    In [6]: r.publish('channel', 'my name is xiaoh')
+    Out[6]: 1L
+    
+    # script output
+    Receive msg:xiaoh.me
+    Receive msg:my name is xiaoh
+
+以上进行了简单的测试。
+
+---
+
+### [持久化](#persistence)
+
+`Redis`是一个支持持久化的内存数据库，也就是说`redis`需要经常将内存中的数据同步到磁盘来保证持久化。`redis`支持两种持久化方式，一种是`Snapshotting`（快照）也是默认方式，另一种是`Append-only file`（缩写aof）的方式。下面分别介绍
+
+##### Snapshotting
+
+快照是默认的持久化方式。这种方式是就是将内存中数据以快照的方式写入到二进制文件中,默认的文件名为`dump.rdb`。可以通过配置设置自动做快照持久化的方式。我们可以配置`redis`在n秒内如果超过m个key被修改就自动做快照，下面是默认的快照保存配置
+
+    save 900 1  #900秒内如果超过1个key被修改，则发起快照保存
+    save 300 10 #300秒内容如超过10个key被修改，则发起快照保存
+    save 60 10000
+
+下面介绍详细的快照保存过程
+
+1. `redis`调用`fork`,现在有了子进程和父进程。
+2. 父进程继续处理`client`请求，子进程负责将内存内容写入到临时文件。由于os的写时复制机制（`copy on write`)父子进程会共享相同的物理页面，当父进程处理写请求时os会为父进程要修改的页面创建副本，而不是写共享的页面。所以子进程的地址空间内的数据是`fork`时刻整个数据库的一个快照。
+3. 当子进程将快照写入临时文件完毕后，用临时文件替换原来的快照文件，然后子进程退出。
+
+`client`也可以使用`save`或者`bgsave`命令通知`redis`做一次快照持久化。
+
+`save`操作是在主线程中保存快照的，由于`redis`是用一个主线程来处理所有 `client`的请求，这种方式会阻塞所有`client`请求。所以不推荐使用。另一点需要注意的是，每次快照持久化都是将内存数据完整写入到磁盘一次，并不是增量的只同步脏数据。如果数据量大的话，而且写操作比较多，必然会引起大量的磁盘io操作，可能会严重影响性能。
+
+另外由于快照方式是在一定间隔时间做一次的，所以如果`redis`意外`down`掉的话，就会丢失最后一次快照后的所有修改。如果应用要求不能丢失任何修改的话，可以采用`aof`持久化方式。
+
+##### Append-only file
+
+`aof`比快照方式有更好的持久化性，是由于在使用`aof`持久化方式时,`redis`会将每一个收到的写命令都通过`write`函数追加到文件中(默认是 `appendonly.aof`)。
+
+当`redis`重启时会通过重新执行文件中保存的写命令来在内存中重建整个数据库的内容。当然由于os会在内核中缓存`write`做的修改，所以可能不是立即写到磁盘上。这样aof方式的持久化也还是有可能会丢失部分修改。不过我们可以通过配置文件告诉`redis`我们想要通过`fsync`函数强制os写入到磁盘的时机。有三种方式如下（默认是：每秒fsync一次）
+
+* appendonly yes           //启用aof持久化方式
+* appendfsync always       //每次收到写命令就立即强制写入磁盘，最慢的，但是保证完全的持久化，不推荐使用
+* appendfsync everysec     //每秒钟强制写入磁盘一次，在性能和持久化方面做了很好的折中，推荐
+* appendfsync no           //完全依赖os，性能最好,持久化没保证
+
+`aof`的方式也同时带来了另一个问题。持久化文件会变的越来越大。例如我们调用`incr test`命令100次，文件中必须保存全部的100条命令，其实有99条都是多余的。因为要恢复数据库的状态其实文件中保存一条`set test 100`就够了。为了压缩aof的持久化文件。`redis`提供了`bgrewriteaof`命令。收到此命令`redis`将使用与快照类似的方式将内存中的数据以命令的方式保存到临时文件中，最后替换原来的文件。具体过程如下
+
+1. `redis`调用`fork` ，现在有父子两个进程
+2. 子进程根据内存中的数据库快照，往临时文件中写入重建数据库状态的命令
+3.父进程继续处理`client`请求，除了把写命令写入到原来的`aof`文件中。同时把收到的写命令缓存起来。这样就能保证如果子进程重写失败的话并不会出问题。
+4.当子进程把快照内容写入已命令方式写到临时文件中后，子进程发信号通知父进程。然后父进程把缓存的写命令也写入到临时文件。
+5.现在父进程可以使用临时文件替换老的`aof`文件，并重命名，后面收到的写命令也开始往新的aof文件中追加。
+
+需要注意到是重写aof文件的操作，并没有读取旧的aof文件，而是将整个内存中的数据库内容用命令的方式重写了一个新的aof文件,这点和快照有点类似。
+
+---
+
+---
+
+### [文档](#documents)
+
+* <http://redisdoc.com/index.html>
+* <https://github.com/andymccurdy/redis-py>
+
+---
+
+### END
 
 
