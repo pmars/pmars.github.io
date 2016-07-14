@@ -20,6 +20,7 @@ tags:
 0. [squid](#squidsquid)
 0. [autossh+privoxy](#autosshprivoxyautosshprivoxy)
 0. [代理方法](#proxy)
+0. [反向代理](#re-proxy)
 
 ---
 
@@ -151,6 +152,14 @@ privoxy 是一个 HTTP 代理，但这个可以将 HTTP 的代理转换为 Socks
 ### [代理方法](#proxy)
 
 最近我在 Chrome 里面使用的代理叫：SwitchyOmega，他可以设置多个代理，之后选择自动切换代理模式，可以处理不同的网站通过不同的代理来进行连接。
+
+---
+
+### [反向代理](#re-proxy)
+
+    ssh -fCNR 1122:127.0.0.1:22 bs.xiaoh.me
+    ssh bs.xiaoh.me
+    ssh -p 1122 127.0.0.1
 
 ---
 
