@@ -71,8 +71,5 @@ friends: [
     },{
         title: "我的项目",
         href: "http://github.com/pmars"
-    },{
-        title: "我的简历",
-        href: "http://www.xiaoh.me/resume"
     }
 ]
