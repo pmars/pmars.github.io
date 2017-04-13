@@ -18,6 +18,7 @@ tags:
     0. [初始化GIT仓库](#initgit)
     0. [禁用shell登录](#loginshell)
     0. [克隆远程仓库](#clone)
+0. [帮助](#help) 
 0. [参考资料](#links)
 
 ---
@@ -94,6 +95,13 @@ warning: You appear to have cloned an empty repository.
 
 ---
 
+### [帮助](#help) 
+
+由于上面的操作比较麻烦,我使用beego的架构写了一个帮助的项目,其中提供了,关于SSH KEY的相关操作,提供了和仓库的相关操作,项目比较简单,目前被我放到了github上面,链接地址如下:
+
+<https://github.com/pmars/gitService>
+
+---
 
 ### [参考资料](#links)
 
