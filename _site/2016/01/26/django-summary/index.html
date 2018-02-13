@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Django Web应用架构 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/01/26/django-summary/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Django" title="Django">Django</a>
+                        
+                        <a class="tag" href="/tags/#服务器" title="服务器">服务器</a>
+                        
+                    </div>
+                    <h1>Django Web应用架构</h1>
+                    
+                    
+                    <h2 class="subheading">Python 服务器架构之 Django</h2>
+                    
+                    <span class="meta">Posted by xiaoh on January 26, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>好久没有写博客了，今天看了一下 <code class="highlighter-rouge">django</code> 就过来水一篇<br />
+这篇文章里面写到了好多模板的东西，而我的博客用的就是markdown模板写的，这样在中间转的时候就出现了问题，所以我给文章中的所有 <code class="highlighter-rouge">'{' + '%'(这里写也编译不过，只能字符串拼接了)</code> 都换成了 <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span></code>，再用的时候需要将 <code class="highlighter-rouge">&lt;removeME&gt;</code> 删除</p>
+</blockquote>
+
+<hr />
+
+<h3 id="section">目录</h3>
+
+<ol>
+  <li><a href="#summary">简介</a></li>
+  <li><a href="#install">安装</a></li>
+  <li><a href="#startproject">创建项目</a></li>
+  <li><a href="#appstartapp">创建APP</a></li>
+  <li><a href="#templates">模板</a></li>
+  <li><a href="#datebase">数据库</a></li>
+</ol>
+
+<hr />
+
+<h3 id="summary"><a href="#summary">简介</a></h3>
+
+<p><code class="highlighter-rouge">Django</code> 是一个开放源代码的 <code class="highlighter-rouge">Web</code> 应用框架，由 <code class="highlighter-rouge">Python</code> 写成。采用了 <code class="highlighter-rouge">MVC</code> 的软件设计模式，即模型M，视图V和控制器C。</p>
+
+<p><code class="highlighter-rouge">Django</code> 的主要目标是使得开发复杂的、数据库驱动的网站变得简单。<code class="highlighter-rouge">Django</code> 注重组件的重用性和“可插拔性”，敏捷开发和 <code class="highlighter-rouge">DRY</code> 法则（Don’t Repeat Yourself）。在 <code class="highlighter-rouge">Django</code> 中 <code class="highlighter-rouge">Python</code> 被普遍使用，甚至包括配置文件和数据模型。</p>
+
+<p><code class="highlighter-rouge">Django</code> 框架的核心包括：一个 物件導向 的映射器，用作数据模型（以 <code class="highlighter-rouge">Python</code> 类的形式定义）和關聯性数据库间的媒介；一个基于正则表达式的 <code class="highlighter-rouge">URL</code> 分发器；一个视图系统，用于处理请求；以及一个模板系统。</p>
+
+<p>核心框架中还包括：</p>
+
+<ul>
+  <li>一个轻量级的、独立的Web服务器，用于开发和测试。</li>
+  <li>一个表单序列化及验证系统，用于HTML表单和适于数据库存储的数据之间的转换。</li>
+  <li>一个缓存框架，并有几种缓存方式可供选择。</li>
+  <li>中间件支持，允许对请求处理的各个阶段进行干涉。</li>
+  <li>内置的分发系统允许应用程序中的组件采用预定义的信号进行相互间的通信。</li>
+  <li>一个序列化系统，能够生成或读取采用XML或JSON表示的Django模型实例。</li>
+  <li>一个用于扩展模板引擎的能力的系统。</li>
+</ul>
+
+<p><code class="highlighter-rouge">Django</code> 包含了很多应用在它的 <code class="highlighter-rouge">contrib</code> 包中，这些包括：</p>
+
+<ul>
+  <li>一个可扩展的认证系统</li>
+  <li>动态站点管理页面</li>
+  <li>一组产生RSS和Atom的工具</li>
+  <li>一个灵活的评论系统</li>
+  <li>产生Google站点地图（Google Sitemaps）的工具</li>
+  <li>防止跨站请求伪造（cross-site request forgery）的工具</li>
+  <li>一套支持轻量级标记语言（Textile和Markdown）的模板库</li>
+  <li>一套协助创建地理信息系统（GIS）的基础框架</li>
+</ul>
+
+<hr />
+
+<h3 id="install"><a href="#install">安装</a></h3>
+
+<p>for ubuntu:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ pip install django
+$ python -c "import django; print(django.get_version())"
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="startproject"><a href="#startproject">创建项目</a></h3>
+
+<p>创建项目用 <code class="highlighter-rouge">startproject</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ django-admin startproject mypro
+$ tree mypro
+mypro
+├── manage.py
+└── mypro
+    ├── __init__.py
+    ├── settings.py
+    ├── urls.py
+    └── wsgi.py
+
+1 directory, 5 files
+</code></pre>
+</div>
+
+<p>启动项目用 <code class="highlighter-rouge">runserver</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ python manage.py runserver 0.0.0.0:8000
+</code></pre>
+</div>
+
+<p>这时就可以在浏览器里面查看了（我就不截图了）</p>
+
+<hr />
+
+<h3 id="appstartapp"><a href="#startapp">创建APP</a></h3>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ cd mypro
+$ python manage.py startapp myapp
+</code></pre>
+</div>
+
+<p><code class="highlighter-rouge">vi myapp/views.py</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>from django.http import HttpResponse
+def index(request):
+    return HttpResponse("Hello, world. You're at the polls index.")
+</code></pre>
+</div>
+
+<p><code class="highlighter-rouge">vi myapp/urls.py</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>from django.conf.urls import url
+from . import views
+urlpatterns = [
+    url(r'^$', views.index, name='index'),
+]
+</code></pre>
+</div>
+
+<p><code class="highlighter-rouge">vi mypro/urls.py</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>from django.conf.urls import include, url
+from django.contrib import admin
+urlpatterns = [
+    url(r'^myapp/', include('myapp.urls')),
+    url(r'^admin/', admin.site.urls),
+]
+</code></pre>
+</div>
+
+<p>修改之后就可以通过浏览器查看 <code class="highlighter-rouge">/myapp/</code> 了。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ curl http://localhost:5000/myapp/
+Hello, world. You're at the polls index.
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="templates"><a href="#templates">模板</a></h3>
+
+<p>在外层的 <code class="highlighter-rouge">mypro</code> 文件夹中创建一个 <code class="highlighter-rouge">templates</code> 文件夹，用来存放各种模板</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ mkdir -p templates
+</code></pre>
+</div>
+
+<p><code class="highlighter-rouge">vi templates/hello.html</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;h1&gt;{ { hello }}&lt;/h1&gt;
+</code></pre>
+</div>
+
+<blockquote>
+  <p>上面代码中{ {之间没有空格的，为了博客显示问题，特意加入的。</p>
+</blockquote>
+
+<p>可以看出来，这就是 <code class="highlighter-rouge">markdown</code> 的模板啊</p>
+
+<p>修改配置文件中模板的路径，<code class="highlighter-rouge">vi mypro/settings.py</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR+'/templates'],
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
+]
+</code></pre>
+</div>
+
+<p>之后再 <code class="highlighter-rouge">myapp/views.py</code> 中添加一个函数</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>def hello(request):
+    context = {}
+    context['hello'] = 'Hello World!'
+    return render(request, 'hello.html', context)
+</code></pre>
+</div>
+
+<p>修改 <code class="highlighter-rouge">urls.py</code>，添加一条刚才函数接口的配置，<code class="highlighter-rouge">vi myapp/urls.py</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>url(r'hello$', views.hello, name='hello'),
+</code></pre>
+</div>
+
+<p>测试一下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ curl http://localhost:5000/myapp/hello
+&lt;h1&gt;Hello World!&lt;/h1&gt;
+</code></pre>
+</div>
+
+<h4 id="django-">django 的模板标签：</h4>
+
+<h6 id="ifelse-">if/else 标签</h6>
+
+<p>基本语法格式如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">condition</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+     </span><span class="err">...</span><span class="w"> </span><span class="err">display</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endif</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<p>或者：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">condition1</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+   </span><span class="err">...</span><span class="w"> </span><span class="err">display</span><span class="w"> </span><span class="mi">1</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">elif</span><span class="w"> </span><span class="err">condiiton2</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+   </span><span class="err">...</span><span class="w"> </span><span class="err">display</span><span class="w"> </span><span class="mi">2</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+   </span><span class="err">...</span><span class="w"> </span><span class="err">display</span><span class="w"> </span><span class="mi">3</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endif</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<p>根据条件判断是否输出。<code class="highlighter-rouge">if/else</code> 支持嵌套。<br />
+<code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 标签接受 and ， or 或者 not 关键字来对多个变量做判断 ，或者对变量取反（ not )，例如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">athlete_list</span><span class="w"> </span><span class="err">and</span><span class="w"> </span><span class="err">coach_list</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+    </span><span class="err">athletes</span><span class="w"> </span><span class="err">和</span><span class="w"> </span><span class="err">coaches</span><span class="w"> </span><span class="err">变量都是可用的。</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endif</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<h6 id="for-">for 标签</h6>
+
+<p><code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">for</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 允许我们在一个序列上迭代。</p>
+
+<p>与 <code class="highlighter-rouge">Python</code> 的 <code class="highlighter-rouge">for</code> 语句的情形类似，循环语法是 <code class="highlighter-rouge">for X in Y</code> ，Y是要迭代的序列而X是在每一个特定的循环中使用的变量名称。</p>
+
+<p>每一次循环中，模板系统会渲染在 <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">for</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 和 <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endfor</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 之间的所有内容。</p>
+
+<p>例如，给定一个运动员列表 <code class="highlighter-rouge">athlete_list</code> 变量，我们可以使用下面的代码来显示这个列表：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&lt;ul&gt;
+{&lt;removeME&gt;% for athlete in athlete_list %}
+    &lt;li&gt;&lt;/li&gt;
+{&lt;removeME&gt;% endfor %}
+&lt;/ul&gt;
+</code></pre>
+</div>
+
+<p>给标签增加一个 <code class="highlighter-rouge">reversed</code> 使得该列表被反向迭代：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">for</span><span class="w"> </span><span class="err">athlete</span><span class="w"> </span><span class="err">in</span><span class="w"> </span><span class="err">athlete_list</span><span class="w"> </span><span class="err">reversed</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span><span class="err">...</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endfor</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<p>可以嵌套使用 <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">for</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 标签：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">for</span><span class="w"> </span><span class="err">athlete</span><span class="w"> </span><span class="err">in</span><span class="w"> </span><span class="err">athlete_list</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+    </span><span class="err">&lt;h</span><span class="mi">1</span><span class="err">&gt;&lt;/h</span><span class="mi">1</span><span class="err">&gt;</span><span class="w">
+    </span><span class="err">&lt;ul&gt;</span><span class="w">
+    </span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">for</span><span class="w"> </span><span class="err">sport</span><span class="w"> </span><span class="err">in</span><span class="w"> </span><span class="err">athlete.sports_played</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+        </span><span class="err">&lt;li&gt;&lt;/li&gt;</span><span class="w">
+    </span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endfor</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+    </span><span class="err">&lt;/ul&gt;</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endfor</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<h6 id="ifequalifnotequal-">ifequal/ifnotequal 标签</h6>
+
+<p><code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">ifequal</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 标签比较两个值，当他们相等时，显示在 <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">ifequal</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 和 <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endifequal</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 之中所有的值。</p>
+
+<p>下面的例子比较两个模板变量 user 和 currentuser :</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">ifequal</span><span class="w"> </span><span class="err">user</span><span class="w"> </span><span class="err">currentuser</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+    </span><span class="err">&lt;h</span><span class="mi">1</span><span class="err">&gt;Welcome!&lt;/h</span><span class="mi">1</span><span class="err">&gt;</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endifequal</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<p>和 <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">if</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 类似， <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">ifequal</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 支持可选的 <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">else%</span><span class="p">}</span></code> 标签：8</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">ifequal</span><span class="w"> </span><span class="err">section</span><span class="w"> </span><span class="err">'sitenews'</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+    </span><span class="err">&lt;h</span><span class="mi">1</span><span class="err">&gt;Site</span><span class="w"> </span><span class="err">News&lt;/h</span><span class="mi">1</span><span class="err">&gt;</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">else</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+    </span><span class="err">&lt;h</span><span class="mi">1</span><span class="err">&gt;No</span><span class="w"> </span><span class="err">News</span><span class="w"> </span><span class="err">Here&lt;/h</span><span class="mi">1</span><span class="err">&gt;</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endifequal</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<h6 id="section-1">注释标签</h6>
+
+<p>Django 注释使用 <code class="highlighter-rouge"><span class="p">{</span><span class="err">#</span><span class="w"> </span><span class="err">#</span><span class="p">}</span></code>。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">#</span><span class="w"> </span><span class="err">这是一个注释</span><span class="w"> </span><span class="err">#</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<h6 id="section-2">过滤器</h6>
+
+<p>模板过滤器可以在变量被显示前修改它，过滤器使用管道字符，如下所示：</p>
+
+<p>`` 变量被过滤器 lower 处理后，文档大写转换文本为小写。</p>
+
+<p>过滤管道可以被* 套接* ，既是说，一个过滤器管道的输出又可以作为下一个管道的输入：</p>
+
+<p>以上实例将第一个元素并将其转化为大写。</p>
+
+<p>有些过滤器有参数。 过滤器的参数跟随冒号之后并且总是以双引号包含。 例如：</p>
+
+<p>这个将显示变量 bio 的前30个词。</p>
+
+<h6 id="section-3">其他过滤器</h6>
+
+<ul>
+  <li>addslashes : 添加反斜杠到任何反斜杠、单引号或者双引号前面。</li>
+  <li>date : 按指定的格式字符串参数格式化 date 或者 datetime 对象，实例：``</li>
+  <li>length : 返回变量的长度。</li>
+  <li>include 标签 {<removeme>% include %} 标签允许在模板中包含其它的模板的内容。</removeme></li>
+</ul>
+
+<p>下面这两个例子都包含了 nav.html 模板：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">include</span><span class="w"> </span><span class="nt">"nav.html"</span><span class="w"> </span><span class="err">%}</span><span class="w">
+</span></code></pre>
+</div>
+
+<h6 id="section-4">模板继承</h6>
+
+<p>模板可以用继承的方式来实现复用。</p>
+
+<p>接下来我们先创建之前项目的 templates 目录中添加 base.html 文件，代码如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="nt">&lt;html&gt;</span>
+  <span class="nt">&lt;head&gt;</span>
+    <span class="nt">&lt;title&gt;</span>Hello World!<span class="nt">&lt;/title&gt;</span>
+  <span class="nt">&lt;/head&gt;</span>
+
+  <span class="nt">&lt;body&gt;</span>
+    <span class="nt">&lt;h1&gt;</span>Hello World!<span class="nt">&lt;/h1&gt;</span>
+    {<span class="nt">&lt;removeME&gt;</span>% block mainbody %}
+       <span class="nt">&lt;p&gt;</span>original<span class="nt">&lt;/p&gt;</span>
+    {<span class="nt">&lt;removeME&gt;</span>% endblock %}
+  <span class="nt">&lt;/body&gt;</span>
+<span class="nt">&lt;/html&gt;</span>
+</code></pre>
+</div>
+
+<p>以上代码中，名为mainbody的block标签是可以被继承者们替换掉的部分。</p>
+
+<p>所有的 <code class="highlighter-rouge"><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">block</span><span class="w"> </span><span class="err">%</span><span class="p">}</span></code> 标签告诉模板引擎，子模板可以重载这些部分。</p>
+
+<p>hello.html 中继承 base.html，并替换特定block，hello.html修改后的代码如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">extends</span><span class="w"> </span><span class="nt">"base.html"</span><span class="w"> </span><span class="err">%}</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">block</span><span class="w"> </span><span class="err">mainbody</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+    </span><span class="err">&lt;p&gt;继承了</span><span class="w"> </span><span class="err">base.html</span><span class="w"> </span><span class="err">文件&lt;/p&gt;</span><span class="w">
+</span><span class="p">{</span><span class="err">&lt;removeME&gt;%</span><span class="w"> </span><span class="err">endblock</span><span class="w"> </span><span class="err">%</span><span class="p">}</span><span class="w">
+</span></code></pre>
+</div>
+
+<p>第一行代码说明 <code class="highlighter-rouge">hello.html</code> 继承了 <code class="highlighter-rouge">base.html</code> 文件。可以看到，这里相同名字的 <code class="highlighter-rouge">block</code> 标签用以替换 <code class="highlighter-rouge">base.html</code> 的相应 <code class="highlighter-rouge">block</code>。</p>
+
+<hr />
+
+<h3 id="datebase"><a href="#datebase">数据库</a></h3>
+
+<p><code class="highlighter-rouge">django</code> 默认使用的是 <code class="highlighter-rouge">sqlite3</code>，你可以通过 <code class="highlighter-rouge">sudo apt-get install sqlite3</code> 来安装，之后进行下面的操作。</p>
+
+<p>使用之前需要先执行一下 <code class="highlighter-rouge">$ python manage.py migrate</code></p>
+
+<p><code class="highlighter-rouge">vi myapp/models.py</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>from django.db import models
+
+class Question(models.Model):
+    question_text = models.CharField(max_length=200)
+    pub_date = models.DateTimeField('date published')
+
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice_text = models.CharField(max_length=200)
+    votes = models.IntegerField(default=0)
+</code></pre>
+</div>
+
+<p>激活models <code class="highlighter-rouge">vi mypro/settings.py</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>INSTALLED_APPS = [
+    'myapp.apps.MyappConfig',
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+]
+</code></pre>
+</div>
+
+<p>执行下面的语句：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ python manage.py makemigrations myapp
+$ python manage.py sqlmigrate myapp 0001
+$ python manage.py migrate
+</code></pre>
+</div>
+
+<p>具体参考 <a href="https://docs.djangoproject.com/en/1.9/intro/tutorial02/">https://docs.djangoproject.com/en/1.9/intro/tutorial02/</a></p>
+
+<h3 id="section-5">最后的目录结构</h3>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ tree mypro
+mypro
+├── db.sqlite3
+├── manage.py
+├── myapp
+│   ├── admin.py
+│   ├── apps.py
+│   ├── __init__.py
+│   ├── __init__.pyc
+│   ├── migrations
+│   │   └── __init__.py
+│   ├── models.py
+│   ├── tests.py
+│   ├── urls.py
+│   ├── urls.pyc
+│   ├── views.py
+│   └── views.pyc
+├── mypro
+│   ├── __init__.py
+│   ├── __init__.pyc
+│   ├── settings.py
+│   ├── settings.pyc
+│   ├── urls.py
+│   ├── urls.pyc
+│   ├── wsgi.py
+│   └── wsgi.pyc
+└── templates
+    └── hello.html
+
+4 directories, 22 files
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/01/09/proxy-setup/" data-toggle="tooltip" data-placement="top" title="代理服务器的搭建方法">
+                        Previous<br>
+                        <span>代理服务器的搭建方法</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/01/27/django-flask-pyramid/" data-toggle="tooltip" data-placement="top" title="选择一个 Python Web 框架：Django vs Flask vs Pyramid">
+                        Next<br>
+                        <span>选择一个 Python Web 框架：Django vs Flask vs Pyramid</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2018
+                    <br>
+                    Theme © <a href="http://xiaoh.me">Xiaoh</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

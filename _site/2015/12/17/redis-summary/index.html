@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Redis简介 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2015/12/17/redis-summary/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-redis-summary.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-redis-summary.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Redis" title="Redis">Redis</a>
+                        
+                        <a class="tag" href="/tags/#数据库" title="数据库">数据库</a>
+                        
+                    </div>
+                    <h1>Redis简介</h1>
+                    
+                    
+                    <h2 class="subheading">Redis数据库快速入门</h2>
+                    
+                    <span class="meta">Posted by xiaoh on December 17, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>最近在看 <code class="highlighter-rouge">celery</code> 的时候，用到了 <code class="highlighter-rouge">Redis</code>，就先了解了一下 <code class="highlighter-rouge">Redis</code>，所以就先写一个Redis的学习笔记</p>
+</blockquote>
+
+<hr />
+
+<h3 id="section">目录</h3>
+
+<ol>
+  <li><a href="#advantage">优势</a></li>
+  <li><a href="#install">安装</a>
+    <ol>
+      <li><a href="#start">启动</a></li>
+    </ol>
+  </li>
+  <li><a href="#data">数据类型</a>
+    <ol>
+      <li><a href="#string">字符串</a></li>
+      <li><a href="#hash">哈希</a></li>
+      <li><a href="#list">列表</a></li>
+      <li><a href="#set">集合</a></li>
+      <li><a href="#listset">有序集合</a></li>
+    </ol>
+  </li>
+  <li><a href="#work">事务</a></li>
+  <li><a href="#pythonpython-use">Python调用</a></li>
+</ol>
+
+<hr />
+
+<p><code class="highlighter-rouge">Redis</code> 是一个开源，先进的 <code class="highlighter-rouge">key-value</code> 存储，并用于构建高性能，可扩展的 <code class="highlighter-rouge">Web</code> 应用程序的完美解决方案。</p>
+
+<p><code class="highlighter-rouge">Redis</code> 从它的许多竞争继承来的三个主要特点：</p>
+
+<ul>
+  <li>Redis数据库完全在内存中，使用磁盘仅用于持久性。</li>
+  <li>相比许多键值数据存储，Redis拥有一套较为丰富的数据类型。</li>
+  <li>Redis可以将数据复制到任意数量的从服务器。</li>
+</ul>
+
+<hr />
+
+<h3 id="advantage"><a href="#advantage">优势</a></h3>
+
+<ul>
+  <li>异常快速：Redis的速度非常快，每秒能执行约11万集合，每秒约81000+条记录。</li>
+  <li>支持丰富的数据类型：Redis支持最大多数开发人员已经知道像列表，集合，有序集合，散列数据类型。这使得它非常容易解决各种各样的问题，因为我们知道哪些问题是可以处理通过它的数据类型更好。</li>
+  <li>操作都是原子性：所有Redis操作是原子的，这保证了如果两个客户端同时访问的Redis服务器将获得更新后的值。</li>
+  <li>多功能实用工具：Redis是一个多功能实用的工具，可以在例如缓存，消息，队列使用(Redis原生支持发布/订阅)，任何短暂的数据，应用程序，如Web应用程序会话，网页命中计数等。</li>
+</ul>
+
+<hr />
+
+<h3 id="install"><a href="#install">安装</a></h3>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ sudo apt-get update
+$ sudo apt-get install redis-server
+</code></pre>
+</div>
+<p>这样，<code class="highlighter-rouge">redis</code> 服务就安装在系统上了，如果你想在 <code class="highlighter-rouge">python</code> 中使用的话，你还需要安装</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ pip install python-redis
+$ pip install redis
+</code></pre>
+</div>
+
+<h5 id="start"><a href="#start">启动</a></h5>
+
+<p>安装之后 <code class="highlighter-rouge">Redis</code> 的服务已经在后台运行了，你可以打开 <code class="highlighter-rouge">Redis</code> 客户端来看:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ redis-server
+</code></pre>
+</div>
+
+<p>或者</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ redis-cli
+</code></pre>
+</div>
+
+<p>效果就自己去试吧</p>
+
+<hr />
+
+<h3 id="data"><a href="#data">数据类型</a></h3>
+
+<h5 id="string"><a href="#string">字符串</a></h5>
+
+<p><code class="highlighter-rouge">Redis</code> 字符串是字节序列。<code class="highlighter-rouge">Redis</code> 字符串是二进制安全的，这意味着他们有一个已知的长度没有任何特殊字符终止，所以你可以存储任何东西，512兆为上限。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>127.0.0.1:6379&gt; set name 'xiaoh'
+OK
+127.0.0.1:6379&gt; get name
+"xiaoh"
+127.0.0.1:6379&gt; del name
+(integer) 1
+127.0.0.1:6379&gt; get name
+(nil)
+</code></pre>
+</div>
+
+<h5 id="hash"><a href="#hash">哈希</a></h5>
+
+<p><code class="highlighter-rouge">Redis</code> 的哈希是键值对的集合。<code class="highlighter-rouge">Redis</code> 的哈希值是字符串字段和字符串值之间的映射，因此它们被用来表示对象</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>127.0.0.1:6379&gt; hmset hh user xiaoh pass xiaoh add "beijing china"
+OK
+127.0.0.1:6379&gt; hgetall hh
+1) "user"
+2) "xiaoh"
+3) "pass"
+4) "xiaoh"
+5) "add"
+6) "beijing china"
+</code></pre>
+</div>
+
+<p>在上面的例子中的哈希数据类型，用于存储其中包含的用户的基本信息用户的对象。</p>
+
+<p>这里 <code class="highlighter-rouge">hmset</code>，<code class="highlighter-rouge">hgetall</code> 作为命令，<code class="highlighter-rouge">user</code>,<code class="highlighter-rouge">pass</code>,<code class="highlighter-rouge">add</code> 是键。</p>
+
+<h5 id="list"><a href="#list">列表</a></h5>
+
+<p><code class="highlighter-rouge">Redis</code> 的列表是简单的字符串列表，排序插入顺序。您可以添加元素到 <code class="highlighter-rouge">Redis</code> 的列表的头部或尾部。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>127.0.0.1:6379&gt; lpush l xiaoh
+(integer) 1
+127.0.0.1:6379&gt; lpush l xingming
+(integer) 2
+127.0.0.1:6379&gt; lpush l huo
+(integer) 3
+127.0.0.1:6379&gt; lrange l 0 10
+1) "huo"
+2) "xingming"
+3) "xiaoh"
+127.0.0.1:6379&gt; rpush l me
+(integer) 4
+127.0.0.1:6379&gt; rpush l blogs
+(integer) 5
+127.0.0.1:6379&gt; lrange l 0 10
+1) "huo"
+2) "xingming"
+3) "xiaoh"
+4) "me"
+5) "blogs"
+</code></pre>
+</div>
+
+<p>列表的最大长度为 2^32 - 1 元素（4294967295，每个列表中可容纳超过4十亿的元素）。</p>
+
+<h5 id="set"><a href="#set">集合</a></h5>
+
+<p><code class="highlighter-rouge">Redis</code> 的集合是字符串的无序集合。在 <code class="highlighter-rouge">Redis</code> 您可以添加，删除和测试文件是否存在，操作均在O（1）的时间复杂度。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>127.0.0.1:6379&gt; sadd s xiaoh xingming
+(integer) 2
+127.0.0.1:6379&gt; sadd s huo
+(integer) 1
+127.0.0.1:6379&gt; sadd s xiaoh
+(integer) 0
+127.0.0.1:6379&gt; smembers s
+1) "xingming"
+2) "huo"
+3) "xiaoh"
+</code></pre>
+</div>
+
+<p><strong>在上面的例子中 我们向 s 集合添加 ‘xiaoh’ 两次，但由于集合元素具有唯一属性。</strong></p>
+
+<p>集合中的元素最大数量为 2^32 - 1 （4294967295，可容纳超过4十亿元素）。</p>
+
+<h5 id="listset"><a href="#listset">有序集合</a></h5>
+
+<p><code class="highlighter-rouge">Redis</code> 的有序集合类似于 <code class="highlighter-rouge">Redis</code> 的集合，字符串不重复的集合。不同的是，一个有序集合的每个成员用分数，以便采取有序 <code class="highlighter-rouge">set</code> 命令，从最小的到最大的成员分数有关。虽然成员具有唯一性，但分数可能会重复。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>127.0.0.1:6379&gt; zadd t 0 xiaoh
+(integer) 1
+127.0.0.1:6379&gt; zadd t 1 xiaoh
+(integer) 0
+127.0.0.1:6379&gt; zadd t 1 xiaoz
+(integer) 1
+127.0.0.1:6379&gt; zadd t 0 xingming
+(integer) 1
+127.0.0.1:6379&gt; zrangebyscore t 0 4
+1) "xingming"
+2) "xiaoh"
+3) "xiaoz"
+127.0.0.1:6379&gt; zrangebyscore t 0 3 withscores
+1) "xingming"
+2) "0"
+3) "xiaoh"
+4) "1"
+5) "xiaoz"
+6) "1"
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="work"><a href="#work">事务</a></h3>
+
+<p>Redis事务让一组命令在单个步骤执行。事务中有两个属性，说明如下：</p>
+
+<p>在一个事务中的所有命令按顺序执行作为单个隔离操作。通过另一个客户端发出的请求在Redis的事务的过程中执行，这是不可能的。</p>
+
+<p>Redis的事务具有原子性。原子意味着要么所有的命令都执行或都不执行。</p>
+
+<p>Redis的事务由指令多重发起，然后需要传递在事务，而且整个事务是通过执行命令EXEC执行命令列表。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>redis 127.0.0.1:6379&gt; MULTI
+OK
+List of commands here
+redis 127.0.0.1:6379&gt; EXEC
+</code></pre>
+</div>
+
+<p>举例说明如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>127.0.0.1:6379&gt; multi
+OK
+127.0.0.1:6379&gt; set name xiaoh
+QUEUED
+127.0.0.1:6379&gt; get name
+QUEUED
+127.0.0.1:6379&gt; invr name
+(error) ERR unknown command 'invr'
+127.0.0.1:6379&gt; incr name
+QUEUED
+127.0.0.1:6379&gt; del name
+QUEUED
+127.0.0.1:6379&gt; get name
+QUEUED
+127.0.0.1:6379&gt; exec
+(error) EXECABORT Transaction discarded because of previous errors.
+</code></pre>
+</div>
+
+<p>中间有一次的实验失败了，结果就都没有执行, 下面一次中间有条命令错误，另一个是正常执行的。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>127.0.0.1:6379&gt; multi
+OK
+127.0.0.1:6379&gt; set name xiaoh
+QUEUED
+127.0.0.1:6379&gt; get name
+QUEUED
+127.0.0.1:6379&gt; incr name
+QUEUED
+127.0.0.1:6379&gt; del name
+QUEUED
+127.0.0.1:6379&gt; get name
+QUEUED
+127.0.0.1:6379&gt; exec
+1) OK
+2) "xiaoh"
+3) (error) ERR value is not an integer or out of range
+4) (integer) 1
+5) (nil)
+
+127.0.0.1:6379&gt; multi
+OK
+127.0.0.1:6379&gt; set num 9
+QUEUED
+127.0.0.1:6379&gt; get num
+QUEUED
+127.0.0.1:6379&gt; incr num
+QUEUED
+127.0.0.1:6379&gt; get num
+QUEUED
+127.0.0.1:6379&gt; exec
+1) OK
+2) "9"
+3) (integer) 10
+4) "10"
+127.0.0.1:6379&gt;
+</code></pre>
+</div>
+
+<hr />
+
+<blockquote>
+  <p>以上就是 <code class="highlighter-rouge">redis</code> 的简单操作，下面我想介绍一下，怎么在 <code class="highlighter-rouge">python</code> 里面使用它</p>
+</blockquote>
+
+<hr />
+
+<h3 id="pythonpython-use"><a href="#python-use">Python调用</a></h3>
+
+<p>在安装部分已经介绍了如何安装 <code class="highlighter-rouge">Python-Redis</code> 的插件。这里就直接介绍怎么应用</p>
+
+<p>接口方面很好理解，上面所有接受的命令，基本上在脚本里面都可以使用：</p>
+
+<p>下面的内容我是我从<strong>help</strong>里面看到的：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ ipython
+$ import redis
+$ r = redis.Redis()
+$ help(r)
+</code></pre>
+</div>
+
+<p>基本操作:</p>
+
+<h6 id="section-1">列表</h6>
+
+<ul>
+  <li>ltrim(list, start, end) 删除不再这个段上的表中的数据</li>
+  <li>lset(list, index, value) 重置表里面第 index 个值为 value</li>
+  <li>lrange(list, start, end) 截取表</li>
+  <li>lpush(list, *values) 将 values 添加到列表头，如果表不存在，就创建</li>
+  <li>lpushx(list, *values) 和上面的一样，只是没有表的话不会创建</li>
+  <li>llen(list) 返回 list 的长度</li>
+  <li>lindex(list, index) 返回 list 中第 index 个值</li>
+  <li>lrem(list, value, num=0) 从 list 里面删掉第 num 个出现的 value</li>
+  <li>rpop(list) 删除并且返回列表中的最后一个值</li>
+  <li>rpoplpush(src, dst) 将 src 的最后一个拿出来，放到 dst 的最前面，并返回</li>
+  <li>rpush(list, *values) 从后面向表里面添加数据</li>
+  <li>rpushx(list, *values) 如果表存在，则从后面向表里面添加数据</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>In [157]: r.lpushx('l', 'xiaoh')
+Out[157]: 0
+
+In [158]: r.lpush('l', 'xiaoh')
+Out[158]: 1L
+
+In [159]: r.rpush('l', 'xingming')
+Out[159]: 2L
+
+In [160]: r.lrange('l', 0, 10)
+Out[160]: ['xiaoh', 'xingming']
+
+In [162]: r.llen('l')
+Out[162]: 2
+
+In [163]: r.lset('l', 1, 'huo')
+Out[163]: True
+
+In [164]: r.lrange('l', 0, 10)
+Out[164]: ['xiaoh', 'huo']
+
+In [165]: r.lpushx('l', 'xiaoz')
+Out[165]: 3
+
+In [166]: r.lrange('l', 0, 10)
+Out[166]: ['xiaoz', 'xiaoh', 'huo']
+
+In [167]: r.rpop('l')
+Out[167]: 'huo'
+</code></pre>
+</div>
+
+<h6 id="section-2">变量</h6>
+
+<ul>
+  <li>set(name, value) 设置变量</li>
+  <li>setnx(name, value) 设置变量之前先检查是否存在，存在就不设置了</li>
+  <li>get(name) 获取 name 的值</li>
+  <li>getrange(name, start, end) 获取 name 的从 start 到 end 的子串</li>
+  <li>getset(name, value) 获取 name 的值，如果没有就将 value 赋值给 name，并返回</li>
+  <li>setex(name, value, time) 将 value 赋值给 name，time 秒之后自动消失</li>
+  <li>append(key, value) 将 value 追加到 key 变量的后面</li>
+  <li>delete(*names) 删除隶属于 names 列表中的值</li>
+  <li>exists(name) 查看变量是否存在</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>In [168]: r.set('name', 'xiaoh')
+Out[168]: True
+
+In [169]: r.setnx('user', 'xiaoh')
+Out[169]: True
+
+In [170]: r.setnx('name', 'xiaoh')
+Out[170]: False
+
+In [171]: r.get('name')
+Out[171]: 'xiaoh'
+
+In [172]: r.getrange('name', 2, 4)
+Out[172]: 'aoh'
+
+In [173]: r.append('name', '.me')
+Out[173]: 8L
+
+In [174]: r.exists('name')
+Out[174]: True
+
+In [175]: r.get('name')
+Out[175]: 'xiaoh.me'
+</code></pre>
+</div>
+
+<h6 id="section-3">有序集合</h6>
+
+<ul>
+  <li>zcard(name) 返回集合大小</li>
+  <li>zcount(name, min, max) 看比分，返回中间的数量</li>
+  <li>zrange(name, start, end) 获得这段中间的集合元素</li>
+  <li>zadd(lset, value, score) 将 value 和 score 作为一对数据添加到 lset 有序集合中</li>
+  <li>zrem(name, *values) 删除集合里面的变量</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>In [177]: r.zadd('zs', 'xiaoh', 1)
+Out[177]: 1
+
+In [179]: r.zcard('zs')
+Out[179]: 1
+
+In [180]: r.zadd('zs', 'xiaoh', 1)
+Out[180]: 0
+
+In [181]: r.zadd('zs', 'xiaoz', 1)
+Out[181]: 1
+
+In [182]: r.zadd('zs', 'xingming', 1)
+Out[182]: 1
+
+In [183]: r.zrange('zs', 0, 3)
+Out[183]: ['xiaoh', 'xiaoz', 'xingming']
+
+In [184]: r.zrem('zs', 'xingming')
+Out[184]: 1
+</code></pre>
+</div>
+
+<h6 id="section-4">无序集合</h6>
+
+<ul>
+  <li>sadd(name, *values) 向集合中添加数据</li>
+  <li>scard(name) 返回集合大小</li>
+</ul>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>In [187]: r.sadd('ss', 'xingming', 'xiaoh', 'xiaoz')
+Out[187]: 3
+
+In [188]: r.scard('ss')
+Out[188]: 3
+</code></pre>
+</div>
+
+<h6 id="section-5">脚本</h6>
+
+<ul>
+  <li>eval(script, numkeys, *keys_add_args) 执行 lua 脚本</li>
+</ul>
+
+<h6 id="section-6">命令</h6>
+
+<ul>
+  <li>execute_command(*args, **options) 执行命令</li>
+  <li>info(section=None) 返回 section 的信息，如果不指定，返回所有</li>
+  <li>keys(pattern=’*’) 返回库里面所有符合 pattern 的键值（感觉像表名）</li>
+  <li>ping() Ping the Redis Server</li>
+  <li>randomkey() 随机返回一个key值</li>
+  <li>rename(src, dst) 修改key的名字</li>
+  <li>renamenx(src, dst) 先检查是否存在dst，之后再进行修改操作</li>
+  <li>delete(*name) 删除键值在names里面的键</li>
+</ul>
+
+<h6 id="section-7">哈希</h6>
+
+<ul>
+  <li>hdel(name, *keys) 删除哈希表 name 中 keys 包含的字段</li>
+  <li>hget(name, key) 获取哈希表 name 中 key 对应的值</li>
+  <li>hexists(name, key) 查看哈希表 name 中是否存在 key</li>
+  <li>hgetall(name) 返回哈希表 name 的所有内容</li>
+  <li>hkeys(name) 返回哈希表 name 的所有键值</li>
+  <li>hlen(name) 返回哈希表 name 的数据量</li>
+  <li>hmget(name, *keys) 返回哈希表 name 中键在 keys 中的值</li>
+  <li>hmset(name, mapping) 批量设置键值对</li>
+  <li>hset(name, key, value) 单个设置</li>
+  <li>hsetnx(name, key, value) 如果表里面没有 key，就设置为 value，设置的话返回1，以前有返回0</li>
+  <li>hvals(name) 返回哈希表中所有的值</li>
+</ul>
+
+<h6 id="section-8">增量</h6>
+
+<ul>
+  <li>incr(name, amount=1) 设置 name = name + amount if name exist else amount</li>
+  <li>incrby(name, amount-1) 和 incr 一样的功能</li>
+  <li>incrbyfloat(name, amount=1.0) 和上面一样的功能，只不过是浮点数而已</li>
+</ul>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2015/12/16/python-config/" data-toggle="tooltip" data-placement="top" title="Python读取Config配置文件">
+                        Previous<br>
+                        <span>Python读取Config配置文件</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2015/12/17/celery-summary/" data-toggle="tooltip" data-placement="top" title="Celery快速入门">
+                        Next<br>
+                        <span>Celery快速入门</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2018
+                    <br>
+                    Theme © <a href="http://xiaoh.me">Xiaoh</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

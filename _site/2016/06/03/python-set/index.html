@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Python Set(集合)类型操作总结 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/06/03/python-set/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Python" title="Python">Python</a>
+                        
+                        <a class="tag" href="/tags/#Set" title="Set">Set</a>
+                        
+                    </div>
+                    <h1>Python Set(集合)类型操作总结</h1>
+                    
+                    
+                    <h2 class="subheading">简单总结一下Set的用法</h2>
+                    
+                    <span class="meta">Posted by xiaoh on June 3, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>python的set和其他语言类似, 是一个无序不重复元素集, 基本功能包括关系测试和消除重复元素. 集合对象还支持union(联合), intersection(交), difference(差)和sysmmetric difference(对称差集)等数学运算.</p>
+</blockquote>
+
+<blockquote>
+  <p>sets 支持 x in set, len(set),和 for x in set。作为一个无序的集合，sets不记录元素位置或者插入点。因此，sets不支持 indexing, slicing, 或其它类序列（sequence-like）的操作。</p>
+</blockquote>
+
+<hr />
+
+<p>下面来点简单的小例子说明:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&gt;&gt;&gt; x = set('spam')
+&gt;&gt;&gt; y = set(['h','a','m'])
+&gt;&gt;&gt; x, y
+(set(['a', 'p', 's', 'm']), set(['a', 'h', 'm']))
+&gt;&gt;&gt; x &amp; y # 交集
+set(['a', 'm'])
+&gt;&gt;&gt; x | y # 并集
+set(['a', 'p', 's', 'h', 'm'])
+&gt;&gt;&gt; x - y # 差集
+set(['p', 's'])
+</code></pre>
+</div>
+
+<p>记得以前个网友提问怎么去除海量列表里重复元素，用hash来解决也行，只不过感觉在性能上不是很高，用set解决还是很不错的，示例如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&gt;&gt;&gt; a = [11,22,33,44,11,22]
+&gt;&gt;&gt; b = set(a)
+&gt;&gt;&gt; b
+set([33, 11, 44, 22])
+&gt;&gt;&gt; c = [i for i in b]
+&gt;&gt;&gt; c
+[33, 11, 44, 22]
+</code></pre>
+</div>
+
+<p>集合用于包含一组无序的对象。要创建集合，可使用set()函数并像下面这样提供一系列的项：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>s = set([3,5,9,10])      #创建一个数值集合
+t = set("Hello")         #创建一个唯一字符的集合
+</code></pre>
+</div>
+
+<p>与列表和元组不同，集合是无序的，也无法通过数字进行索引。此外，集合中的元素不能重复。例如，如果检查前面代码中t集合的值，结果会是：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>&gt;&gt;&gt; t
+set(['H', 'e', 'l', 'o'])
+</code></pre>
+</div>
+
+<blockquote>
+  <p>注意只出现了一个’l’。</p>
+</blockquote>
+
+<p>集合支持一系列标准操作，包括并集、交集、差集和对称差集，例如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>a = t | s          # t 和 s的并集
+b = t &amp; s          # t 和 s的交集
+c = t – s          # 求差集（项在t中，但不在s中）
+d = t ^ s          # 对称差集（项在t或s中，但不会同时出现在二者中）
+</code></pre>
+</div>
+
+<p>基本操作：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>t.add('x')            # 添加一项
+s.update([10,37,42])  # 在s中添加多项
+t.remove('H')         # 使用remove()可以删除一项
+len(s)                # set 的长度
+x in s                # 测试 x 是否是 s 的成员
+x not in s            # 测试 x 是否不是 s 的成员
+
+s.issubset(t)
+s &lt;= t                # 测试是否 s 中的每一个元素都在 t 中
+
+s.issuperset(t)
+s &gt;= t                # 测试是否 t 中的每一个元素都在 s 中
+
+s.union(t)
+s | t                 # 返回一个新的 set 包含 s 和 t 中的每一个元素
+
+s.intersection(t)
+s &amp; t                 # 返回一个新的 set 包含 s 和 t 中的公共元素
+
+s.difference(t)
+s - t                 # 返回一个新的 set 包含 s 中有但是 t 中没有的元素
+
+s.symmetric_difference(t)
+s ^ t                 # 返回一个新的 set 包含 s 和 t 中不重复的元素
+
+s.copy()              #返回 set “s”的一个浅复制
+</code></pre>
+</div>
+
+<blockquote>
+  <p>请注意：<code class="highlighter-rouge">union()</code>, <code class="highlighter-rouge">intersection()</code>, <code class="highlighter-rouge">difference()</code> 和 <code class="highlighter-rouge">symmetric_difference()</code> 的非运算符（<code class="highlighter-rouge">non-operator</code>，就是形如 <code class="highlighter-rouge">s.union()</code>这样的）版本将会接受任何 <code class="highlighter-rouge">iterable</code> 作为参数。相反，它们的运算符版本（<code class="highlighter-rouge">operator based counterparts</code>）要求参数必须是 <code class="highlighter-rouge">sets</code>。这样可以避免潜在的错误，如：为了更可读而使用 <code class="highlighter-rouge">set('abc') &amp; 'cbs'</code> 来替代 <code class="highlighter-rouge">set('abc').intersection('cbs')</code>。从 2.3.1 版本中做的更改：以前所有参数都必须是 sets。</p>
+</blockquote>
+
+<p>另外，Set 和 ImmutableSet 两者都支持 set 与 set 之间的比较。两个 sets 在也只有在这种情况下是相等的：每一个 set 中的元素都是另一个中的元素（二者互为subset）。一个 set 比另一个 set 小，只有在第一个 set 是第二个 set 的 subset 时（是一个 subset，但是并不相等）。一个 set 比另一个 set 打，只有在第一个 set 是第二个 set 的 superset 时（是一个 superset，但是并不相等）。</p>
+
+<p>子 set 和相等比较并不产生完整的排序功能。例如：任意两个 sets 都不相等也不互为子 set，因此以下的运算都会返回 False：a&lt;b, a==b, 或者a&gt;b。因此，sets 不提供 <strong>cmp</strong> 方法。</p>
+
+<p>因为 sets 只定义了部分排序功能（subset 关系），list.sort() 方法的输出对于 sets 的列表没有定义。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>hash(s) # 返回 s 的 hash 值
+</code></pre>
+</div>
+
+<p>下面这个表列出了对于 Set 可用二对于 ImmutableSet 不可用的运算：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>运算符（voperator）</th>
+      <th>等价于</th>
+      <th>运算结果</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>s.update(t)</td>
+      <td>s |= t</td>
+      <td>返回增加了 set “t”中元素后的 set “s”</td>
+    </tr>
+    <tr>
+      <td>s.intersection_update(t)</td>
+      <td>s &amp;= t</td>
+      <td>返回只保留含有 set “t”中元素的 set “s”</td>
+    </tr>
+    <tr>
+      <td>s.difference_update(t)</td>
+      <td>s -= t</td>
+      <td>返回删除了 set “t”中含有的元素后的 set “s”</td>
+    </tr>
+    <tr>
+      <td>s.symmetric_difference_update(t)</td>
+      <td>s ^= t</td>
+      <td>返回含有 set “t”或者 set “s”中有而不是两者都有的元素的 set “s”</td>
+    </tr>
+    <tr>
+      <td>s.add(x)</td>
+      <td> </td>
+      <td>向 set “s”中增加元素 x</td>
+    </tr>
+    <tr>
+      <td>s.remove(x)</td>
+      <td> </td>
+      <td>从 set “s”中删除元素 x, 如果不存在则引发 KeyError</td>
+    </tr>
+    <tr>
+      <td>s.discard(x)</td>
+      <td> </td>
+      <td>如果在 set “s”中存在元素 x, 则删除</td>
+    </tr>
+    <tr>
+      <td>s.pop()</td>
+      <td> </td>
+      <td>删除并且返回 set “s”中的一个不确定的元素, 如果为空则引发 KeyError</td>
+    </tr>
+    <tr>
+      <td>s.clear()</td>
+      <td> </td>
+      <td>删除 set “s”中的所有元素</td>
+    </tr>
+  </tbody>
+</table>
+
+<blockquote>
+  <p>请注意：非运算符版本的 update(), intersection_update(), difference_update()和symmetric_difference_update()将会接受任意 iterable 作为参数。从 2.3.1 版本做的更改：以前所有参数都必须是 sets。</p>
+</blockquote>
+
+<blockquote>
+  <p>还请注意：这个模块还包含一个 union_update() 方法，它是 update() 方法的一个别名。包含这个方法是为了向后兼容。程序员们应该多使用 update() 方法，因为这个方法也被内置的 set() 和 frozenset() 类型支持。</p>
+</blockquote>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/05/31/sync-async/" data-toggle="tooltip" data-placement="top" title="同步，异步，阻塞和非阻塞的理解">
+                        Previous<br>
+                        <span>同步，异步，阻塞和非阻塞的理解</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/06/11/son-things/" data-toggle="tooltip" data-placement="top" title="记几件有趣的事">
+                        Next<br>
+                        <span>记几件有趣的事</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2018
+                    <br>
+                    Theme © <a href="http://xiaoh.me">Xiaoh</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

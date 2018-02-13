@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Lua 语言快速入门 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/02/03/lua-summary/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Lua" title="Lua">Lua</a>
+                        
+                    </div>
+                    <h1>Lua 语言快速入门</h1>
+                    
+                    
+                    <h2 class="subheading">Lua脚本语法说明</h2>
+                    
+                    <span class="meta">Posted by xiaoh on February 3, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h3 id="section">目录</h3>
+
+<ol>
+  <li><a href="#remark">首先是注释</a></li>
+  <li><a href="#luacoding">Lua编程</a></li>
+  <li><a href="#key">关键字</a></li>
+  <li><a href="#vartype">变量类型</a></li>
+  <li><a href="#vardefine">变量的定义</a></li>
+</ol>
+
+<hr />
+
+<blockquote>
+  <p>前不久写了一篇文章 <a href="http://www.xiaoh.me/2016/01/05/nginx-lua-redis/">高并发服务器构建方案</a> 里面用到了 Lua 语言，最近又对程序做了部分修正，添加了部分功能，又一次接触了 Lua 语言，这里就整理一下语法规则，方便学习，文章更多是从网上搜索而来，请查看 <a href="http://www.cnblogs.com/ly4cn/archive/2006/08/04/467550.html">源地址</a></p>
+</blockquote>
+
+<hr />
+
+<h2 id="lua">Lua脚本语法说明</h2>
+
+<p>Lua 的语法比较简单，学习起来也比较省力，但功能却并不弱。</p>
+
+<p>所以，我只简单的归纳一下Lua的一些语法规则，使用起来方便好查就可以了。估计看完了，就懂得怎么写Lua程序了。</p>
+
+<p>在Lua中，一切都是变量，除了关键字。</p>
+
+<hr />
+
+<h3 id="remark"><a href="#remark">首先是注释</a></h3>
+
+<p>写一个程序，总是少不了注释的。</p>
+
+<ul>
+  <li>在Lua中，你可以使用单行注释和多行注释。</li>
+  <li>单行注释中，连续两个减号<code class="highlighter-rouge">"--"</code>表示注释的开始，一直延续到行末为止。相当于C++语言中的”//”。</li>
+  <li>多行注释中，由<code class="highlighter-rouge">"--[["</code>表示注释开始，并且一直延续到”]]”为止。这种注释相当于C语言中的”/*…*/”。在注释当中，”[[“和”]]”是可以嵌套的（在lua5.1中，中括号中间是可以加若干个”=”号的，如 [==[ … ]==]），见下面的字符串表示说明。</li>
+</ul>
+
+<hr />
+
+<h3 id="luacoding"><a href="#coding">Lua编程</a></h3>
+
+<p>经典的”Hello world”的程序总是被用来开始介绍一种语言。在Lua中，写一个这样的程序很简单：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>print("Hello world")
+</code></pre>
+</div>
+
+<p>在Lua中，语句之间可以用分号”；”隔开，也可以用空白隔开。一般来说，如果多个语句写在同一行的话，建议总是用分号隔开。</p>
+
+<p>Lua 有好几种程序控制语句，如：</p>
+
+<h6 id="if">If</h6>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>if 条件 then ... elseif 条件 then ... else ... end
+if 1+1=2 then print("true")
+elseif 1+2~=3 then print("true")
+else print("false") end
+</code></pre>
+</div>
+
+<h6 id="while">While</h6>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>while 条件 do ... end
+while 1+1~=2 do print("true") end
+</code></pre>
+</div>
+
+<h6 id="repeat">Repeat</h6>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>repeat ... until 条件
+repeat print("Hello") until 1+1~=2
+</code></pre>
+</div>
+
+<h6 id="for">For</h6>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>for 变量=初值, 终点值, 步进 do ... end
+for i = 1, 10, 2 do print(i) end
+
+for 变量1, 变量2, ... 变量n in 表或枚举函数 do ... end
+for a,b in mylist do print(a, b) end
+</code></pre>
+</div>
+
+<blockquote>
+  <p>注意一下，for的循环变量总是只作用于for的局部变量；当省略步进值时，for循环会使用1作为步进值。<br />
+使用break可以用来中止一个循环。</p>
+</blockquote>
+
+<h5 id="clua">相对C语言来说，Lua有几个地方是明显不同的，所以面要特别注意一下：</h5>
+
+<h6 id="section-1">语句块</h6>
+
+<p>语句块在C中是用”{“和”}”括起来的，在Lua中，它是用do 和 end 括起来的。比如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>do print("Hello") end
+</code></pre>
+</div>
+
+<p>可以在 函数 中和 语句块 中定局部变量。</p>
+
+<h6 id="section-2">赋值语句</h6>
+<p>　　　　<br />
+赋值语句在Lua被强化了。它可以同时给多个变量赋值。例如：</p>
+
+<p>　　a,b,c,d=1,2,3,4<br />
+　　a,b=b,a  – 多么方便的交换变量功能啊。</p>
+
+<p>在默认情况下，变量总是认为是全局的。假如需要定义局部变量，则在第一次赋值的时候，需要用local说明。比如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>local a,b,c = 1,2,3  -- a,b,c都是局部变量
+</code></pre>
+</div>
+
+<h6 id="section-3">数值运算</h6>
+
+<p>和C语言一样，支持 +, -, *, /。但Lua还多了一个”^”。这表示指数乘方运算。比如2^3 结果为8, 2^4结果为16。</p>
+
+<p>连接两个字符串，可以用”..”运处符。如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>"This a " .. "string." -- 等于 "this a string"
+</code></pre>
+</div>
+
+<h6 id="section-4">比较运算</h6>
+
+<table>
+  <thead>
+    <tr>
+      <th>比较符号</th>
+      <th>&lt;</th>
+      <th>&gt;</th>
+      <th>&lt;=</th>
+      <th>&gt;=</th>
+      <th>==</th>
+      <th>~=</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>含义</td>
+      <td>小于</td>
+      <td>大于</td>
+      <td>小于或等于</td>
+      <td>大于或等于</td>
+      <td>相等</td>
+      <td>不相等</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>所有这些操作符总是返回true或false。</p>
+
+<p>对于Table，Function和Userdata类型的数据，只有 == 和 ~=可以用。相等表示两个变量引用的是同一个数据。比如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>a={1,2}
+b=a
+print(a==b, a~=b)  --输出 true, false
+a={1,2}
+b={1,2}
+print(a==b, a~=b)  --输出 false, true
+</code></pre>
+</div>
+
+<h6 id="section-5">逻辑运算</h6>
+
+<p>and, or, not 其中，and 和 or 与C语言区别特别大。</p>
+
+<p>在这里，请先记住，在Lua中，只有false和nil才计算为false，其它任何数据都计算为true，0也是true！</p>
+
+<ul>
+  <li>and 和 or的运算结果不是true和false，而是和它的两个操作数相关。</li>
+  <li>a and b：如果a为false，则返回a；否则返回b</li>
+  <li>a or b：如果 a 为true，则返回a；否则返回b</li>
+</ul>
+
+<p>举几个例子：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>print(4 and 5) --输出 5
+print(nil and 13) --输出 nil
+print(false and 13) --输出 false
+print(4 or 5) --输出 4
+print(false or 5) --输出 5
+</code></pre>
+</div>
+
+<p>在Lua中这是很有用的特性，也是比较令人混洧的特性。</p>
+
+<p>我们可以模拟C语言中的语句：<code class="highlighter-rouge">x = a? b : c</code>，在Lua中，可以写成：<code class="highlighter-rouge">x = a and b or c</code>。</p>
+
+<p>最有用的语句是： <code class="highlighter-rouge">x = x or v</code>，它相当于：<code class="highlighter-rouge">if not x then x = v end</code> 。</p>
+
+<h6 id="section-6">运算符优先级，从低到高顺序如下：</h6>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>or
+and
+&lt;     &gt;     &lt;=    &gt;=    ~=    ==
+.. (字符串连接)
++     -
+*     /     %
+not   #(lua5.1 取长度运算)     - (一元运算)
+^ 和C语言一样，括号可以改变优先级。
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="key"><a href="#key">关键字</a></h3>
+
+<p>关键字是不能做为变量的。Lua的关键字不多，就以下几个：</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>and</td>
+      <td>break</td>
+      <td>do</td>
+      <td>else</td>
+      <td>elseif</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>end</td>
+      <td>false</td>
+      <td>for</td>
+      <td>function</td>
+      <td>if</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>in</td>
+      <td>local</td>
+      <td>nil</td>
+      <td>not</td>
+      <td>or</td>
+      <td> </td>
+    </tr>
+    <tr>
+      <td>repeat</td>
+      <td>return</td>
+      <td>then</td>
+      <td>true</td>
+      <td>until</td>
+      <td>while</td>
+    </tr>
+  </tbody>
+</table>
+
+<hr />
+
+<h3 id="vartype"><a href="#vartype">变量类型</a></h3>
+
+<p>怎么确定一个变量是什么类型的呢？大家可以用type()函数来检查。Lua支持的类型有以下几种：</p>
+
+<ul>
+  <li>Nil 空值，所有没有使用过的变量，都是nil。nil既是值，又是类型。</li>
+  <li>Boolean 布尔值，只有两个有效值：true和false</li>
+  <li>Number  数值，在Lua里，数值相当于C语言的double</li>
+  <li>String  字符串，如果你愿意的话，字符串是可以包含”\0”字符的（这和C语言总是以”\0”结尾是不一样的）</li>
+  <li>Table   关系表类型，这个类型功能比较强大，请参考后面的内容。</li>
+  <li>Function    函数类型，不要怀疑，函数也是一种类型，也就是说，所有的函数，它本身就是一个变量。</li>
+  <li>Userdata    嗯，这个类型专门用来和Lua的宿主打交道的。宿主通常是用C和C++来编写的，在这种情况下，Userdata可以是宿主的任意数据类型，常用的有Struct和指针。</li>
+  <li>Thread  线程类型，在Lua中没有真正的线程。Lua中可以将一个函数分成几部份运行。如果感兴趣的话，可以去看看Lua的文档。也跟遍历函数（Iterator函数）有点象。</li>
+</ul>
+
+<p>如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>function range(n)
+  local i = 0
+  while(i &lt; n) do 
+    coroutine.yield( i )
+    i = i + 1
+  end
+end
+</code></pre>
+</div>
+
+<p>要继续运行，需要coroutine.resume函数。</p>
+
+<hr />
+
+<h3 id="vardefine"><a href="#vardefine">变量的定义</a></h3>
+
+<p>所有的语言，都要用到变量。在Lua中，不管在什么地方使用变量，都不需要声明，并且所有的这些变量总是全局变量，除非我们在前面加上”local”。这一点要特别注意，因为我们可能想在函数里使用局部变量，却忘了用local来说明。</p>
+
+<p>至于变量名字，它是大小写相关的。也就是说，A和a是两个不同的变量。</p>
+
+<p>定义一个变量的方法就是赋值。”＝”操作就是用来赋值的</p>
+
+<p>我们一起来定义几种常用类型的变量吧。</p>
+
+<h6 id="nil">Nil</h6>
+
+<p>正如前面所说的，没有使用过的变量的值，都是Nil。有时候我们也需要将一个变量清除，这时候，我们可以直接给变量赋以nil值。如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>var1=nil  -- 请注意 nil 一定要小写
+</code></pre>
+</div>
+
+<h6 id="boolean">Boolean</h6>
+
+<p>布尔值通常是用在进行条件判断的时候。布尔值有两种：true 和 false。在Lua中，只有false和nil才被计算为false，而所有任何其它类型的值，都是true。比如0，空串等等，都是true。不要被 C语言的习惯所误导，0在Lua中的的确确是true。你也可以直接给一个变量赋以Boolean类型的值，如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>theBoolean = true
+</code></pre>
+</div>
+
+<h6 id="number">Number</h6>
+
+<p>在Lua中，是没有整数类型的，也不需要。一般情况下，只要数值不是很大（比如不超过100,000,000,000,000），是不会产生舍入误差的。在WindowsXP能跑的当今主流PC上，实数的运算并不比整数慢。</p>
+
+<p>实数的表示方法，同C语言类似，如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>4 0.4 4.57e-3 0.3e12 5e+20
+</code></pre>
+</div>
+
+<h6 id="string">String</h6>
+
+<p>字符串，总是一种非常常用的高级类型。在Lua中，我们可以非常方便的定义很长很长的字符串。</p>
+
+<p>字符串在Lua中有几种方法来表示，最通用的方法，是用双引号或单引号来括起一个字符串的，如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>"That's go!"
+或
+'Hello world!'
+</code></pre>
+</div>
+
+<p>和C语言相同的，它支持一些转义字符，列表如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>\a  bell
+\b  back space
+\f  form feed
+\n  newline
+\r  carriage return
+\t  horizontal tab
+\v  vertical tab
+\\  backslash
+\"  double quote
+\"  single quote
+\[  left square bracket
+\]  right square bracket
+</code></pre>
+</div>
+
+<p>由于这种字符串只能写在一行中，因此，不可避免的要用到转义字符。加入了转义字符的串，看起来实在是不敢恭维，比如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>"one line\nnext line\n\"in quotes\", "in quotes""
+</code></pre>
+</div>
+
+<p>一大堆的”"符号让人看起来很倒胃口。如果你与我有同感，那么，我们在Lua中，可以用另一种表示方法：用”[[“和”]]”将多行的字符串括起来。（lua5.1: 中括号中间可以加入若干个”=”号，如 [==[ … ]==]，详见下面示例）</p>
+
+<p>示例：下面的语句所表示的是完全相同的字符串：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>a = 'alo\n123"'
+a = "alo\n123\""
+a = '\97lo\10\04923"'
+a = [[alo
+123"]]
+a = [==[
+alo
+123"]==]
+</code></pre>
+</div>
+
+<p>值得注意的是，在这种字符串中，如果含有单独使用的”[[“或”]]”就仍然得用”\[“或”\]”来避免歧义。当然，这种情况是极少会发生的。</p>
+
+<h6 id="table">Table</h6>
+
+<p>关系表类型，这是一个很强大的类型。我们可以把这个类型看作是一个数组。只是C语言的数组，只能用正整数来作索引；在Lua中，你可以用任意类型来作数组的索引，除了nil。同样，在C语言中，数组的内容只允许一种类型；在Lua中，你也可以用任意类型的值来作数组的内容，除了nil。</p>
+
+<p>Table的定义很简单，它的主要特征是用”{“和”}”来括起一系列数据元素的。比如：<br />
+　　　　<br />
+    T1 = {}  – 定义一个空表<br />
+    T1[1]=10  – 然后我们就可以象C语言一样来使用它了。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>T1["John"]={Age=27, Gender="Male"}
+这一句相当于：
+T1["John"]={}  -- 必须先定义成一个表，还记得未定义的变量是nil类型吗
+T1["John"]["Age"]=27
+T1["John"]["Gender"]="Male"
+当表的索引是字符串的时候，我们可以简写成：
+T1.John={}
+T1.John.Age=27
+T1.John.Gender="Male"
+或
+T1.John{Age=27, Gender="Male"}
+</code></pre>
+</div>
+
+<p>这是一个很强的特性。</p>
+
+<p>在定义表的时候，我们可以把所有的数据内容一起写在”{“和”}”之间，这样子是非常方便，而且很好看。比如，前面的T1的定义，我们可以这么写：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>T1=
+{
+　　10,  -- 相当于 [1] = 10
+　　[100] = 40,
+　　John=  -- 如果你原意，你还可以写成：["John"] =
+　　{
+　　　　Age=27,   -- 如果你原意，你还可以写成：["Age"] =27
+　　　　Gender=Male   -- 如果你原意，你还可以写成：["Gender"] =Male
+　　},
+　　20  -- 相当于 [2] = 20
+}
+</code></pre>
+</div>
+
+<p>看起来很漂亮，不是吗？我们在写的时候，需要注意三点：</p>
+
+<ul>
+  <li>第一，所有元素之间，总是用逗号”，”隔开；</li>
+  <li>第二，所有索引值都需要用”[“和”]”括起来；如果是字符串，还可以去掉引号和中括号；</li>
+  <li>第三，如果不写索引，则索引就会被认为是数字，并按顺序自动从1往后编；</li>
+</ul>
+
+<p>表类型的构造是如此的方便，以致于常常被人用来代替配置文件。是的，不用怀疑，它比ini文件要漂亮，并且强大的多。</p>
+
+<h6 id="function">Function</h6>
+
+<p>函数，在Lua中，函数的定义也很简单。典型的定义如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>function add(a,b)  -- add 是函数名字，a和b是参数名字
+ return a+b  -- return 用来返回函数的运行结果
+end
+</code></pre>
+</div>
+
+<p>请注意，return语言一定要写在end之前。假如我们非要在中间放上一句return，那么就应该要写成：do return end。</p>
+
+<p>还记得前面说过，函数也是变量类型吗？上面的函数定义，其实相当于：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>add = function (a,b) return a+b end
+</code></pre>
+</div>
+
+<p>当重新给add赋值时，它就不再表示这个函数了。我们甚至可以赋给add任意数据，包括nil （这样，赋值为nil，将会把该变量清除）。Function是不是很象C语言的函数指针呢？</p>
+
+<p>和C语言一样，Lua的函数可以接受可变参数个数，它同样是用”…“来定义的，比如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>function sum (a,b,)
+</code></pre>
+</div>
+
+<p>如果想取得…所代表的参数，可以在函数中访问arg局部变量（表类型）得到 (lua5.1: 取消arg，并直接用”…“来代表可变参数了，本质还是arg)。</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>如 sum(1,2,3,4)
+则，在函数中，a = 1, b = 2, arg = {3, 4}  (lua5.1:  a = 1, b = 2, ... = {3, 4})
+</code></pre>
+</div>
+
+<p>更可贵的是，它可以同时返回多个结果，比如：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>function s()
+　　return 1,2,3,4
+end
+a,b,c,d = s()  -- 此时，a = 1, b = 2, c = 3, d = 4
+</code></pre>
+</div>
+
+<p>前面说过，表类型可以拥有任意类型的值，包括函数！因此，有一个很强大的特性是，拥有函数的表，哦，我想更恰当的应该说是对象吧。Lua可以使用面向对象编程了。不信？举例如下：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>t =
+{
+ Age = 27
+ add = function(self, n) self.Age = self.Age+n end
+}
+print(t.Age)  -- 27
+t.add(t, 10)
+print(t.Age)  -- 37
+</code></pre>
+</div>
+
+<p>不过，t.add(t,10) 这一句实在是有点土对吧？没关系，在Lua中，我们可以简写成：</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>t:add(10)    -- 相当于 t.add(t,10)
+</code></pre>
+</div>
+
+<h6 id="userdata--thread">Userdata 和 Thread</h6>
+
+<p>这两个类型的话题，超出了本文的内容，就不打算细说了。</p>
+
+<hr />
+
+<h3 id="section-7">结束语</h3>
+
+<p>就这么结束了吗？当然不是，接下来，我们需要用Lua解释器，来帮助理解和实践了。相信这样会更快的对Lua上手了。</p>
+
+<p>就象C语言一样，Lua提供了相当多的标准函数来增强语言的功能。使用这些标准函数，可以很方便的操作各种数据类型，并处理输入输出。有关这方面的信息，我们可以参考《Programming in Lua 》一书，也可以在网络上直接观看电子版，网址为：<a href="http://www.lua.org/pil/index.html">http://www.lua.org/pil/index.html</a><br />
+　　<br />
+备注：本文的部份内容摘、译自lua随机文档。</p>
+
+<p>相关链接：</p>
+
+<ul>
+  <li>Lua 官方网站： <a href="http://www.lua.org">http://www.lua.org</a></li>
+  <li>Lua Wiki网站，你可以在这里找到很多相关的资料，如文档、教程、扩展，以及C/C++的包装等： <a href="http://lua-users.org/wiki/">http://lua-users.org/wiki/</a></li>
+  <li>Lua 打包下载（包括各种平台和编译器的工程文件如vs2003,vs2005）：<a href="http://luabinaries.luaforge.net/download.html">http://luabinaries.luaforge.net/download.html</a></li>
+</ul>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/02/01/stdout-colors/" data-toggle="tooltip" data-placement="top" title="Python 实现终端显示各种颜色，下划线，粗体等效果">
+                        Previous<br>
+                        <span>Python 实现终端显示各种颜色，下划线，粗体等效果</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/02/04/python-study/" data-toggle="tooltip" data-placement="top" title="Python学习笔记">
+                        Next<br>
+                        <span>Python学习笔记</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2018
+                    <br>
+                    Theme © <a href="http://xiaoh.me">Xiaoh</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

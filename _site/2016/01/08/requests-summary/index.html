@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="/img/favicon.ico">
+
+    <title>Requests快速入门 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/01/08/requests-summary/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="/">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/about/">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="/tags/">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-requests-summary.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('/img/post-bg-requests-summary.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="/tags/#Requests" title="Requests">Requests</a>
+                        
+                    </div>
+                    <h1>Requests快速入门</h1>
+                    
+                    
+                    <h2 class="subheading">十分钟了解Requests用法</h2>
+                    
+                    <span class="meta">Posted by xiaoh on January 8, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>这篇文章绝大多数都是转载，你可以去看 <a href="http://cn.python-requests.org/en/latest/user/quickstart.html#id2">文章出处</a><br />
+其实关于 <code class="highlighter-rouge">Requests</code>，最好的学习方法就是去看 <a href="http://cn.python-requests.org/en/latest/index.html#">官方文档</a><br />
+最近发现写博客有个好处，每天晚上躺在床上可以用手机看一下，也回顾了一下过往学习的内容。</p>
+</blockquote>
+
+<hr />
+
+<h3 id="section">目录</h3>
+
+<ol>
+  <li><a href="#install">安装</a></li>
+  <li><a href="#request">发送请求</a></li>
+  <li><a href="#urlparams">为URL传递参数</a></li>
+  <li><a href="#response">响应内容</a></li>
+  <li><a href="#binary">二进制响应内容</a></li>
+  <li><a href="#jsonresponse">JSON响应内容</a></li>
+  <li><a href="#preresponse">原始响应内容</a></li>
+  <li><a href="#headers">定制请求头</a></li>
+  <li><a href="#postcomplexrequest">更加复杂的POST请求</a></li>
+  <li><a href="#postmultipartencodedmulti">POST一个多部分编码(Multipart-Encoded)的文件</a></li>
+  <li><a href="#statuscode">响应状态码</a></li>
+  <li><a href="#responseheader">响应头</a></li>
+  <li><a href="#cookiescookies">Cookies</a></li>
+  <li><a href="#history">重定向与请求历史</a></li>
+  <li><a href="#timeout">超时</a></li>
+  <li><a href="#error">错误与异常</a></li>
+</ol>
+
+<hr />
+
+<h3 id="install"><a href="#install">安装</a></h3>
+
+<p><code class="highlighter-rouge">Requests</code> 安装方法很简单，你可以查看 <a href="http://cn.python-requests.org/en/latest/user/install.html#install">官方说明</a>，这里我用的是 <code class="highlighter-rouge">pip</code></p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>pip install requests
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="request"><a href="#request">发送请求</a></h3>
+
+<p>使用 Requests 发送网络请求非常简单。</p>
+
+<p>一开始要导入 Requests 模块:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ import requests
+</code></pre>
+</div>
+
+<p>然后，尝试获取某个网页。本例子中，我们来获取 Github 的公共时间线</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r = requests.get('https://github.com/timeline.json')
+</code></pre>
+</div>
+
+<p>现在，我们有一个名为 r 的 Response 对象。可以从这个对象中获取所有我们想要的信息。</p>
+
+<p>Requests 简便的 API 意味着所有 HTTP 请求类型都是显而易见的。例如，你可以这样发送一个 HTTP POST 请求:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r = requests.post("http://httpbin.org/post")
+</code></pre>
+</div>
+
+<p>漂亮，对吧？那么其他HTTP请求类型：PUT， DELETE， HEAD 以及 OPTIONS 又是如何的呢？都是一样的简单:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r = requests.put("http://httpbin.org/put")
+$ r = requests.delete("http://httpbin.org/delete")
+$ r = requests.head("http://httpbin.org/get")
+$ r = requests.options("http://httpbin.org/get")
+</code></pre>
+</div>
+
+<p>都很不错吧，但这也仅是 Requests 的冰山一角呢。</p>
+
+<hr />
+
+<h3 id="urlparams"><a href="#params">为URL传递参数</a></h3>
+
+<p>你也许经常想为 URL 的查询字符串(query string)传递某种数据。如果你是手工构建 URL，那么数据会以键/值 对的形式置于 URL 中，跟在一个问号的后面。例如， <code class="highlighter-rouge">httpbin.org/get?key=val</code> 。 Requests 允许你使用 params 关键字参数，以一个字典来提供这些参数。举例来说，如果你想传递 <code class="highlighter-rouge">key1=value1</code> 和 <code class="highlighter-rouge">key2=value2</code> 到 <code class="highlighter-rouge">httpbin.org/get</code> ，那么你可以使用如下代码:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ payload = {'key1': 'value1', 'key2': 'value2'}
+$ r = requests.get("http://httpbin.org/get", params=payload)
+</code></pre>
+</div>
+
+<p>通过打印输出该 URL，你能看到 URL 已被正确编码:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ print(r.url)
+http://httpbin.org/get?key2=value2&amp;key1=value1
+</code></pre>
+</div>
+
+<p>注意字典里值为 None 的键都不会被添加到 URL 的查询字符串里。</p>
+
+<hr />
+
+<h3 id="response"><a href="#response">响应内容</a></h3>
+
+<p>我们能读取服务器响应的内容。再次以 Github 时间线为例:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ import requests
+$ r = requests.get('https://github.com/timeline.json')
+$ r.text
+u'[{"repository":{"open_issues":0,"url":"https://github.com/...
+</code></pre>
+</div>
+
+<p>Requests 会自动解码来自服务器的内容。大多数 unicode 字符集都能被无缝地解码。</p>
+
+<p>请求发出后，Requests 会基于 HTTP 头部对响应的编码作出有根据的推测。当你访问 <code class="highlighter-rouge">r.text</code> 之时，Requests 会使用其推测的文本编码。你可以找出 Requests 使用了什么编码，并且能够使用 <code class="highlighter-rouge">r.encoding</code> 属性来改变它:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r.encoding
+'utf-8'
+$ r.encoding = 'ISO-8859-1'
+</code></pre>
+</div>
+
+<p>如果你改变了编码，每当你访问 <code class="highlighter-rouge">r.text</code> ，Request 都将会使用 <code class="highlighter-rouge">r.encoding</code> 的新值。你可能希望在使用特殊逻辑计算出文本的编码的情况下来修改编码。比如 HTTP 和 XML 自身可以指定编码。这样的话，你应该使用 <code class="highlighter-rouge">r.content</code> 来找到编码，然后设置 <code class="highlighter-rouge">r.encoding</code> 为相应的编码。这样就能使用正确的编码解析 <code class="highlighter-rouge">r.text</code> 了。</p>
+
+<p>在你需要的情况下，Requests 也可以使用定制的编码。如果你创建了自己的编码，并使用 <code class="highlighter-rouge">codecs</code> 模块进行注册，你就可以轻松地使用这个解码器名称作为 <code class="highlighter-rouge">r.encoding</code> 的值， 然后由 Requests 来为你处理编码。</p>
+
+<hr />
+
+<h3 id="binary"><a href="#binary">二进制响应内容</a></h3>
+
+<p>你也能以字节的方式访问请求响应体，对于非文本请求:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r.content
+b'[{"repository":{"open_issues":0,"url":"https://github.com/...
+</code></pre>
+</div>
+
+<p>Requests 会自动为你解码 gzip 和 deflate 传输编码的响应数据。</p>
+
+<p>例如，以请求返回的二进制数据创建一张图片，你可以使用如下代码:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ from PIL import Image
+$ from StringIO import StringIO
+$ i = Image.open(StringIO(r.content))
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="jsonresponse"><a href="#response">JSON响应内容</a></h3>
+
+<p>Requests 中也有一个内置的 JSON 解码器，助你处理 JSON 数据:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ import requests
+$ r = requests.get('https://github.com/timeline.json')
+$ r.json()
+[{u'repository': {u'open_issues': 0, u'url': 'https://github.com/...
+</code></pre>
+</div>
+
+<p>如果 JSON 解码失败， <code class="highlighter-rouge">r.json</code> 就会抛出一个异常。例如，相应内容是 <code class="highlighter-rouge">401 (Unauthorized)</code> ，尝试访问 <code class="highlighter-rouge">r.json</code> 将会抛出 <code class="highlighter-rouge">ValueError: No JSON object could be decoded</code> 异常。</p>
+
+<hr />
+
+<h3 id="preresponse"><a href="#preresponse">原始响应内容</a></h3>
+
+<p>在罕见的情况下你可能想获取来自服务器的原始套接字响应，那么你可以访问 <code class="highlighter-rouge">r.raw</code> 。 如果你确实想这么干，那请你确保在初始请求中设置了 <code class="highlighter-rouge">stream=True</code> 。具体的你可以这么做:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r = requests.get('https://github.com/timeline.json', stream=True)
+$ r.raw
+&lt;requests.packages.urllib3.response.HTTPResponse object at 0x101194810&gt;
+$ r.raw.read(10)
+'\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\x03'
+</code></pre>
+</div>
+
+<p>但一般情况下，你应该下面的模式将文本流保存到文件:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>with open(filename, 'wb') as fd:
+for chunk in r.iter_content(chunk_size):
+    fd.write(chunk)
+</code></pre>
+</div>
+
+<p>使用 <code class="highlighter-rouge">Response.iter_content</code> 将会处理大量你直接使用 <code class="highlighter-rouge">Response.raw</code> 不得不处理的。 当流下载时，上面是优先推荐的获取内容方式。</p>
+
+<hr />
+
+<h3 id="headers"><a href="#headers">定制请求头</a></h3>
+
+<p>如果你想为请求添加 HTTP 头部，只要简单地传递一个 dict 给 headers 参数就可以了。</p>
+
+<p>例如，在前一个示例中我们没有指定 <code class="highlighter-rouge">content-type</code>:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ import json
+$ url = 'https://api.github.com/some/endpoint'
+$ payload = {'some': 'data'}
+$ headers = {'content-type': 'application/json'}
+
+$ r = requests.post(url, data=json.dumps(payload), headers=headers)
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="postcomplexrequest"><a href="#complexrequest">更加复杂的POST请求</a></h3>
+
+<p>通常，你想要发送一些编码为表单形式的数据—非常像一个 HTML 表单。 要实现这个，只需简单地传递一个字典给 data 参数。你的数据字典 在发出请求时会自动编码为表单形式:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ payload = {'key1': 'value1', 'key2': 'value2'}
+$ r = requests.post("http://httpbin.org/post", data=payload)
+$ print r.text
+{
+  ...
+  "form": {
+    "key2": "value2",
+    "key1": "value1"
+  },
+  ...
+}
+</code></pre>
+</div>
+
+<p>很多时候你想要发送的数据并非编码为表单形式的。如果你传递一个 string 而不是一个 dict ，那么数据会被直接发布出去。</p>
+
+<p>例如，Github API v3 接受编码为 JSON 的 POST/PATCH 数据:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ import json
+$ url = 'https://api.github.com/some/endpoint'
+$ payload = {'some': 'data'}
+
+$ r = requests.post(url, data=json.dumps(payload))
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="postmultipart-encodedmulti"><a href="#multi">POST一个多部分编码(Multipart-Encoded)的文件</a></h3>
+
+<p>Requests 使得上传多部分编码文件变得很简单:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ url = 'http://httpbin.org/post'
+$ files = {'file': open('report.xls', 'rb')}
+
+$ r = requests.post(url, files=files)
+$ r.text
+{
+  ...
+  "files": {
+    "file": "&lt;censored...binary...data&gt;"
+  },
+  ...
+}
+</code></pre>
+</div>
+
+<p>你可以显式地设置文件名，文件类型和请求头:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ url = 'http://httpbin.org/post'
+$ files = {'file': ('report.xls', open('report.xls', 'rb'), 'application/vnd.ms-excel', {'Expires': '0'})}
+
+$ r = requests.post(url, files=files)
+$ r.text
+{
+  ...
+  "files": {
+    "file": "&lt;censored...binary...data&gt;"
+  },
+  ...
+}
+</code></pre>
+</div>
+
+<p>如果你想，你也可以发送作为文件来接收的字符串:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ url = 'http://httpbin.org/post'
+$ files = {'file': ('report.csv', 'some,data,to,send\nanother,row,to,send\n')}
+
+$ r = requests.post(url, files=files)
+$ r.text
+{
+  ...
+  "files": {
+    "file": "some,data,to,send\\nanother,row,to,send\\n"
+  },
+  ...
+}
+</code></pre>
+</div>
+
+<p>如果你发送一个非常大的文件作为 <code class="highlighter-rouge">multipart/form-data</code> 请求，你可能希望流请求(?)。默认下 requests 不支持, 但有个第三方包支持 - requests-toolbelt. 你可以阅读 <a href="https://toolbelt.rtfd.org/">toolbelt</a> 文档 来了解使用方法。</p>
+
+<p>在一个请求中发送多文件参考 <a href="http://www.xiaoh.me/2016/01/08/requests-advanced/">高级用法</a> 一节.</p>
+
+<hr />
+
+<h3 id="statuscode"><a href="#statuscode">响应状态码</a></h3>
+
+<p>我们可以检测响应状态码:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r = requests.get('http://httpbin.org/get')
+$ r.status_code
+200
+</code></pre>
+</div>
+
+<p>为方便引用，Requests 还附带了一个内置的状态码查询对象:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r.status_code == requests.codes.ok
+True
+</code></pre>
+</div>
+
+<p>如果发送了一个失败请求(非200响应)，我们可以通过 <code class="highlighter-rouge">Response.raise_for_status()</code> 来抛出异常:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ bad_r = requests.get('http://httpbin.org/status/404')
+$ bad_r.status_code
+404
+
+$ bad_r.raise_for_status()
+Traceback (most recent call last):
+  File "requests/models.py", line 832, in raise_for_status
+    raise http_error
+requests.exceptions.HTTPError: 404 Client Error
+</code></pre>
+</div>
+
+<p>但是，由于我们的例子中 r 的 status_code 是 200 ，当我们调用 <code class="highlighter-rouge">raise_for_status()</code> 时，得到的是:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r.raise_for_status()
+None
+</code></pre>
+</div>
+
+<p>一切都挺和谐哈。</p>
+
+<hr />
+
+<h3 id="responseheader"><a href="#responseheader">响应头</a></h3>
+
+<p>我们可以查看以一个 Python 字典形式展示的服务器响应头:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r.headers
+{
+    'content-encoding': 'gzip',
+    'transfer-encoding': 'chunked',
+    'connection': 'close',
+    'server': 'nginx/1.0.4',
+    'x-runtime': '148ms',
+    'etag': '"e1ca502697e5c9317743dc078f67693f"',
+    'content-type': 'application/json'
+}
+</code></pre>
+</div>
+
+<p>但是这个字典比较特殊：它是仅为 HTTP 头部而生的。根据 <code class="highlighter-rouge">RFC 2616</code> ， HTTP 头部是大小写不敏感的。</p>
+
+<p>因此，我们可以使用任意大写形式来访问这些响应头字段:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r.headers['Content-Type']
+'application/json'
+
+$ r.headers.get('content-type')
+'application/json'
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="cookiescookies"><a href="#cookies">Cookies</a></h3>
+
+<p>如果某个响应中包含一些 Cookie，你可以快速访问它们:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ url = 'http://example.com/some/cookie/setting/url'
+$ r = requests.get(url)
+
+$ r.cookies['example_cookie_name']
+'example_cookie_value'
+</code></pre>
+</div>
+
+<p>要想发送你的 cookies 到服务器，可以使用 cookies 参数:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ url = 'http://httpbin.org/cookies'
+$ cookies = dict(cookies_are='working')
+
+$ r = requests.get(url, cookies=cookies)
+$ r.text
+'{"cookies": {"cookies_are": "working"}}'
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="history"><a href="#history">重定向与请求历史</a></h3>
+
+<p>默认情况下，除了 HEAD, Requests 会自动处理所有重定向。</p>
+
+<p>可以使用响应对象的 history 方法来追踪重定向。</p>
+
+<p><code class="highlighter-rouge">Response.history</code> 是一个 <code class="highlighter-rouge">:class:Response &lt;requests.Response&gt;</code> 对象的列表，为了完成请求而创建了这些对象。这个对象列表按照从最老到最近的请求进行排序。</p>
+
+<p>例如，Github 将所有的 HTTP 请求重定向到 HTTPS。:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r = requests.get('http://github.com')
+$ r.url
+'https://github.com/'
+$ r.status_code
+200
+$ r.history
+[&lt;Response [301]&gt;]
+</code></pre>
+</div>
+
+<p>如果你使用的是 GET, OPTIONS, POST, PUT, PATCH 或者 DELETE,，那么你可以通过 allow_redirects 参数禁用重定向处理:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r = requests.get('http://github.com', allow_redirects=False)
+$ r.status_code
+301
+$ r.history
+[]
+</code></pre>
+</div>
+
+<p>如果你使用的是 HEAD，你也可以启用重定向:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ r = requests.head('http://github.com', allow_redirects=True)
+$ r.url
+'https://github.com/'
+$ r.history
+[&lt;Response [301]&gt;]
+</code></pre>
+</div>
+
+<hr />
+
+<h3 id="timeout"><a href="#timeout">超时</a></h3>
+
+<p>你可以告诉 requests 在经过以 timeout 参数设定的秒数时间之后停止等待响应:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code>$ requests.get('http://github.com', timeout=0.001)
+Traceback (most recent call last):
+  File "&lt;stdin&gt;", line 1, in &lt;module&gt;
+requests.exceptions.Timeout: HTTPConnectionPool(host='github.com', port=80): Request timed out. (timeout=0.001)
+</code></pre>
+</div>
+
+<ul>
+  <li>timeout 仅对连接过程有效，与响应体的下载无关。 timeout is not a time limit on the entire response download; rather, an exception is raised if the server has not issued a response for timeout seconds (more precisely, if no bytes have been received on the underlying socket for timeout seconds).</li>
+</ul>
+
+<hr />
+
+<h3 id="error"><a href="#error">错误与异常</a></h3>
+
+<p>遇到网络问题（如：DNS 查询失败、拒绝连接等）时，Requests 会抛出一个 <code class="highlighter-rouge">ConnectionError</code> 异常。</p>
+
+<p>遇到罕见的无效 HTTP 响应时，Requests 则会抛出一个 <code class="highlighter-rouge">HTTPError</code> 异常。</p>
+
+<p>若请求超时，则抛出一个 Timeout 异常。</p>
+
+<p>若请求超过了设定的最大重定向次数，则会抛出一个 <code class="highlighter-rouge">TooManyRedirects</code> 异常。</p>
+
+<p>所有 Requests 显式抛出的异常都继承自 <code class="highlighter-rouge">requests.exceptions.RequestException</code> 。</p>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="/2016/01/05/nginx-lua-redis/" data-toggle="tooltip" data-placement="top" title="高并发服务器构建方案">
+                        Previous<br>
+                        <span>高并发服务器构建方案</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="/2016/01/08/requests-advanced/" data-toggle="tooltip" data-placement="top" title="Requests高级用法">
+                        Next<br>
+                        <span>Requests高级用法</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="/tags/">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="/tags/#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="/tags/#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="/tags/#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/hux-blog.min.js "></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2018
+                    <br>
+                    Theme © <a href="http://xiaoh.me">Xiaoh</a> |
+                    <iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="/img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
