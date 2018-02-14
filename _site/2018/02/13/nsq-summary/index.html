@@ -195,9 +195,12 @@
 
 				<h1 id="nsq-">NSQ-异步消息队列</h1>
 
-<p>NSQ是Golang编写的分布式实时消息平台<br />
-+ Github地址：https://github.com/nsqio/nsq<br />
-+ NSQ官网的文档：http://nsq.io/overview/quick_start.html</p>
+<p>NSQ是Golang编写的分布式实时消息平台</p>
+
+<ul>
+  <li>Github地址：https://github.com/nsqio/nsq</li>
+  <li>NSQ官网的文档：http://nsq.io/overview/quick_start.html</li>
+</ul>
 
 <h3 id="nsq">NSQ简介</h3>
 
@@ -260,14 +263,26 @@
 
 <p><img src="https://f.cloud.github.com/assets/187441/1700696/f1434dc8-6029-11e3-8a66-18ca4ea10aca.gif" alt="" /></p>
 
-<p>上图表明：<br />
-+ 没有router<br />
-    + 对于消息中间件，话题（topic）和通道（channel）是非常基本的，他们是1:N 的关系。<br />
-    + 相对于RabitMQ，NSQ没有router这一层，功能也简化了不少，因此运维非常容易上手。<br />
-+ 消费者对应Channel<br />
-    + 如果channel没有消费，将会保留。如果同一个channel有多个消费者，则会轮训，按序分配给就绪（当前无处理任务）的消费者<br />
-+ 存储<br />
-    + Topic和Channel缓冲的数据相互独立，防止缓慢消费者造成对其他通道造成积压（同样适用于话题级别）。</p>
+<p>上图表明：</p>
+
+<ul>
+  <li>没有router
+    <ul>
+      <li>对于消息中间件，话题（topic）和通道（channel）是非常基本的，他们是1:N 的关系。</li>
+      <li>相对于RabitMQ，NSQ没有router这一层，功能也简化了不少，因此运维非常容易上手。</li>
+    </ul>
+  </li>
+  <li>消费者对应Channel
+    <ul>
+      <li>如果channel没有消费，将会保留。如果同一个channel有多个消费者，则会轮训，按序分配给就绪（当前无处理任务）的消费者</li>
+    </ul>
+  </li>
+  <li>存储
+    <ul>
+      <li>Topic和Channel缓冲的数据相互独立，防止缓慢消费者造成对其他通道造成积压（同样适用于话题级别）。</li>
+    </ul>
+  </li>
+</ul>
 
 <hr />
 
@@ -283,10 +298,15 @@
 <p>启动 nsqlookupd<br />
 &gt; <code class="highlighter-rouge">nsqlookupd</code></p>
 
-<p>启动 nsqd<br />
-&gt; <code class="highlighter-rouge">nsqd --lookupd-tcp-address=127.0.0.1:4160</code><br />
-&gt;<br />
-&gt; <code class="highlighter-rouge">nsqd --lookupd-tcp-address=127.0.0.1:4160 --tcp-address=0.0.0.0:4250 --http-address=0.0.0.0:4251 --data-path=/home/steve-3/nsq/data2</code></p>
+<p>启动 nsqd</p>
+
+<blockquote>
+  <p><code class="highlighter-rouge">nsqd --lookupd-tcp-address=127.0.0.1:4160</code></p>
+</blockquote>
+
+<blockquote>
+  <p><code class="highlighter-rouge">nsqd --lookupd-tcp-address=127.0.0.1:4160 --tcp-address=0.0.0.0:4250 --http-address=0.0.0.0:4251 --data-path=/home/steve-3/nsq/data2</code></p>
+</blockquote>
 
 <p>启动 nsqadmin 浏览地址：http://127.0.0.1:4171/<br />
 &gt; <code class="highlighter-rouge">nsqadmin --lookupd-http-address=127.0.0.1:4161</code></p>
