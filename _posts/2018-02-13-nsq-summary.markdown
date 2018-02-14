@@ -87,6 +87,7 @@ http://nsq.io/deployment/installing.html
 ### NSQ使用
 
 启动 nsqlookupd
+
 > `nsqlookupd`
 
 启动 nsqd
@@ -96,9 +97,11 @@ http://nsq.io/deployment/installing.html
 > `nsqd --lookupd-tcp-address=127.0.0.1:4160 --tcp-address=0.0.0.0:4250 --http-address=0.0.0.0:4251 --data-path=/home/steve-3/nsq/data2`
 
 启动 nsqadmin 浏览地址：http://127.0.0.1:4171/
+
 > `nsqadmin --lookupd-http-address=127.0.0.1:4161`
 
 启动 nsq_to_file
+
 > `nsq_to_file --topic=test --output-dir=./ --lookupd-http-address=127.0.0.1:4161`
 
 向客户端写入消息
