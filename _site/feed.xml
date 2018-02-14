@@ -5,9 +5,81 @@
     <description>死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目</description>
     <link>http://www.xiaoh.me/</link>
     <atom:link href="http://www.xiaoh.me/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Tue, 13 Feb 2018 08:44:53 +0800</pubDate>
-    <lastBuildDate>Tue, 13 Feb 2018 08:44:53 +0800</lastBuildDate>
+    <pubDate>Tue, 13 Feb 2018 17:51:07 +0800</pubDate>
+    <lastBuildDate>Tue, 13 Feb 2018 17:51:07 +0800</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>NSQ消息队列详解</title>
+        <description>&lt;h1 id=&quot;nsq-&quot;&gt;NSQ-异步消息队列&lt;/h1&gt;
+
+&lt;p&gt;NSQ是Golang编写的分布式实时消息平台，Github地址：https://github.com/nsqio/nsq&lt;/p&gt;
+
+&lt;h3 id=&quot;nsq&quot;&gt;NSQ简介&lt;/h3&gt;
+
+&lt;p&gt;NSQ可用于大规模系统中的实时消息服务，并且每天能够处理数亿级别的消息，其设计目标是为在分布式环境下运行的去中心化服务提供一个强大的基础架构。NSQ具有分布式、去中心化的拓扑结构，该结构具有无单点故障、故障容错、高可用性以及能够保证消息的可靠传递的特征。NSQ非常容易配置和部署，且具有最大的灵活性，支持众多消息协议。&lt;/p&gt;
+
+&lt;h3 id=&quot;nsq-1&quot;&gt;NSQ组件&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;nsqd （守护进程；接收，接收，缓存，投递消息给客户端）
+    &lt;ul&gt;
+      &lt;li&gt;它可以独立运行，不过通常它是由 nsqlookupd 实例所在集群配置的（它在这能声明 topics 和 channels，以便大家能找到）&lt;/li&gt;
+    &lt;/ul&gt;
+  &lt;/li&gt;
+  &lt;li&gt;nsqlookupd （守护进程；为消费者提供运行时发现服务，来查找指定话题（topic）的生产者 nsqd）&lt;/li&gt;
+  &lt;li&gt;nsqadmin（提供 Web 页面用来实时的管理你的 NSQ 集群。它通过和 nsqlookupd 实例交流，来确定生产者）&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;nsq-2&quot;&gt;NSQ工具&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;nsq_pubsub&lt;/li&gt;
+  &lt;li&gt;nsq_stat&lt;/li&gt;
+  &lt;li&gt;nsq_tail&lt;/li&gt;
+  &lt;li&gt;nsq_to_file&lt;/li&gt;
+  &lt;li&gt;nsq_to_http&lt;/li&gt;
+  &lt;li&gt;nsq_to_ns&lt;/li&gt;
+  &lt;li&gt;to_nsq&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;nsq-3&quot;&gt;NSQ核心概念&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;topic: topic是nsq的消息发布的逻辑关键词。当程序初次发布带topic的消息时,如果topic不存在,则会被创建。&lt;/li&gt;
+  &lt;li&gt;channels: 当生产者每次发布消息的时候,消息会采用多播的方式被拷贝到各个channel中,channel起到队列的作用。&lt;/li&gt;
+  &lt;li&gt;messages: 数据流的形式。&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;nsq-4&quot;&gt;NSQ安装（略）&lt;/h3&gt;
+
+&lt;p&gt;http://nsq.io/deployment/installing.html&lt;br /&gt;
+网上随便一个地方就能找到安装方式了&lt;/p&gt;
+
+&lt;h3 id=&quot;nsq-5&quot;&gt;NSQ使用&lt;/h3&gt;
+
+&lt;p&gt;启动 nsqlookupd: &lt;code class=&quot;highlighter-rouge&quot;&gt;nsqlookupd&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;启动 nsqd: &lt;code class=&quot;highlighter-rouge&quot;&gt;nsqd --lookupd-tcp-address=127.0.0.1:4160&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;启动&lt;/p&gt;
+
+&lt;hr /&gt;
+
+&lt;h3 id=&quot;end&quot;&gt;END&lt;/h3&gt;
+</description>
+        <pubDate>Tue, 13 Feb 2018 16:42:44 +0800</pubDate>
+        <link>http://www.xiaoh.me/2018/02/13/nsq-summary/</link>
+        <guid isPermaLink="true">http://www.xiaoh.me/2018/02/13/nsq-summary/</guid>
+        
+        <category>NSQ</category>
+        
+        <category>Golang</category>
+        
+        <category>MQ</category>
+        
+        
+      </item>
     
       <item>
         <title>关于创业</title>
@@ -2018,490 +2090,6 @@ s.copy()              #返回 set “s”的一个浅复制
         <category>Sync</category>
         
         <category>Async</category>
-        
-        
-      </item>
-    
-      <item>
-        <title>Python爬虫之PhantomJS用法总结</title>
-        <description>&lt;h3 id=&quot;section&quot;&gt;目录&lt;/h3&gt;
-
-&lt;ol&gt;
-  &lt;li&gt;&lt;a href=&quot;#install&quot;&gt;安装&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#quickstart&quot;&gt;快速开始&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#screen&quot;&gt;屏幕捕获&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#network&quot;&gt;网络监听&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#auto&quot;&gt;页面自动化处理&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#webpagewebpage&quot;&gt;Webpage对象&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#commandline&quot;&gt;命令行&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#examples&quot;&gt;实例&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;#document&quot;&gt;文档&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;hr /&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;大家有没有发现之前我们写的爬虫都有一个共性，就是只能爬取单纯的html代码，如果页面是JS渲染的该怎么办呢？如果我们单纯去分析一个个后台的请求，手动去摸索JS渲染的到的一些结果，那简直没天理了。所以，我们需要有一些好用的工具来帮助我们像浏览器一样渲染JS处理的页面。其中有一个比较常用的工具，那就是 &lt;a href=&quot;#http://phantomjs.org/&quot;&gt;PhantomJS&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Full web stack No browser required&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;PhantomJS is a headless WebKit scriptable with a JavaScript API. It has fast andnative support for various web standards: DOM handling, CSS selector, JSON, Canvas, and SVG.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;PhantomJS是一个无界面的,可脚本编程的WebKit浏览器引擎。它原生支持多种web 标准：DOM 操作，CSS选择器，JSON，Canvas 以及SVG。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;install&quot;&gt;&lt;a href=&quot;#install&quot;&gt;安装&lt;/a&gt;&lt;/h3&gt;
-
-&lt;p&gt;PhantomJS安装方法有两种，一种是下载源码之后自己来编译，另一种是直接下载编译好的二进制文件。然而自己编译需要的时间太长，而且需要挺多的磁盘空间。官方推荐直接下载二进制文件然后安装。&lt;/p&gt;
-
-&lt;p&gt;大家可以依照自己的开发平台选择不同的包进行下载 &lt;a href=&quot;http://phantomjs.org/download.html&quot;&gt;http://phantomjs.org/download.html&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;当然如果你不嫌麻烦，可以选择 &lt;a href=&quot;http://phantomjs.org/build.html&quot;&gt;http://phantomjs.org/build.html&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;安装完成之后命令行输入 &lt;code class=&quot;highlighter-rouge&quot;&gt;phantomjs -v&lt;/code&gt;&lt;/p&gt;
-
-&lt;p&gt;如果正常显示版本号，那么证明安装成功了。如果提示错误，那么请重新安装。&lt;/p&gt;
-
-&lt;p&gt;本文介绍大部分内容来自于官方文档，博主对其进行了整理，学习更多请参考 &lt;a href=&quot;http://phantomjs.org/quick-start.html&quot;&gt;http://phantomjs.org/quick-start.html&lt;/a&gt;&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;quickstart&quot;&gt;&lt;a href=&quot;#quickstart&quot;&gt;快速开始&lt;/a&gt;&lt;/h3&gt;
-
-&lt;h5 id=&quot;section-1&quot;&gt;第一个程序&lt;/h5&gt;
-
-&lt;p&gt;第一个程序当然是Hello World，新建一个 js 文件。命名为 helloworld.js&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;console.log(&#39;Hello, world!&#39;);
-phantom.exit();
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;命令行输入&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;phantomjs helloworld.js
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;程序输出了 Hello，world！程序第二句话终止了 phantom 的执行。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;&lt;strong&gt;phantom.exit();&lt;/strong&gt; 这句话非常重要，否则程序将永远不会终止。&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h5 id=&quot;section-2&quot;&gt;页面加载&lt;/h5&gt;
-
-&lt;p&gt;可以利用 phantom 来实现页面的加载，下面的例子实现了页面的加载并将页面保存为一张图片。&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&quot;language-Python&quot;&gt;var page = require(&#39;webpage&#39;).create();
-page.viewportSize = {width:1920,height:1080}
-page.open(&#39;http://www.xiaoh.me/about/&#39;, function (status) {
-    console.log(&quot;Status: &quot; + status);
-    if (status === &quot;success&quot;) {
-        page.render(&#39;about-page.png&#39;);
-    }
-    phantom.exit();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;首先创建了一个webpage对象，然后加载本站点主页，判断响应状态，如果成功，那么保存截图为 example.png&lt;/p&gt;
-
-&lt;p&gt;以上代码命名为 pageload.js，命令行&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;phantomjs pageload.js
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;发现执行成功，然后目录下多了一张图片，about-page.png&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://www.xiaoh.me/img/about-page.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;pntom 经常会用到网页截图的功能。hantomjs pageload.js&lt;/p&gt;
-
-&lt;h5 id=&quot;section-3&quot;&gt;测试页面加载速度&lt;/h5&gt;
-
-&lt;p&gt;下面这个例子计算了一个页面的加载速度，同时还用到了命令行传参的特性。新建文件保存为 loadspeed.js&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kd&quot;&gt;var&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;page&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;webpage&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;create&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(),&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;system&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;require&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;system&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;address&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
- 
-&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;length&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;===&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Usage: loadspeed.js &amp;lt;some URL&amp;gt;&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;phantom&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
- 
-&lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;now&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;address&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;];&lt;/span&gt;
-&lt;span class=&quot;nx&quot;&gt;page&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;open&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;address&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;status&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;status&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;!==&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39;success&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;FAIL to load the address&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;else&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Date&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;now&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Loading &#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;system&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;args&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]);&lt;/span&gt;
-    &lt;span class=&quot;nx&quot;&gt;console&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;log&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&#39;Loading time &#39;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;t&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;+&lt;/span&gt; &lt;span class=&quot;s1&quot;&gt;&#39; msec&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;);&lt;/span&gt;
-  &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
-  &lt;span class=&quot;nx&quot;&gt;phantom&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;exit&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;});&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;程序判断了参数的多少，如果参数不够，那么终止运行。然后记录了打开页面的时间，请求页面之后，再纪录当前时间，二者之差就是页面加载速度。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;phantomjs loadspeed.js http://www.xiaoh.me
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;运行结果&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Loading http://www.xiaoh.me
-Loading time 3628 msec
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;这个时间包括JS渲染的时间，当然和网速也有关。&lt;/p&gt;
-
-&lt;h6 id=&quot;section-4&quot;&gt;代码评估&lt;/h6&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;To evaluate JavaScript code in the context of the web page, use evaluate() function. The execution is “sandboxed”, there is no way for the code to access any JavaScript objects and variables outside its own page context. An object can be returned from evaluate(), however it is limited to simple objects and can’t contain functions or closures.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;利用 evaluate 方法我们可以获取网页的源代码。这个执行是“沙盒式”的，它不会去执行网页外的 JavaScript 代码。evalute 方法可以返回一个对象，然而返回值仅限于对象，不能包含函数（或闭包）&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var url = &#39;http://www.baidu.com&#39;;
-var page = require(&#39;webpage&#39;).create();
-page.open(url, function(status) {
-  var title = page.evaluate(function() {
-    return document.title;
-  });
-  console.log(&#39;Page title is &#39; + title);
-  phantom.exit();
-});
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;以上代码获取了百度的网站标题。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Page title is 百度一下，你就知道
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;任何来自于网页并且包括来自 evaluate() 内部代码的控制台信息，默认不会显示。&lt;/p&gt;
-
-&lt;p&gt;需要重写这个行为，使用 onConsoleMessage 回调函数，示例可以改写成&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var url = &#39;http://www.baidu.com&#39;;
-var page = require(&#39;webpage&#39;).create();
-page.onConsoleMessage = function (msg) {
-    console.log(msg);
-};
-page.open(url, function (status) {
-    page.evaluate(function () {
-        console.log(document.title);
-    });
-    phantom.exit();
-});
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;这样的话，如果你用浏览器打开百度首页，打开调试工具的console，可以看到控制台输出信息。&lt;/p&gt;
-
-&lt;p&gt;重写了 onConsoleMessage 方法之后，可以发现控制台输出的结果和我们需要输出的标题都打印出来了。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;一张网页，要经历怎样的过程，才能抵达用户面前？
-一位新人，要经历怎样的成长，才能站在技术之巅？
-探寻这里的秘密；
-体验这里的挑战；
-成为这里的主人；
-加入百度，加入网页搜索，你，可以影响世界。
- 
-请将简历发送至 %c ps_recruiter@baidu.com（ 邮件标题请以“姓名-应聘XX职位-来自console”命名） color:red
-职位介绍：http://dwz.cn/hr2013
-百度一下，你就知道
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;screen&quot;&gt;&lt;a href=&quot;#screen&quot;&gt;屏幕捕获&lt;/a&gt;&lt;/h3&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Since PhantomJS is using WebKit, a real layout and rendering engine, it can capture a web page as a screenshot. Because PhantomJS can render anything on the web page, it can be used to convert contents not only in HTML and CSS, but also SVG and Canvas.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;因为 PhantomJS 使用了 WebKit内核，是一个真正的布局和渲染引擎，它可以像屏幕截图一样捕获一个web界面。因为它可以渲染网页中的人和元素，所以它不仅用到HTML，CSS的内容转化，还用在SVG，Canvas。可见其功能是相当强大的。&lt;/p&gt;
-
-&lt;p&gt;下面的例子就捕获了github网页的截图。上文有类似内容，不再演示。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var page = require(&#39;webpage&#39;).create();
-page.open(&#39;http://github.com/&#39;, function() {
-  page.render(&#39;github.png&#39;);
-  phantom.exit();
-});
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;除了 png 格式的转换，PhantomJS还支持 jpg，gif，pdf等格式。&lt;a href=&quot;https://github.com/ariya/phantomjs/blob/master/examples/rasterize.js&quot;&gt;https://github.com/ariya/phantomjs/blob/master/examples/rasterize.js&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;其中最重要的方法便是 viewportSize 和 clipRect 属性。&lt;/p&gt;
-
-&lt;p&gt;viewportSize 是视区的大小，你可以理解为你打开了一个浏览器，然后把浏览器窗口拖到了多大。&lt;/p&gt;
-
-&lt;p&gt;clipRect 是裁切矩形的大小，需要四个参数，前两个是基准点，后两个参数是宽高。&lt;/p&gt;
-
-&lt;p&gt;通过下面的小例子感受一下。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var page = require(&#39;webpage&#39;).create();
-//viewportSize being the actual size of the headless browser
-page.viewportSize = { width: 1024, height: 768 };
-//the clipRect is the portion of the page you are taking a screenshot of
-page.clipRect = { top: 0, left: 0, width: 1024, height: 768 };
-//the rest of the code is the same as the previous example
-page.open(&#39;http://www.xiaoh.me/about/&#39;, function() {
-  page.render(&#39;about-page.png&#39;);
-  phantom.exit();
-});
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;运行结果&lt;/p&gt;
-
-&lt;p&gt;&lt;img src=&quot;http://www.xiaoh.me/img/about-page.png&quot; alt=&quot;&quot; /&gt;&lt;/p&gt;
-
-&lt;p&gt;就相当于把浏览器窗口拖到了 1024×768 大小，然后从左上角裁切出了 1024×768 的页面。&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;network&quot;&gt;&lt;a href=&quot;#network&quot;&gt;网络监听&lt;/a&gt;&lt;/h3&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Because PhantomJS permits the inspection of network traffic, it is suitable to build various analysis on the network behavior and performance.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;因为 PhantomJS 有网络通信的检查功能，它也很适合用来做网络行为的分析。&lt;/p&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;When a page requests a resource from a remote server, both the request and the response can be tracked via onResourceRequested and onResourceReceived callback.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;当接受到请求时，可以通过改写onResourceRequested和onResourceReceived回调函数来实现接收到资源请求和资源接受完毕的监听。例如&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var url = &#39;http://www.xiaoh.me&#39;;
-var page = require(&#39;webpage&#39;).create();
-page.onResourceRequested = function(request) {
-  console.log(&#39;Request &#39; + JSON.stringify(request, undefined, 4));
-};
-page.onResourceReceived = function(response) {
-  console.log(&#39;Receive &#39; + JSON.stringify(response, undefined, 4));
-};
-page.open(url);
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;运行结果会打印出所有资源的请求和接收状态，以JSON格式输出。&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;auto&quot;&gt;&lt;a href=&quot;#auto&quot;&gt;页面自动化处理&lt;/a&gt;&lt;/h3&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Because PhantomJS can load and manipulate a web page, it is perfect to carry out various page automations.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;因为 PhantomJS 可以加载和操作一个web页面，所以用来自动化处理也是非常适合的。&lt;/p&gt;
-
-&lt;h5 id=&quot;dom&quot;&gt;DOM操作&lt;/h5&gt;
-
-&lt;blockquote&gt;
-  &lt;p&gt;Since the script is executed as if it is running on a web browser, standard DOM scripting and CSS selectors work just fine.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;p&gt;脚本都是像在浏览器中运行的，所以标准的 JavaScript 的 DOM 操作和 CSS 选择器也是生效的。&lt;/p&gt;
-
-&lt;p&gt;例如下面的例子就修改了 User-Agent，然后还返回了页面中某元素的内容。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var page = require(&#39;webpage&#39;).create();
-console.log(&#39;The default user agent is &#39; + page.settings.userAgent);
-page.settings.userAgent = &#39;SpecialAgent&#39;;
-page.open(&#39;http://www.httpuseragent.org&#39;, function(status) {
-  if (status !== &#39;success&#39;) {
-    console.log(&#39;Unable to access network&#39;);
-  } else {
-    var ua = page.evaluate(function() {
-      return document.getElementById(&#39;myagent&#39;).textContent;
-    });
-    console.log(ua);
-  }
-  phantom.exit();
-});
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;运行结果&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;The default user agent is Mozilla/5.0 (Macintosh; Intel Mac OS X) AppleWebKit/538.1 (KHTML, like Gecko) PhantomJS/2.1.0 Safari/538.1
-Your Http User Agent string is: SpecialAgent
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;首先打印出了默认的 User-Agent，然后通过修改它，请求验证 User-Agent 的一个站点，通过选择器得到了修改后的 User-Agent。&lt;/p&gt;
-
-&lt;h5 id=&quot;section-5&quot;&gt;使用附加库&lt;/h5&gt;
-
-&lt;p&gt;在1.6版本之后允许添加外部的JS库，比如下面的例子添加了jQuery，然后执行了jQuery代码。&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;var page = require(&#39;webpage&#39;).create();
-page.open(&#39;http://www.sample.com&#39;, function() {
-  page.includeJs(&quot;http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.min.js&quot;, function() {
-    page.evaluate(function() {
-      $(&quot;button&quot;).click();
-    });
-    phantom.exit()
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;引用了 jQuery 之后，我们便可以在下面写一些 jQuery 代码了。&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;webpagewebpage&quot;&gt;&lt;a href=&quot;#webpage&quot;&gt;Webpage对象&lt;/a&gt;&lt;/h3&gt;
-
-&lt;p&gt;在前面我们介绍了 webpage 对象的几个方法和属性，其实它本身还有其它很多的属性。具体的内容可以参考&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://phantomjs.org/page-automation.html&quot;&gt;http://phantomjs.org/page-automation.html&lt;/a&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;a href=&quot;https://github.com/ariya/phantomjs/blob/master/examples/page_events.js&quot;&gt;https://github.com/ariya/phantomjs/blob/master/examples/page_events.js&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;里面介绍了 webpage的所有属性，方法，回调。&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;commandline&quot;&gt;&lt;a href=&quot;#commandline&quot;&gt;命令行&lt;/a&gt;&lt;/h3&gt;
-
-&lt;p&gt;Command-line Options&lt;/p&gt;
-
-&lt;p&gt;PhantomJS提供的命令行选项有：&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;help&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;h&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;lists&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;all&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;possible&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;line&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;options&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Halts&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;immediately&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;will&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;run&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;script&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;passed&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［帮助列表］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;v&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;prints&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;out&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;version&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;PhantomJS&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Halts&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;immediately&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;will&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;run&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;script&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;passed&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;argument&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［查看版本］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cookies&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;file&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/path/&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cookies&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;txt&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;specifies&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;file&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;name&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;store&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;persistent&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Cookies&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［指定存放&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cookies&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;的路径］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;disk&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;enables&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;disk&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cache&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;at&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;desktop&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;services&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cache&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;storage&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;location&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Also&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;accepted&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;yes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;no&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［硬盘缓存开关，默认为关］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ignore&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ssl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;errors&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;ignores&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;SSL&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;errors&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;such&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;expired&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;self&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;signed&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;certificate&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;errors&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Also&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;accepted&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;yes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;no&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［忽略&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ssl&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;错误，默认不忽略］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;images&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;load&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;all&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;inlined&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;images&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Also&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;accepted&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;yes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;no&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［加载图片，默认为加载］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;local&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;storage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/some/&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;save&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;LocalStorage&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;content&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;WebSQL&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;content&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［本地存储路径，如本地文件和&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;SQL&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;文件等］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;local&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;storage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;quota&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;number&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;maximum&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;allow&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［本地文件最大大小］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;local&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;access&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;allows&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;local&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;content&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;access&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;URL&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Also&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;accepted&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;yes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;no&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［是否允许远程加载文件，默认不允许］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;max&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;disk&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cache&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;limits&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;size&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;disk&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cache&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;KB&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［最大缓存空间］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;output&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;encoding&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;encoding&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sets&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;encoding&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;used&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;terminal&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;output&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;utf8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［默认输出编码，默认&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;utf8&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;debugger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;port&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;starts&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;script&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;debug&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;harness&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;listens&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;on&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;specified&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;port&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［远程调试端口］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;kr&quot;&gt;debugger&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;autorun&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;runs&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;script&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;kr&quot;&gt;debugger&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;immediately&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;yes&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;or&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;no&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［在调试环境下是否立即执行脚本，默认否］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;address&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;port&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;specifies&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;proxy&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;use&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;192.168&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.42&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8080&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［代理］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;socks5&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;none&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;specifies&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;type&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;proxy&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;server&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［代理类型，默认&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;http&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;auth&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;specifies&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;authentication&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;information&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;proxy&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;e&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;g&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;proxy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;auth&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;username&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;password&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［代理认证］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;script&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;encoding&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;encoding&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sets&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;encoding&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;used&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;starting&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;script&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;utf8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［脚本编码，默认&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;utf8&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ssl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;protocol&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sslv3&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;sslv2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;tlsv1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;any&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;sets&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;SSL&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;protocol&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;secure&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;connections&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;SSLv3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;SSL&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;协议，默认&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;SSLv3&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;ssl&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;certificates&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;path&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&amp;lt;&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;val&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Sets&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;location&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;custom&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;CA&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;certificates&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;none&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;uses&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;system&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;default&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;SSL&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;证书路径，默认系统默认路径］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;web&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;security&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;kc&quot;&gt;false&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;enables&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;web&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;security&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;and&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;forbids&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;cross&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;domain&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;XHR&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;is&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Also&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;accepted&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;yes&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;|&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;no&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;].&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［是否开启安全保护和禁止异站&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Ajax&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;，默认开启保护］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;webdriver&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;starts&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Remote&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;WebDriver&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;mode&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;embedded&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;GhostDriver&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[[&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]]&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;127.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.1&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;8910&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;′&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［以远程&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;WebDriver&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;模式启动］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;webdriver&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;selenium&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;grid&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;hub&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;URL&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;the&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Selenium&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Grid&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;HUB&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;URLTOHUB&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;default&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;none&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;NOTE&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;works&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;only&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;together&lt;/span&gt; &lt;span class=&quot;kd&quot;&gt;with&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;‘–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;webdriver&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;’&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;Selenium&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;接口］&lt;/span&gt;
-
-&lt;span class=&quot;err&quot;&gt;–&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;sr&quot;&gt;/path/&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;/&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;json&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;can&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;utilize&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;JavaScript&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;Object&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;Notation&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;JSON&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;configuration&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;file&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;instead&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;of&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;passing&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;multiple&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;command&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;line&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;optionss&lt;/span&gt; &lt;span class=&quot;err&quot;&gt;［所有的命令行配置从&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;json&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;中读取］&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;注：JSON文件配置格式&lt;/p&gt;
-
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
-  &lt;span class=&quot;cm&quot;&gt;/* Same as: --ignore-ssl-errors=true */&lt;/span&gt;
-  &lt;span class=&quot;s2&quot;&gt;&quot;ignoreSslErrors&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;kc&quot;&gt;true&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
- 
-  &lt;span class=&quot;cm&quot;&gt;/* Same as: --max-disk-cache-size=1000 */&lt;/span&gt;
-  &lt;span class=&quot;s2&quot;&gt;&quot;maxDiskCacheSize&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
- 
-  &lt;span class=&quot;cm&quot;&gt;/* Same as: --output-encoding=utf8 */&lt;/span&gt;
-  &lt;span class=&quot;s2&quot;&gt;&quot;outputEncoding&quot;&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;utf8&quot;&lt;/span&gt;
- 
-  &lt;span class=&quot;cm&quot;&gt;/* etc. */&lt;/span&gt;
-&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
- 
-&lt;span class=&quot;nx&quot;&gt;There&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;are&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;some&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;keys&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;that&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;do&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;translate&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;directly&lt;/span&gt;&lt;span class=&quot;err&quot;&gt;:&lt;/span&gt;
- 
- &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;disk&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;cache&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;diskCacheEnabled&lt;/span&gt;
- &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;load&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;images&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;autoLoadImages&lt;/span&gt;
- &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;local&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;storage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;path&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;offlineStoragePath&lt;/span&gt;
- &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;local&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;storage&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;quota&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;offlineStorageDefaultQuota&lt;/span&gt;
- &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;local&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;to&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;remote&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;url&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;access&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;localToRemoteUrlAccessEnabled&lt;/span&gt;
- &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;--&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;web&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;security&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&amp;gt;&lt;/span&gt; &lt;span class=&quot;nx&quot;&gt;webSecurityEnabled&lt;/span&gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;以上是命令行的基本配置&lt;/p&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;examples&quot;&gt;&lt;a href=&quot;#examples&quot;&gt;实例&lt;/a&gt;&lt;/h3&gt;
-
-&lt;p&gt;在此提供官方文档实例，多对照实例练习，使用起来会更得心应手。&lt;/p&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://phantomjs.org/examples/index.html&quot;&gt;http://phantomjs.org/examples/index.html&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;document&quot;&gt;&lt;a href=&quot;#document&quot;&gt;文档&lt;/a&gt;&lt;/h3&gt;
-
-&lt;ul&gt;
-  &lt;li&gt;&lt;a href=&quot;http://cuiqingcai.com/2577.html&quot;&gt;http://cuiqingcai.com/2577.html&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;hr /&gt;
-
-&lt;h3 id=&quot;end&quot;&gt;END&lt;/h3&gt;
-
-</description>
-        <pubDate>Tue, 24 May 2016 11:05:56 +0800</pubDate>
-        <link>http://www.xiaoh.me/2016/05/24/phantomjs-summary/</link>
-        <guid isPermaLink="true">http://www.xiaoh.me/2016/05/24/phantomjs-summary/</guid>
-        
-        <category>Spider</category>
-        
-        <category>Python</category>
-        
-        <category>PhantomJS</category>
         
         
       </item>
