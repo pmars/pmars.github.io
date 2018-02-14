@@ -5,8 +5,8 @@
     <description>死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目</description>
     <link>http://www.xiaoh.me/</link>
     <atom:link href="http://www.xiaoh.me/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Wed, 14 Feb 2018 09:03:06 +0800</pubDate>
-    <lastBuildDate>Wed, 14 Feb 2018 09:03:06 +0800</lastBuildDate>
+    <pubDate>Wed, 14 Feb 2018 09:10:07 +0800</pubDate>
+    <lastBuildDate>Wed, 14 Feb 2018 09:10:07 +0800</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -113,8 +113,11 @@
 
 &lt;h3 id=&quot;nsq-5&quot;&gt;NSQ使用&lt;/h3&gt;
 
-&lt;p&gt;启动 nsqlookupd&lt;br /&gt;
-&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;nsqlookupd&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;启动 nsqlookupd&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;nsqlookupd&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;启动 nsqd&lt;/p&gt;
 
@@ -126,11 +129,17 @@
   &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;nsqd --lookupd-tcp-address=127.0.0.1:4160 --tcp-address=0.0.0.0:4250 --http-address=0.0.0.0:4251 --data-path=/home/steve-3/nsq/data2&lt;/code&gt;&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;p&gt;启动 nsqadmin 浏览地址：http://127.0.0.1:4171/&lt;br /&gt;
-&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;nsqadmin --lookupd-http-address=127.0.0.1:4161&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;启动 nsqadmin 浏览地址：http://127.0.0.1:4171/&lt;/p&gt;
 
-&lt;p&gt;启动 nsq_to_file&lt;br /&gt;
-&amp;gt; &lt;code class=&quot;highlighter-rouge&quot;&gt;nsq_to_file --topic=test --output-dir=./ --lookupd-http-address=127.0.0.1:4161&lt;/code&gt;&lt;/p&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;nsqadmin --lookupd-http-address=127.0.0.1:4161&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;p&gt;启动 nsq_to_file&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;nsq_to_file --topic=test --output-dir=./ --lookupd-http-address=127.0.0.1:4161&lt;/code&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
 
 &lt;p&gt;向客户端写入消息&lt;br /&gt;
 &lt;code class=&quot;highlighter-rouge&quot;&gt;
