@@ -65,6 +65,7 @@ NSQ具有分布式、去中心化的拓扑结构，该结构具有无单点故�
 ![](https://f.cloud.github.com/assets/187441/1700696/f1434dc8-6029-11e3-8a66-18ca4ea10aca.gif)
 
 上图表明：
+
 + 没有router
     + 对于消息中间件，话题（topic）和通道（channel）是非常基本的，他们是1:N 的关系。
     + 相对于RabitMQ，NSQ没有router这一层，功能也简化了不少，因此运维非常容易上手。
@@ -88,8 +89,9 @@ http://nsq.io/deployment/installing.html
 > `nsqlookupd`
 
 启动 nsqd
+
 > `nsqd --lookupd-tcp-address=127.0.0.1:4160`
->
+
 > `nsqd --lookupd-tcp-address=127.0.0.1:4160 --tcp-address=0.0.0.0:4250 --http-address=0.0.0.0:4251 --data-path=/home/steve-3/nsq/data2`
 
 启动 nsqadmin 浏览地址：http://127.0.0.1:4171/
