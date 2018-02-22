@@ -23,6 +23,7 @@ Python对SMTP支持有smtplib和email两个模块，email负责构造邮件，sm
 
 以下是各种电子邮件模式的发送代码：
 
+```python
     #!/usr/bin/python
     #-*- coding:utf-8 -*-
     
@@ -145,6 +146,7 @@ Python对SMTP支持有smtplib和email两个模块，email负责构造邮件，sm
     
     if __name__ == "__main__":
         main()
+```
 
 ---
 
@@ -162,6 +164,7 @@ Python内置一个poplib模块，实现了POP3协议，可以直接用来收邮�
 
 第二部：用email解析原始文本，还原为邮件对象。
 
+```python
     #!/usr/bin/python
     #-*- coding:utf-8 -*-
     
@@ -281,6 +284,7 @@ Python内置一个poplib模块，实现了POP3协议，可以直接用来收邮�
     
     if __name__ == "__main__":
         main()
+```
 
 ---
 
