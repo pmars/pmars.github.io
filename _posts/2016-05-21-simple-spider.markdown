@@ -29,6 +29,7 @@ tags:
 
 控制器作为爬虫的整合工具，起到调度的作用，具有将爬虫各个组件协调起来工作的能力。
 
+```python
     #!/usr/bin/python
     #-*- coding:utf-8 -*-
     
@@ -78,6 +79,7 @@ tags:
         start_url = "http://baike.baidu.com/view/6687996.htm"
         spider = SpiderMain()
         spider.craw(start_url)
+```
 
 ---
 
@@ -85,6 +87,7 @@ tags:
 
 下载器则需要进行页面的下载工作，简单的下载器直接调用库函数即可，但复杂一些的就需要考虑到限制IP（使用代理），查看Cookies（模拟登录），脚本加密（模拟浏览器执行）等等方面，这里只简单介绍最基础的下载器，更深入的后续会在博客里面进行更新。
 
+```python
     #!/usr/bin/python
     #-*- coding:utf-8 -*-
     
@@ -105,6 +108,7 @@ tags:
             if req.status_code != 200:
                 return None
             return req.content
+```
 
 ---
 
@@ -114,6 +118,7 @@ tags:
 
 而结构化解析有一个第三方的库叫 `BeautifulSoup` 他可以更好的进行网页的解析（其实就是用起来简单）
 
+```python
     #!/usr/bin/python
     #-*- coding:utf-8 -*-
     
@@ -155,6 +160,7 @@ tags:
                 "summary":summary.text,
                 "url":url
             }
+```
 
 ---
 
@@ -162,6 +168,7 @@ tags:
 
 URL管理器主要工作就是存储URL列表，并进行URL去重
 
+```python
     #!/usr/bin/python
     #-*- coding:utf-8 -*-
     
@@ -200,6 +207,7 @@ URL管理器主要工作就是存储URL列表，并进行URL去重
     
         def has_new_url(self):
             return len(self.new_urls) != 0
+```
 
 ---
 
@@ -207,6 +215,7 @@ URL管理器主要工作就是存储URL列表，并进行URL去重
 
 输出器则是将下载的内容进行整理输出的模块，这部分可以自定义做各种入库或者写入文件的操作。
 
+```python
     #!/usr/bin/python
     #-*- coding:utf-8 -*-
     
@@ -238,6 +247,7 @@ URL管理器主要工作就是存储URL列表，并进行URL去重
                 fout.write('<td>%s</td>' % data['summary'].encode('utf-8'))
                 fout.write('</tr>')
             fout.write('</html></body></table>')
+```
 
 ---
 
