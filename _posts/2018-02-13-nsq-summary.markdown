@@ -16,8 +16,8 @@ tags:
 
 NSQ是Golang编写的分布式实时消息平台
 
-+ Github地址：https://github.com/nsqio/nsq
-+ NSQ官网的文档：http://nsq.io/overview/quick_start.html
++ Github地址：<https://github.com/nsqio/nsq>
++ NSQ官网的文档：<http://nsq.io/overview/quick_start.html>
 
 ### NSQ简介
 
@@ -79,7 +79,7 @@ NSQ具有分布式、去中心化的拓扑结构，该结构具有无单点故�
 
 ### NSQ安装（略）
 
-http://nsq.io/deployment/installing.html
+<http://nsq.io/deployment/installing.html>
 网上随便一个地方就能找到安装方式了
 
 ---
@@ -136,7 +136,7 @@ NSQ提倡co-locating的部署方式, 也就是生产者与nsqd尽量在同一个
 
 ### 消息创建与接收
 
-NSQ封了一个包：https://github.com/nsqio/go-nsq
+NSQ封了一个包：<https://github.com/nsqio/go-nsq>
 
 我们可以很方便的使用NSQ
 
