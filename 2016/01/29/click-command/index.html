@@ -1,0 +1,1719 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>Python Click Command 快速入门 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/01/29/click-command/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Python" title="Python">Python</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#Click" title="Click">Click</a>
+                        
+                    </div>
+                    <h1>Python Click Command 快速入门</h1>
+                    
+                    
+                    <h2 class="subheading">快速理解Python Click模块</h2>
+                    
+                    <span class="meta">Posted by xiaoh on January 29, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#install">安装</a></li>
+  <li><a href="index.html#commandcommand">Command</a></li>
+  <li><a href="index.html#groupgroup">Group</a></li>
+  <li><a href="index.html#parametersparameters">Parameters</a></li>
+  <li><a href="index.html#setup">安装工具</a></li>
+  <li><a href="index.html#optionsoption">Options</a></li>
+  <li><a href="index.html#argumentsarguments">Arguments</a></li>
+</ol>
+
+<hr />
+
+<blockquote>
+  <p>在写命令行工具的时候都会用到参数解析模块，Click就是一个参数解析模块，今天学习一下
+Click的文档在此：<a href="http://click.pocoo.org/5/quickstart/">CLICK文档</a></p>
+</blockquote>
+
+<hr />
+
+<h3 id="安装"><a href="index.html#install">安装</a></h3>
+
+<p>Click的安装很简单，直接 <code class="highlighter-rouge">pip install click</code> 即可</p>
+
+<p>官方推荐你安装 <code class="highlighter-rouge">virtualenv</code>，我本地是安装了的，你可以安装一下：<code class="highlighter-rouge">sudo pip install virtualenv</code> or <code class="highlighter-rouge">sudo apt-get install python-virtualenv</code></p>
+
+<p>之后找一个地方创建一个虚拟目录即可，<code class="highlighter-rouge">virtualenv pyvirt</code>，之后加载一下：<code class="highlighter-rouge">. pyvirt/bin/activate</code>，之后 pip 安装的东西都会在这里面了，想换一套的话，可以直接给这个虚拟目录删掉。</p>
+
+<hr />
+
+<h3 id="command"><a href="index.html#command">Command</a></h3>
+
+<p>Click 通过 <code class="highlighter-rouge">click.command()</code> 来整理一个命令行工具，通过click.option()来添加命令行的参数，可以看一下下面的例子：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import click
+
+@click.command()
+@click.option('--count', default=1, help='Number of greetings.')
+@click.option('--name', prompt='Your name',
+              help='The person to greet.')
+def hello(count, name):
+    """Simple program that greets NAME for a total of COUNT times."""
+    for x in range(count):
+        click.echo('Hello %s!' % name)
+
+if __name__ == '__main__':
+    hello()
+</code></pre></div></div>
+
+<p>测试一下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py --count=2
+Your name: xiaoh
+Hello xiaoh!
+Hello xiaoh!
+
+$ python hello.py --help
+Usage: hello.py [OPTIONS]
+
+  Simple program that greets NAME for a total of COUNT times.
+
+Options:
+  --count INTEGER  Number of greetings.
+  --name TEXT      The person to greet.
+  --help           Show this message and exit.
+</code></pre></div></div>
+
+<p>代码里面用的是 click.echo() 而不是 print() ，这是因为 click.echo() 可以解决一些环境问题，比如说 python2 or python3.</p>
+
+<hr />
+
+<h3 id="group"><a href="index.html#group">Group</a></h3>
+
+<p>Click 通过 group 来创建一个命令行组，也就是说它可以有各种参数来解决相同类别的不同问题</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import click
+
+@click.group()
+def cli():
+    pass
+
+@click.command()
+def initdb():
+    click.echo('Initialized the database')
+····
+@click.command()
+def dropdb():
+    click.echo('Droped the database')
+
+cli.add_command(initdb)
+cli.add_command(dropdb)
+
+if __name__ == "__main__":
+    cli()
+</code></pre></div></div>
+
+<p>可以测试一下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py
+Usage: hello.py [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  dropdb
+  initdb
+$ python hello.py initdb
+Initialized the database
+$ python hello.py dropdb
+Droped the database
+</code></pre></div></div>
+
+<h6 id="pass_content">pass_content</h6>
+
+<p>在Group里面可以添加 pass_content 选项，这样的话，他就会把所有的输入添加到一个对象中去，并且作为第一个参数传递给函数：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.group()
+@click.option('--debug/--no-debug', default=False)
+@click.pass_context
+def cli(ctx, debug):
+    ctx.obj['DEBUG'] = debug
+
+@cli.command()
+@click.pass_context
+def sync(ctx):
+    click.echo('Debug is %s' % (ctx.obj['DEBUG'] and 'on' or 'off'))
+
+if __name__ == '__main__':
+    cli(obj={})
+</code></pre></div></div>
+
+<p>更多使用方法请参考 <a href="http://click.pocoo.org/5/commands/">http://click.pocoo.org/5/commands/</a></p>
+
+<hr />
+
+<h3 id="parameters"><a href="index.html#parameters">Parameters</a></h3>
+
+<p>Click 通过 click.option() 添加可选参数，通过 click.argument() 来添加有可能可选的参数</p>
+
+<p>以下几点是两个的区别：</p>
+
+<ul>
+  <li>需要提示补全输入的时候使用 option()</li>
+  <li>标志位(flag or acts) 使用 option()</li>
+  <li>option的值可以从环境变量获取，而argument不行</li>
+  <li>option的值会在帮助里面列出，而argument不能</li>
+</ul>
+
+<p>简单看一个例子:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--force', default=True, help='drop db anyway')
+@click.argument('name')
+def dropdb(force, name):
+    click.echo(force)
+    click.echo('Droped the database:%s' % name)
+</code></pre></div></div>
+
+<p>测试一下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py dropdb dbname
+True
+Droped the database:dbname
+(pyvirt)xingming@ubuntu:~/help/blogs/click$ python hello.py dropdb --force=False dbname
+False
+Droped the database:dbname
+(pyvirt)xingming@ubuntu:~/help/blogs/click$ python hello.py dropdb
+Usage: hello.py dropdb [OPTIONS] NAME
+
+Error: Missing argument "name".
+</code></pre></div></div>
+
+<h5 id="参数类型">参数类型</h5>
+
+<p>Click支持一下参数类型</p>
+
+<table>
+  <tbody>
+    <tr>
+      <td>STR</td>
+      <td>click.STRING</td>
+      <td>Unicode</td>
+    </tr>
+    <tr>
+      <td>INT</td>
+      <td>click.INT</td>
+      <td>Integers</td>
+    </tr>
+    <tr>
+      <td>Floating</td>
+      <td>click.FLOAT</td>
+      <td>floating</td>
+    </tr>
+    <tr>
+      <td>Istanbul</td>
+      <td>click.BOOL</td>
+      <td>boolean</td>
+    </tr>
+    <tr>
+      <td>UUID</td>
+      <td>click.UUID</td>
+      <td>uuid.UUID</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>还有就是</p>
+
+<ul>
+  <li>click.File(mode=’R’, encoding=no , errors=’strict’, lazy=no , atomic=false)</li>
+  <li>click.Path(exists=False, file_okay=True, dir_okay=True, writable=False, readable=True, resolve_path=False)</li>
+  <li>click.Choice([‘a’,’b’])</li>
+  <li>click.IntRange</li>
+</ul>
+
+<p>click.File 的例子：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.argument('input', type=click.File('rb'))
+@click.argument('output', type=click.File('wb'))
+</code></pre></div></div>
+
+<p>click.Path 的用法和File是一样的，就不多写了</p>
+
+<p>click.Choice的例子：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--hash-type', type=click.Choice(['md5', 'sha1']))
+def digest(hash_type):
+    click.echo(hash_type)
+
+=======================================
+$ digest --hash-type=md5
+md5
+
+$ digest --hash-type=foo
+Usage: digest [OPTIONS]
+
+Error: Invalid value for "--hash-type": invalid choice: foo. (choose from md5, sha1)
+
+$ digest --help
+Usage: digest [OPTIONS]
+
+Options:
+  --hash-type [md5|sha1]
+  --help                  Show this message and exit.
+</code></pre></div></div>
+
+<p>click.IntRange()的例子：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--count', type=click.IntRange(0, 20, clamp=True))
+@click.option('--digit', type=click.IntRange(0, 10))
+def repeat(count, digit):
+    click.echo(str(digit) * count)
+
+if __name__ == '__main__':
+    repeat()
+
+=========================================
+$ repeat --count=1000 --digit=5
+55555555555555555555
+$ repeat --count=1000 --digit=12
+Usage: repeat [OPTIONS]
+
+Error: Invalid value for "--digit": 12 is not in the valid range of 0 to 10.
+</code></pre></div></div>
+
+<h5 id="参数名称">参数名称</h5>
+
+<p>Click 的参数名称有几种形式，不过用的最多的应该就是 <code class="highlighter-rouge">('-n', '--name')</code> 之后变量名称会赋值给参数name</p>
+
+<hr />
+
+<h3 id="安装工具"><a href="index.html#setup">安装工具</a></h3>
+
+<p>如果你的模块里面用到了Click，并且向打一个pypi包的话，你需要按照下面的方式来填写 setup.py</p>
+
+<p>当你的打包脚本和你的模块脚本在一个文件夹的时候：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yourscript.py
+setup.py
+</code></pre></div></div>
+
+<p>setup.py 写法如下:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from setuptools import setup
+
+setup(
+    name='yourscript',
+    version='0.1',
+    py_modules=['yourscript'],
+    install_requires=[
+        'Click',
+    ],
+    entry_points='''
+        [console_scripts]
+        yourscript=yourscript:cli
+    ''',
+)
+</code></pre></div></div>
+
+<p>当你的脚本比较复杂，比如：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yourpackage/
+    __init__.py
+    main.py
+    utils.py
+    scripts/
+        __init__.py
+        yourscript.py
+</code></pre></div></div>
+
+<p>setup.py 写法如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from setuptools import setup, find_packages
+
+setup(
+    name='yourpackage',
+    version='0.1',
+    packages=find_packages(),
+    include_package_data=True,
+    install_requires=[
+        'Click',
+    ],
+    entry_points='''
+        [console_scripts]
+        yourscript=yourpackage.scripts.yourscript:cli
+    ''',
+)
+</code></pre></div></div>
+
+<p>其实就是换了一个路径而已。</p>
+
+<hr />
+
+<h3 id="options"><a href="index.html#option">Options</a></h3>
+
+<h5 id="basic-value-options">Basic Value Options</h5>
+
+<p>最简单的参数就是一个的时候，参数如果有类型，就按照类型来，如果没有就按照默认值来。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--n', default=1)
+def dots(n):
+    click.echo('.' * n)
+</code></pre></div></div>
+
+<p>简单测试一下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py dots --n=4
+....
+</code></pre></div></div>
+
+<h5 id="multi-value-options">Multi Value Options</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--pos', nargs=2, type=float)
+def findme(pos):
+    click.echo('%s / %s' % pos)
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py findme --pos 3.4 5.0
+3.4 / 5.0
+</code></pre></div></div>
+
+<h5 id="tuples-as-multi-value-options">Tuples as Multi Value Options</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--item', type=(unicode, int))
+def putitem(item):
+    click.echo('name:%s, id=%s' % item)
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py putitem --item xiaoh 12
+name:xiaoh, id=12
+</code></pre></div></div>
+
+<p>这个是一个tuple类型的参数，里面有两个值，其实就相当于也设置了 nargs=2 这个参数。</p>
+
+<h5 id="multiple-options">Multiple Options</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--message', '-m', multiple=True)
+def commit(message):
+    click.echo('\n'.join(message))
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py commit -m a -m b -m c -m d
+a
+b
+c
+d
+$ python hello.py commit -m hello -m world
+hello
+world
+</code></pre></div></div>
+
+<h5 id="counting">Counting</h5>
+
+<p>这个貌似只能给 verbosity flags 使用</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('-v', '--verbose', count=True)
+def log(verbose):
+    click.echo('Verbosity: %s' % verbose)
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py log -vvvvvv
+Verbosity: 6
+</code></pre></div></div>
+
+<h5 id="boolean-flags">Boolean Flags</h5>
+
+<p>布尔类型有多种设置方式：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--shout/--no-shout', default=False)
+def info(shout):
+    rv = sys.platform
+    if shout:
+        rv = rv.upper() + '!!!!111'
+    click.echo(rv)
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ info --shout
+LINUX2!!!!111
+$ info --no-shout
+linux2
+</code></pre></div></div>
+
+<p>还有就是一个变量的：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--shout', is_flag=True)
+def info1(shout):
+    rv = sys.platform
+    if shout:
+        rv = rv.upper() + '!!!!111'
+    click.echo(rv)
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py info1
+linux2
+$ python hello.py info1 --shout
+LINUX2!!!!111
+</code></pre></div></div>
+
+<p>还有一种：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('/debug;/no-debug')
+def info2(debug):
+    click.echo('debug=%s' % debug)
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py info2 /debug
+debug=True
+$ python hello.py info2 /no-debug
+debug=False
+$ python hello.py info2
+debug=False
+</code></pre></div></div>
+
+<h5 id="feature-switches">Feature Switches</h5>
+
+<p>这个很厉害，看例子:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--upper', 'transformation', flag_value='upper',
+              default=True)
+@click.option('--lower', 'transformation', flag_value='lower')
+def info3(transformation):
+    click.echo(getattr(sys.platform, transformation)())
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py info3
+LINUX2
+$ python hello.py info3 --lower
+linux2
+$ python hello.py info3 --upper
+LINUX2
+</code></pre></div></div>
+
+<h5 id="choice-options">Choice Options</h5>
+
+<p>这个在上面已经说过了，在贴一次：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--hash-type', type=click.Choice(['md5', 'sha1']))
+def digest(hash_type):
+    click.echo(hash_type)
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py digest
+
+$ python hello.py digest --hash-type md3
+Usage: hello.py digest [OPTIONS]
+
+Error: Invalid value for "--hash-type": invalid choice: md3. (choose from md5, sha1)
+$ python hello.py digest --hash-type md5
+md5
+</code></pre></div></div>
+
+<h5 id="prompting">Prompting</h5>
+
+<p>这个在一开始的例子中就有涉及，如果设置为True的话，就提示你输入</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--name', prompt=True)
+def hello(name):
+    click.echo('Hello %s!' % name)
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ hello --name=Xiaoh
+Hello Xiaoh!
+$ hello
+Name: Xiaoh.me
+Hello Xiaoh.me!
+</code></pre></div></div>
+
+<p>或者你可以换一种问法：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--name', prompt='Your name please')
+def hello(name):
+    click.echo('Hello %s!' % name)
+</code></pre></div></div>
+
+<p>这个就不测试了。</p>
+
+<h5 id="password-prompts">Password Prompts</h5>
+
+<p>这个指定 hide_input=True 就可以隐藏输入，用来做密码还是蛮好的。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--password', prompt=True, hide_input=True,
+              confirmation_prompt=True)
+def encrypt(password):
+    click.echo('Encrypting password to %s' % password.encode('rot13'))
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py encrypt
+Password:
+Repeat for confirmation:
+Encrypting password to kvnbu
+</code></pre></div></div>
+
+<p>Click 也提供了 password_option() 来处理输入密码的问题:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.password_option()
+def encrypt(password):
+    click.echo('Encrypting password to %s' % password.encode('rot13'))
+</code></pre></div></div>
+
+<p>和上面的测试一样，都看不到，就不贴了。</p>
+
+<h5 id="dynamic-defaults-for-prompts">Dynamic Defaults for Prompts</h5>
+
+<p>自动获取默认值</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--username', prompt=True,
+              default=lambda: os.environ.get('USER', ''))
+def hello1(username):
+    print("Hello,", username)
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ export USER=xiaoh
+$ python hello.py hello1
+Username [xiaoh]:
+('Hello,', u'xiaoh')
+$ python hello.py hello1
+Username [xiaoh]: xingming
+('Hello,', u'xingming')
+$ python hello.py hello1 --username xiaoh.me
+('Hello,', u'xiaoh.me')
+</code></pre></div></div>
+
+<h5 id="callbacks-and-eager-options">Callbacks and Eager Options</h5>
+
+<p>有时候你可能需要通过要给选项就运行到另一个函数，运行完之后就退出，而不是继续运行后面的东西，比如 –version</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def print_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo('Version 1.0')
+    ctx.exit()
+
+@click.command()
+@click.option('--version', is_flag=True, callback=print_version,
+              expose_value=False, is_eager=True)
+def hello2():
+    click.echo('Hello World!')
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py hello2
+Hello World!
+$ python hello.py hello2 --version
+Version 1.0
+</code></pre></div></div>
+
+<p>这个很有用啊，我将他放到了 click.group()下面，之后就可以从外层来使用了。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def print_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo('Version 1.0')
+    ctx.exit()
+
+@click.group()
+@click.option('--version', is_flag=True, callback=print_version,
+              expose_value=False, is_eager=True)
+def cli():
+    pass
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py --version
+Version 1.0
+</code></pre></div></div>
+
+<h5 id="yes-parameters">Yes Parameters</h5>
+
+<p>这个就是问你是不是要这么做啊，是就继续，不是就go dead…</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def abort_if_false(ctx, param, value):
+    if not value:
+        ctx.abort()
+
+@click.command()
+@click.option('--yes', is_flag=True, callback=abort_if_false,
+              expose_value=False,
+              prompt='Are you sure you want to drop the db?')
+def dropdb():
+    click.echo('Dropped all tables!')
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ dropdb
+Are you sure you want to drop the db? [y/N]: n
+Aborted!
+$ dropdb --yes
+Dropped all tables!
+</code></pre></div></div>
+
+<p>这个其实也挺常用的，所以Click也提供了另一种解决方案：<code class="highlighter-rouge">confirmation_option()</code></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.confirmation_option(help='Are you sure you want to drop the db?')
+def dropdb():
+    click.echo('Dropped all tables!'
+</code></pre></div></div>
+
+<h5 id="values-from-environment-variables">Values from Environment Variables</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--username')
+def greet(username):
+    click.echo('Hello %s!' % username)
+
+if __name__ == '__main__':
+    greet(auto_envvar_prefix='GREETER')
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ export GREETER_USERNAME=xiaoh
+$ greet
+Hello xiaoh!
+</code></pre></div></div>
+
+<p>当然还可以在Option里面指定环境变量的名字：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.option('--username')
+def greet(username):
+    click.echo('Hello %s!' % username)
+
+if __name__ == '__main__':
+    greet(auto_envvar_prefix='GREETER')
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ export GREETER_USERNAME=xiaoh
+$ greet
+Hello xiaoh!
+</code></pre></div></div>
+
+<p>后面还有几个，就不打算罗列了，用到的机会不大感觉，IntRange这个在上面说过了就不写了。</p>
+
+<p>那么所有的Option()的方法基本上就在这了</p>
+
+<hr />
+
+<h3 id="arguments"><a href="index.html#Arguments">Arguments</a></h3>
+
+<h5 id="basic-arguments">Basic Arguments</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.argument('filename')
+def touch(filename):
+    click.echo(filename)
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py touch
+Usage: hello.py touch [OPTIONS] FILENAME
+
+Error: Missing argument "filename".
+$ python hello.py touch abc
+abc
+</code></pre></div></div>
+
+<h5 id="variadic-arguments">Variadic Arguments</h5>
+
+<p>多个参数的情况下，可以指定 nargs 的值，如果是-1的话就代表多个（*的意思）</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.argument('src', nargs=-1)
+@click.argument('dst', nargs=1)
+def copy(src, dst):
+    for fn in src:
+        click.echo('move %s to folder %s' % (fn, dst))
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py copy a b c d e
+move a to folder e
+move b to folder e
+move c to folder e
+move d to folder e
+</code></pre></div></div>
+
+<h5 id="file-arguments">File Arguments</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.argument('input', type=click.File('rb'))
+@click.argument('output', type=click.File('wb'))
+def inout(input, output):
+    while True:
+        chunk = input.read(1024)
+        if not chunk:
+            break
+        output.write(chunk)
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py inout - hello.txt
+hello
+^C
+Aborted!
+$ python hello.py inout hello.txt -
+hello
+</code></pre></div></div>
+
+<h5 id="file-path-arguments">File Path Arguments</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.argument('f', type=click.Path(exists=True))
+def touch1(f):
+    click.echo(click.format_filename(f))
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py touch1 hellodfadf
+Usage: hello.py touch1 [OPTIONS] F
+
+Error: Invalid value for "f": Path "hellodfadf" does not exist.
+$ python hello.py touch1 hello.txt
+hello.txt
+</code></pre></div></div>
+
+<h5 id="environment-variables">Environment Variables</h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.argument('src', envvar='SRC', type=click.File('r'))
+def echo(src):
+    click.echo(src.read())
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python hello.py echo hello.txt
+hello
+
+$ export SRC=hello.txt
+$ echo
+
+$ python hello.py echo
+hello
+</code></pre></div></div>
+
+<h5 id="option-like-arguments">Option-Like Arguments</h5>
+
+<p>这边也可以设置类似于 Option 的参数</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@click.command()
+@click.argument('files', nargs=-1, type=click.Path())
+def touch(files):
+    for filename in files:
+        click.echo(filename)
+</code></pre></div></div>
+
+<p>测试:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ touch -- -foo.txt bar.txt
+-foo.txt
+bar.txt
+</code></pre></div></div>
+
+<blockquote>
+  <p>可用的所有的情况都已经说了。。。。</p>
+</blockquote>
+
+<hr />
+
+<p>贴一下自己测试的代码:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/home/xingming/pyvirt/bin/python</span>
+<span class="c">#-*- coding:utf-8 -*-</span>
+
+<span class="c">#############################################</span>
+<span class="c"># File Name: hello.py</span>
+<span class="c"># Author: xiaoh</span>
+<span class="c"># Mail: xiaoh@about.me </span>
+<span class="c"># Created Time:  2016-01-29 15:00:47</span>
+<span class="c">#############################################</span>
+
+<span class="kn">import</span> <span class="nn">os</span><span class="p">,</span> <span class="n">sys</span><span class="p">,</span> <span class="n">click</span>
+
+<span class="k">def</span> <span class="nf">print_version</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span> <span class="ow">or</span> <span class="n">ctx</span><span class="o">.</span><span class="n">resilient_parsing</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'Version 1.0'</span><span class="p">)</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="nb">exit</span><span class="p">()</span>
+
+<span class="nd">@click.group</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--version'</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">print_version</span><span class="p">,</span>
+              <span class="n">expose_value</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">is_eager</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">cli</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--n'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">dots</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'.'</span> <span class="o">*</span> <span class="n">n</span><span class="p">)</span>
+    
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--pos'</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">findme</span><span class="p">(</span><span class="n">pos</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'</span><span class="si">%</span><span class="s">s / </span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">pos</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--item'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="nb">unicode</span><span class="p">,</span> <span class="nb">int</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">putitem</span><span class="p">(</span><span class="n">item</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'name:</span><span class="si">%</span><span class="s">s, id=</span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">item</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--message'</span><span class="p">,</span> <span class="s">'-m'</span><span class="p">,</span> <span class="n">multiple</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">commit</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'-v'</span><span class="p">,</span> <span class="s">'--verbose'</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="n">verbose</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'Verbosity: </span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">verbose</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--shout/--no-shout'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="n">shout</span><span class="p">):</span>
+    <span class="n">rv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span>
+    <span class="k">if</span> <span class="n">shout</span><span class="p">:</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s">'!!!!111'</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--shout'</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">info1</span><span class="p">(</span><span class="n">shout</span><span class="p">):</span>
+    <span class="n">rv</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span>
+    <span class="k">if</span> <span class="n">shout</span><span class="p">:</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="s">'!!!!111'</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'/debug;/no-debug'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">info2</span><span class="p">(</span><span class="n">debug</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'debug=</span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">debug</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--upper'</span><span class="p">,</span> <span class="s">'transformation'</span><span class="p">,</span> <span class="n">flag_value</span><span class="o">=</span><span class="s">'upper'</span><span class="p">,</span>
+              <span class="n">default</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--lower'</span><span class="p">,</span> <span class="s">'transformation'</span><span class="p">,</span> <span class="n">flag_value</span><span class="o">=</span><span class="s">'lower'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">info3</span><span class="p">(</span><span class="n">transformation</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">,</span> <span class="n">transformation</span><span class="p">)())</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--hash-type'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Choice</span><span class="p">([</span><span class="s">'md5'</span><span class="p">,</span> <span class="s">'sha1'</span><span class="p">]))</span>
+<span class="k">def</span> <span class="nf">digest</span><span class="p">(</span><span class="n">hash_type</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">hash_type</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--name'</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'Hello </span><span class="si">%</span><span class="s">s!'</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--password'</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">hide_input</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+              <span class="n">confirmation_prompt</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">encrypt</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'Encrypting password to </span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">'rot13'</span><span class="p">))</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.password_option</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">encrypt1</span><span class="p">(</span><span class="n">password</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'Encrypting password to </span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">password</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">'rot13'</span><span class="p">))</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--username'</span><span class="p">,</span> <span class="n">prompt</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+              <span class="n">default</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">'USER'</span><span class="p">,</span> <span class="s">''</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">hello1</span><span class="p">(</span><span class="n">username</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">"Hello,"</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--version'</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">print_version</span><span class="p">,</span>
+              <span class="n">expose_value</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">is_eager</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello2</span><span class="p">():</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'Hello World!'</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">abort_if_false</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+        <span class="n">ctx</span><span class="o">.</span><span class="n">abort</span><span class="p">()</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.option</span><span class="p">(</span><span class="s">'--yes'</span><span class="p">,</span> <span class="n">is_flag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">abort_if_false</span><span class="p">,</span>
+              <span class="n">expose_value</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+              <span class="n">prompt</span><span class="o">=</span><span class="s">'Are you sure you want to drop the db?'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">dropdb</span><span class="p">():</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'Dropped all tables!'</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.argument</span><span class="p">(</span><span class="s">'filename'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.argument</span><span class="p">(</span><span class="s">'src'</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="nd">@click.argument</span><span class="p">(</span><span class="s">'dst'</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">src</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s">'move </span><span class="si">%</span><span class="s">s to folder </span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">dst</span><span class="p">))</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.argument</span><span class="p">(</span><span class="s">'input'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s">'rb'</span><span class="p">))</span>
+<span class="nd">@click.argument</span><span class="p">(</span><span class="s">'output'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s">'wb'</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">inout</span><span class="p">(</span><span class="nb">input</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">1024</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.argument</span><span class="p">(</span><span class="s">'f'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">exists</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">touch1</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">click</span><span class="o">.</span><span class="n">format_filename</span><span class="p">(</span><span class="n">f</span><span class="p">))</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.argument</span><span class="p">(</span><span class="s">'src'</span><span class="p">,</span> <span class="n">envvar</span><span class="o">=</span><span class="s">'SRC'</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="s">'r'</span><span class="p">))</span>
+<span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="n">src</span><span class="p">):</span>
+    <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">src</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+<span class="nd">@click.command</span><span class="p">()</span>
+<span class="nd">@click.argument</span><span class="p">(</span><span class="s">'files'</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">click</span><span class="o">.</span><span class="n">Path</span><span class="p">())</span>
+<span class="k">def</span> <span class="nf">touch2</span><span class="p">(</span><span class="n">files</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="n">click</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">touch2</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">echo</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">touch1</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">inout</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">copy</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">touch</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">dropdb</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">hello2</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">hello1</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">encrypt1</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">encrypt</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">dots</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">findme</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">putitem</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">commit</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">info1</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">info2</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">info3</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">digest</span><span class="p">)</span>
+<span class="n">cli</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">hello</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">cli</span><span class="p">()</span>
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../awk-summary/index.html" data-toggle="tooltip" data-placement="top" title="快速了解AWK">
+                        Previous<br>
+                        <span>快速了解AWK</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../30/bugs/index.html" data-toggle="tooltip" data-placement="top" title="常见问题汇总">
+                        Next<br>
+                        <span>常见问题汇总</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

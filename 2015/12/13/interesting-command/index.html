@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>Linux下有趣的命令 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2015/12/13/interesting-command/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-command-cmatrix.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-command-cmatrix.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Ubuntu" title="Ubuntu">Ubuntu</a>
+                        
+                    </div>
+                    <h1>Linux下有趣的命令</h1>
+                    
+                    
+                    <h2 class="subheading">Linux下好玩的命令，Interesting Command of Linux</h2>
+                    
+                    <span class="meta">Posted by Xiaoh on December 13, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>周末闲来无事，搜索了一些有趣的命令，看起来会没什么用途，其实还是可以小装一下的，哈哈哈哈</p>
+</blockquote>
+
+<hr />
+
+<h3 id="catalog">Catalog</h3>
+
+<ol>
+  <li><a href="index.html#cmatrix">cmatrix</a></li>
+  <li><a href="index.html#banner-toilet-figlet">banner toilet figlet</a></li>
+  <li><a href="index.html#fortune">fortune</a></li>
+  <li><a href="index.html#cowsay-cowthink">cowsay cowthink</a></li>
+  <li><a href="index.html#aafire">aafire</a></li>
+  <li><a href="index.html#sl">sl</a></li>
+  <li><a href="index.html#moo">moo</a></li>
+  <li><a href="index.html#bb">bb</a></li>
+  <li><a href="index.html#linuxlogo">linuxlogo</a></li>
+  <li><a href="index.html#else">else</a></li>
+</ol>
+
+<hr />
+
+<h6 id="cmatrix">cmatrix</h6>
+
+<p>看过《黑客帝国》的应该都熟悉满是字节流的屏幕，<code class="highlighter-rouge">cmatrix</code> 就可以做到这个。</p>
+
+<p>安装 <code class="highlighter-rouge">cmatrix</code>：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get install cmatrix
+</code></pre></div></div>
+
+<p>执行效果：</p>
+
+<p><img src="http://www.xiaoh.me/img/post-command-cmatrix.jpg" alt="" /></p>
+
+<p>你还可以指定参数，输入 <code class="highlighter-rouge">cmatrix -h</code> 进行查看，具体的就不多说了。</p>
+
+<hr />
+
+<h6 id="banner-toilet-figlet">banner toilet figlet</h6>
+
+<p>这三个命令可以用特殊字符打印字符串：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ banner xiaoh.me
+
+ #    #     #      ##     ####   #    #          #    #  ######
+  #  #      #     #  #   #    #  #    #          ##  ##  #
+   ##       #    #    #  #    #  ######          # ## #  #####
+   ##       #    ######  #    #  #    #   ###    #    #  #
+  #  #      #    #    #  #    #  #    #   ###    #    #  #
+ #    #     #    #    #   ####   #    #   ###    #    #  ######
+
+$ toilet xiaoh.me
+
+          "                  #
+ m   m  mmm     mmm    mmm   # mm          mmmmm   mmm
+  #m#     #    "   #  #" "#  #"  #         # # #  #"  #
+  m#m     #    m"""#  #   #  #   #         # # #  #""""
+ m" "m  mm#mm  "mm"#  "#m#"  #   #    #    # # #  "#mm"
+
+
+$ figlet xiaoh.me
+      _             _
+__  _(_) __ _  ___ | |__    _ __ ___   ___
+\ \/ / |/ _` |/ _ \| '_ \  | '_ ` _ \ / _ \
+ &gt;  &lt;| | (_| | (_) | | | |_| | | | | |  __/
+/_/\_\_|\__,_|\___/|_| |_(_)_| |_| |_|\___|
+</code></pre></div></div>
+
+<p>再来一张彩色的：</p>
+
+<p><img src="http://www.xiaoh.me/img/post-command-toilet.jpg" alt="" /></p>
+
+<p>是不是看起来很炫，更多的用户可以通过 <code class="highlighter-rouge">--help</code> 来查看。</p>
+
+<p>查看字体用 showfigfonts 即可！</p>
+
+<hr />
+
+<h6 id="fortune">fortune</h6>
+
+<p>这个命令会随机输出一句英文句子，如果你想输出汉语的诗词也可以多安装 <code class="highlighter-rouge">fortune-zh</code> 这个包</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get install fortune
+$ sudo apt-get install fortune-zh
+</code></pre></div></div>
+
+<p>执行以下效果:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ fortune
+There was a phone call for you.
+$ fortune
+So you're back... about time...
+$ fortune
+《破山寺后禅院》
+作者：常建
+清晨入古寺，初日照高林。
+曲径通幽处，禅房花木深。
+山光悦鸟性，潭影空人心。
+万籁此俱寂，惟闻钟磬音。
+</code></pre></div></div>
+
+<hr />
+
+<h6 id="cowsay-cowthink">cowsay cowthink</h6>
+
+<p>这个命令可以调出来一头牛，它会说话和思考，安装:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get install cowsay
+</code></pre></div></div>
+
+<p>执行效果：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cowsay xiaoh.me
+ __________
+&lt; xiaoh.me &gt;
+ ----------
+        \   ^__^
+         \  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+$ cowthink xiaoh.me
+ __________
+( xiaoh.me )
+ ----------
+        o   ^__^
+         o  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+</code></pre></div></div>
+
+<p>这个命令可以和上面的 <code class="highlighter-rouge">fortune</code> 一起来使用：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ fortune | cowthink
+ __________________________________
+( You are going to have a new love )
+( affair.                          )
+ ----------------------------------
+        o   ^__^
+         o  (oo)\_______
+            (__)\       )\/\
+                ||----w |
+                ||     ||
+</code></pre></div></div>
+
+<p>应该还有其他动物说话的命令，我没有细查，如果你知道，请告诉我。</p>
+
+<p>还有个更高端点的 <code class="highlighter-rouge">xcowsay</code>，你也可以安装试一下，会出现一头真牛。。。</p>
+
+<hr />
+
+<h6 id="aafire">aafire</h6>
+
+<p>这个命令可以让你的终端燃气一把火，安装:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get install libaa-bin
+</code></pre></div></div>
+
+<p>执行效果：</p>
+
+<p><img src="http://www.xiaoh.me/img/post-command-aafire.jpg" alt="" /></p>
+
+<hr />
+
+<h6 id="sl">sl</h6>
+
+<p>这个命令让你的终端跑起来一个小火车，安装：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get install sl
+</code></pre></div></div>
+
+<p>执行效果：</p>
+
+<p><img src="http://www.xiaoh.me/img/post-command-sl.jpg" alt="" /></p>
+
+<hr />
+
+<h6 id="moo">moo</h6>
+
+<p>这个命令不需要安装，我们直接看执行效果：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ apt-get moo
+                 (__)
+                 (oo)
+           /------\/
+          / |    ||
+         *  /\---/\
+            ~~   ~~
+..."Have you mooed today?"...
+
+$ apt-build moo
+         (__)    ~
+         (oo)   /
+     _____\/___/
+    /  /\ / /
+   ~  /  * /
+     / ___/
+*----/\
+    /  \
+   /   /
+  ~    ~
+..."Have you danced today? Discow!"...
+</code></pre></div></div>
+
+<hr />
+
+<h6 id="bb">bb</h6>
+
+<p>这个命令太炫酷了，特别推荐一下，哈哈，安装：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get install bb
+</code></pre></div></div>
+
+<p>执行效果部分截图：</p>
+
+<p><img src="http://www.xiaoh.me/img/post-command-bb1.jpg" alt="" />
+<img src="http://www.xiaoh.me/img/post-command-bb2.jpg" alt="" />
+<img src="http://www.xiaoh.me/img/post-command-bb3.jpg" alt="" /></p>
+
+<hr />
+
+<h6 id="linuxlogo">linuxlogo</h6>
+
+<p>可以输出你的 <code class="highlighter-rouge">Linux</code> 的 <code class="highlighter-rouge">logo</code>，安装：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get install linuxlogo
+</code></pre></div></div>
+
+<p>效果图：</p>
+
+<p><img src="http://www.xiaoh.me/img/post-command-linuxlogo.jpg" alt="" /></p>
+
+<hr />
+
+<h6 id="asciiquarium">asciiquarium</h6>
+
+<p>这个命令如果有时间一定要玩，这个让你的屏幕成为一个水族馆，满满的装X情节啊。</p>
+
+<p>安装方法：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ wget http://search.cpan.org/CPAN/authors/id/K/KB/KBAUCOM/Term-Animation-2.4.tar.gz
+$ tar -zxvf Term-Animation-2.4.tar.gz
+$ cd Term-Animation-2.4/
+$ apt-get install libcurses-perl
+$ perl Makefile.PL &amp;&amp; make &amp;&amp; make test
+$ sudo make install
+</code></pre></div></div>
+
+<p>上面是安装了基础库而已，下面才是真正的安装(其实就是download而已)</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ wget http://www.robobunny.com/projects/asciiquarium/asciiquarium.tar.gz
+$ tar -zxvf asciiquarium.tar.gz
+</code></pre></div></div>
+
+<p>下载完了，执行：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cd asciiquarium_1.0/
+$ ./asciiquarium
+</code></pre></div></div>
+
+<p>我这里只是测试，如果你没事就像用的话，最好给他放到 /usr/local/bin 下面去，就不用每次都到根目录下面运行了。</p>
+
+<p><img src="http://www.xiaoh.me/img/post-command-asciiquarium.jpg" alt="" /></p>
+
+<hr />
+
+<h6 id="else">else</h6>
+
+<p>还有很多其他的命令，由于虚拟机没有 <code class="highlighter-rouge">display</code>，就不多说了，你可以自己去尝试一下。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ xeyes     # 会出来两个大眼珠子
+$ oneko     # 跳出来一直兔子
+$ factor    # 因式分解
+$ cal       # 打印日历
+$ ddate     # 把日历转换成其他的什么历
+$ yes       # 输出很多个y，可以用来对付选择很多y/n的应用
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../12/ubuntu-init/index.html" data-toggle="tooltip" data-placement="top" title="Ubuntu系统的简单配置">
+                        Previous<br>
+                        <span>Ubuntu系统的简单配置</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../14/markdown-summary/index.html" data-toggle="tooltip" data-placement="top" title="Markdown的基本语法">
+                        Next<br>
+                        <span>Markdown的基本语法</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

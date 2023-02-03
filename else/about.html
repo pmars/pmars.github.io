@@ -1,0 +1,151 @@
+---
+layout: page
+title: "About"
+description: "死生契阔，与子成说；执子之手，与子偕老。"
+header-img: "img/about-bg.jpg"
+---
+
+<!-- Language Selector -->
+<select onchange= "onLanChange(this.options[this.options.selectedIndex].value)">
+    <option value="0" selected> 中文 Chinese </option>
+    <option value="1"> 英文 English </option>
+</select>
+
+<!-- Chinese Version -->
+<div class="zh">
+    <blockquote>
+        写写代码，玩玩游戏，交交朋友。<br>
+        世界那么大，带媳妇去看看。^V^
+    </blockquote>
+
+    <p>
+    程序员，后端工程师，2010至今，写过C#.NET, 用过C++, 做过大数据，学过NLP，用Python写过ML和Spider，如今主要使用Golang.
+    </p>
+
+    <p>
+        2010~2012，用C#.NET在做比价网站，使用过各种爬虫，学习了正则表达式。</br>
+        2012~2013，用Awk/Shell处理了各种数据分析项目，并使用C++做了数据处理引擎。</br>
+        2013~2014，学习了NLP/SVM等机器学习模型，完成在线客服<a href="http://zhike.xiaoh.me">知客系统</a></br>
+        2013~2015，使用Python在做大数据服务系统<a href="http://cloud.zetyun.com">DataCanvas</a> </br>
+        2014~2016，深入学习机器学习及大数据应用，期间学习了各种爬虫技术，对爬虫具有深入理解，并应用到实际场景中。</br>
+        2015~至今，使用Golang做后台服务，支持多种高并发场景，对新技术多有研究。
+    </p>
+
+    <p>
+    热衷于各类 Web & Mobile 产品，对多个领域有所研究，在娱乐互联网领域进行过创业(失败)。组织朋友创建了Crab工作室，承接各种互联网项目，欢迎来电。
+    </p>
+
+    <p>
+    Dota2选手，喜欢和朋友开黑。也爱好打球、徒步等。没事泡泡社交网络，水水微博知乎
+    </p>
+
+    <p>
+    嗯，我叫<b>兴明</b>，朋友叫我<b>小霍</b>，英文名字常用<b>pmars</b>
+    </p>
+
+    <p>
+    联系邮箱：<a class="email" href="mailto:admin@xiaoh.me">admin@xiaoh.me</a> 或 QQ(Wechat):812220350
+    </p>
+
+    <br>
+    <br>
+</div>
+
+<!-- English Version -->
+<div class="en">
+    <blockquote>
+        Engineer and Husband, things in between.
+    </blockquote>
+
+    <p>Programmer, backend engineer, working since 2010, C#/C++/Shell/Awk/Regex/Hadoop/Spark/HIVE/Python/NLP/MVC and so on.</p>
+
+    <p>
+        2010 to 2012, use C# do comparison sites. Using a variety of reptiles architecture. Learning regex expression.<br>
+        2012 to 2013, handle some project of data analysis with awk/shell. Writing data analysis architecture with C++ <br>
+        2013 to 2014, learning the nlp/mvc etc. Writing online customer service <a href="http://zhike.xiaoh.me">Zhike</a>
+        2013 to 2015, use python in the big data service system <a href="http://dc.xiaoh.me">Datacanvas</a>
+        2015 to 2016, in-depth study of machine learning and big data applications, during the study of a variety of crawler technology, has a deep understanding of reptiles, and applied to the actual scene
+        2015 to now, use Golang as a background service, support a variety of high concurrency scenarios, and research new technologies
+    </p>
+
+    <p>Interested in all kinds of Web & Mobile products, very ideal. Creating Crab-Studio with my friends. </p>
+
+    <p>Dotaer, Basketball and Hiking. Zhihu and Weibo are comfortable to me.</p>
+
+    <p>
+    You can call me English name <b>Pmars</b>,<br>
+    And my Chinese name is <b>Xingming</b>,<br>
+    But my friends always call me <b>Xiaoh</b>
+    </p>
+
+    <p>
+    Contact: <a class="email" href="mailto:xiaoh@about.me">xiaoh@about.me</a> OR QQ(Wechat):812220350
+    </p>
+
+</div>
+
+<!-- Handle Language Change -->
+<script type="text/javascript">
+    // get nodes
+    var $zh = document.querySelector(".zh");
+    var $en = document.querySelector(".en");
+    var $select = document.querySelector("select");
+
+    // bind hashchange event
+    window.addEventListener('hashchange', _render);
+
+    // handle render
+    function _render(){
+        var _hash = window.location.hash;
+        // en
+        if(_hash == "#en"){
+            $select.selectedIndex = 1;
+            $en.style.display = "block";
+            $zh.style.display = "none";
+        // zh by default
+        }else{
+            // not trigger onChange, otherwise cause a loop call.
+            $select.selectedIndex = 0;
+            $zh.style.display = "block";
+            $en.style.display = "none";
+        }
+    }
+
+    // handle select change
+    function onLanChange(index){
+        if(index == 0){
+            window.location.hash = "#zh"
+        }else{
+            window.location.hash = "#en"
+        }
+    }
+
+    // init
+    _render();
+</script>
+
+
+{% if site.disqus_username %}
+<!-- disqus 评论框 start -->
+<div class="comment">
+    <div id="disqus_thread" class="disqus-thread">
+
+    </div>
+</div>
+<!-- disqus 评论框 end -->
+
+<!-- disqus 公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+    /* * * CONFIGURATION VARIABLES * * */
+    var disqus_shortname = "{{site.disqus_username}}";
+    var disqus_identifier = "{{site.disqus_username}}/{{page.url}}";
+    var disqus_url = "{{site.url}}{{page.url}}";
+
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<!-- disqus 公共JS代码 end -->
+{% endif %}

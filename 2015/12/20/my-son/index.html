@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>纪念孩子降生 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2015/12/20/my-son/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-my-son.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-my-son.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#杂谈" title="杂谈">杂谈</a>
+                        
+                    </div>
+                    <h1>纪念孩子降生</h1>
+                    
+                    
+                    <h2 class="subheading">一个父亲的心路历程</h2>
+                    
+                    <span class="meta">Posted by xiaoh on December 20, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>今天媳妇产仔了，哈哈哈哈哈哈哈哈</p>
+</blockquote>
+
+<hr />
+
+<p>这个得从昨天早上说起了</p>
+
+<p>昨天早上起床，看丫头就去卫生间的频率就比以前要高了，问了一下，说稍微感觉到了一丝宫缩了，不过很微弱，之后也没有当回事，昨天我就去加班了。</p>
+
+<p>白天的时候，丫头和马都和我说，丫头又感觉了，不过那会还真的没有特别在意。</p>
+
+<p>后来，晚上八点的时候我们还是在公司忙着，这个时候接到了我妈的电话，说丫头反应强烈了，让我赶快回家，我马上放下了手头的事情，直接赶回了家里。</p>
+
+<p>到了沙河地铁，想到可能晚上或者后半夜都可能会去医院，我就记下了七八个出租师傅的电话，万一用得到呢。</p>
+
+<p>后来到家里之后，看丫头的状态还可以，而且丫头也是一脸若无其事的样子，貌似宫缩的现象也不是很厉害的样子（之前医生说过，实在受不了的宫缩或者是破羊水之后就可以直接来医院了），所以我们也没有当回事。</p>
+
+<p>看样子推测，当天晚上应该没有什么问题的样子，怎么说也得是第二天才能生了，而且，离预产期还有半个月呢。</p>
+
+<p>后来就准备休息了，我坐在床边的小板凳上，摸着她的肚子，感受小家伙的活动。</p>
+
+<p>摸着摸着，感觉宫缩越来越厉害了，从十点半开始，准确计时的记录来看，大约五分钟一次，而且每次都能持续一分钟给你的样子，看着丫头的标枪，貌似越发厉害了。</p>
+
+<p>去网上查了一下，宫缩频率多久可以去医院，都说，基本上五分钟一次就可以去了，再看看丫头的状态，满复合的啊，商议之后，我们决定去医院了，当时还觉得，很有可能就是瞎折腾，但这样至少保险点。</p>
+
+<p>我们叫了Uber，11：38分上车，00：09到了医院，路上我们一直打着双闪，真心谢谢这位师傅。</p>
+
+<p>挂急诊的时候，护士问了我们的情况，说你们还早着呢，一般两分钟一次的宫缩才有可能生呢，而且人家要生的，基本都是扶墙进的呢。没办法，既然来了就先检查看看喽，挂急诊的号，过去排号了。</p>
+
+<p>丫头检查出来，得到的结论是，开了七八指，这家伙，真是够以外的，瞬间大家就都紧张起来了，看着丫头走路，更多的是沉重的感觉。医生也赶快让我去办住院，之后让我去产房找他们。</p>
+
+<p>这段需要说说我这冒失鬼的事情，在丫头检查的时候，我就为了忘记丫头的社保卡跑了一次，之后又因为产检记录册跑了一次，后来在办理住院手续的时候，又跑过去找生育服务单，之后又跑了一次为了急诊的退卡（办理住院必须给急诊的手续都结清，当时我手头还有一个急诊的卡没有退）不过，在知道丫头一会有戏的时候，跑起来感觉有力气多了。</p>
+
+<p>办好之后赶紧去了五楼看丫头，不过，这个时候他早就进了产房，我们只能站在门口等她。</p>
+
+<p>之后就是护工给我们安排需要的东西，还有收钱的事情（200/天），给丫头的衣服都给了我们。医生也过来找我签字，当然也就是一般的情况啊，都懂，签字就行了（不签试试？）</p>
+
+<p>之后就是在外面无限的等待了，丫头一点钟进入的产房。。。。。四个小时过去了，依然没有任何的消息。</p>
+
+<p>这个时候我也开始犯困了，每次觉得撑不住的时候就会站起来溜达依稀啊，后来几乎每五分钟就得起来溜达五分钟，解困啊。不过想想，在产房的丫头，更辛苦啊，这个时候还痛着呢。</p>
+
+<p>在丫头进去之后，来了两拨生产的，三个人一个消息都没有，和丫头聊微信，他也没有回复我（产房不让进去人，只能通过手机和丫头进行沟通），我只能是希望他是在休息，养精蓄锐，为了下一秒的奋斗。</p>
+
+<p>又经过了一个半小时，在06:46的时候，接到了最新的消息，丫头当时并没有休息，而是在不断的尝试，后来听他说这段时间她在一个人试着给孩子生出来，奈何还是不知道怎么用力，一直在徒劳，知道六点的时候医生多了起来，才帮助了他一下，接着说最新的消息：男孩，顺产+侧切，3650g，2015-12-20 06:28生产。</p>
+
+<p>我妈已经激动的受不了了，他给亲戚挨个的通知了一遍，我爹（腿受伤还没有康复，没有和我们一起来医院），老舅，二舅，姥姥，山。。。后来知道，我爹知道这个消息之后给我姐还打了个电话。真的是太高兴了他们。</p>
+
+<p>之后我买饭让护工送进去，看到丫头在床上面，孩子在他的怀里，貌似状态还可以的样子，心里真的放下了，好高兴当时。</p>
+
+<p>说要等两个小时才能给丫头送出来，因为要监护一下，免得孕妇会出现大出血的状况，我们要等到八点四十多呢。纠结。</p>
+
+<p>到了八点的时候，自己再也抑制不住了，心中的喜悦已经按捺不住了，在买好待产包之后，我打电话给了海王和小六，让他们也分享我的喜悦。—本来还打算带丫头去看看六呢今天，她生日啊，我们家宝宝和小六一天生日了。</p>
+
+<p>后来就是在外面等着丫头和孩子出来，心情那个激动，就不再多说了。</p>
+
+<p>收到了大量的祝福，真心感谢大家的挂念，非常感谢。</p>
+
+<p>后面的事情，就是一个高兴的人忙的忘我的故事，就不再多说了。</p>
+
+<p>真心感谢上苍，让我拥有了最美好的家庭，父母健康，夫妻和睦，孩子出生，全家大喜。</p>
+
+<p>最后，孩子的名字还没搞定呢，纠结。。。。。。。。。。。。。。。。</p>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../17/supervisor-summary/index.html" data-toggle="tooltip" data-placement="top" title="Supervisor简介">
+                        Previous<br>
+                        <span>Supervisor简介</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../../../2016/01/04/web-testing/index.html" data-toggle="tooltip" data-placement="top" title="Linux下服务器压力测试工具介绍">
+                        Next<br>
+                        <span>Linux下服务器压力测试工具介绍</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

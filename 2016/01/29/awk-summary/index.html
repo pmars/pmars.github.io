@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>快速了解AWK - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/01/29/awk-summary/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#AWK" title="AWK">AWK</a>
+                        
+                    </div>
+                    <h1>快速了解AWK</h1>
+                    
+                    
+                    <h2 class="subheading">AWK快速入门</h2>
+                    
+                    <span class="meta">Posted by xiaoh on January 29, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#awkfirst">AWK入门指南</a>
+    <ol>
+      <li><a href="index.html#start">起步</a>
+        <ol>
+          <li><a href="index.html#awkstructure">AWK程序的结构</a></li>
+          <li><a href="index.html#awkrun">执行AWK程序</a></li>
+          <li><a href="index.html#error">错误</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#output">简单输出</a>
+        <ol>
+          <li><a href="index.html#everyline">打印每一行</a></li>
+          <li><a href="index.html#specialline">打印特定字段</a></li>
+          <li><a href="index.html#nf-nf">NF, 字段数量</a></li>
+          <li><a href="index.html#print">计算和打印</a></li>
+          <li><a href="index.html#printpagenum">打印行号</a></li>
+          <li><a href="index.html#withelse">在输出中添加内容</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#senioroutput">高级输出</a>
+        <ol>
+          <li><a href="index.html#format">字段排队</a></li>
+          <li><a href="index.html#rangeoutput">排序输出</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#select">选择</a>
+        <ol>
+          <li><a href="index.html#bycompare">通过对比选择</a></li>
+          <li><a href="index.html#bycompute">通过计算选择</a></li>
+          <li><a href="index.html#bytext">通过文本内容选择</a></li>
+          <li><a href="index.html#or">模式组合</a></li>
+          <li><a href="index.html#datasure">数据验证</a></li>
+          <li><a href="index.html#beginendbeginend">BEGIN与END</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#awkcompute">使用AWK进行计算</a>
+        <ol>
+          <li><a href="index.html#number">计数</a></li>
+          <li><a href="index.html#sum">求和与平均值</a></li>
+          <li><a href="index.html#checktext">处理文本</a></li>
+          <li><a href="index.html#strformat">字符串连接</a></li>
+          <li><a href="index.html#printlast">打印最后一个输入行</a></li>
+          <li><a href="index.html#innerfunction">内置函数</a></li>
+          <li><a href="index.html#linewords">行、单词以及字符的计数</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#contral">控制语句</a>
+        <ol>
+          <li><a href="index.html#ifelseifelse">if-else语句</a></li>
+          <li><a href="index.html#whilewhile">while语句</a></li>
+          <li><a href="index.html#forfor">for语句</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#array">数组</a></li>
+    </ol>
+  </li>
+</ol>
+
+<hr />
+
+<blockquote>
+  <p>学习AWK已经是三年前的时候了，用shell+awk做过数据处理的项目，不过后来有两年没有用到了，最近有的时候需要用到，还是需要google一下，现在整理一下Awk的相关用法。
+文章来源 <a href="http://awk.readthedocs.org/en/latest/chapter-one.html">AWK技术文档</a></p>
+</blockquote>
+
+<hr />
+
+<h3 id="awk入门指南"><a href="index.html#first">AWK入门指南</a></h3>
+
+<p>Awk是一种便于使用且表达能力强的程序设计语言，可应用于各种计算和数据处理任务。本章是个入门指南，让你能够尽快地开始编写你自己的程序。第二章将描述整个语言，而剩下的章节将向你展示如何使用Awk来解决许多不同方面的问题。纵观全书，我们尽量选择了一些对你有用、有趣并且有指导意义的实例。</p>
+
+<h5 id="起步"><a href="index.html#start">起步</a></h5>
+
+<p>有用的awk程序往往很简短，仅仅一两行。假设你有一个名为 emp.data 的文件，其中包含员工的姓名、薪资（美元/小时）以及小时数，一个员工一行数据，如下所示：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Beth    4.00    0
+Dan 3.75    0
+kathy   4.00    10
+Mark    5.00    20
+Mary    5.50    22
+Susie   4.25    18
+</code></pre></div></div>
+
+<p>现在你想打印出工作时间超过零小时的员工的姓名和工资（薪资乘以时间）。这种任务对于awk来说就是小菜一碟。输入这个命令行就可以了：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk '$3 &gt;0 { print $1, $2 * $3 }' emp.data
+</code></pre></div></div>
+
+<p>你应该会得到如下输出：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Kathy 40
+Mark 100
+Mary 121
+Susie 76.5
+</code></pre></div></div>
+
+<p>该命令行告诉系统执行引号内的awk程序，从输入文件 emp.data 获取程序所需的数据。引号内的部分是个完整的awk程序，包含单个模式-动作语句。模式 $3&gt;0 用于匹配第三列大于0的输入行，动作:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print $1, $2 * $3 }
+</code></pre></div></div>
+
+<p>打印每个匹配行的第一个字段以及第二第三字段的乘积。</p>
+
+<p>如果你想打印出还没工作过的员工的姓名，则输入命令行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk '$3 == 0 { print $1 }' emp.data
+</code></pre></div></div>
+
+<p>这里，模式 $3 == 0 匹配第三个字段等于0的行，动作:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print $1 }
+</code></pre></div></div>
+
+<p>打印该行的第一个字段。</p>
+
+<p>当你阅读本书时，应该尝试执行与修改示例程序。大多数程序都很简短，所以你能快速理解awk是如何工作的。在Unix系统上，以上两个事务在终端里看起来是这样的：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ awk ‘$3 &gt; 0 { print $1, $2 * $3 }’ emp.data
+Kathy 40
+Mark 100
+Mary 121
+Susie 76.5
+
+$ awk ‘$3 == 0 { print $1 }’ emp.data
+Beth
+Dan
+</code></pre></div></div>
+
+<h6 id="awk程序的结构"><a href="index.html#structure">AWK程序的结构</a></h6>
+
+<p>让我们回头看一下到底发生了什么事情。上述的命令行中，引号之间的部分是awk编程语言写就的程序。本章中的每个awk程序都是一个或多个模式-动作语句的序列：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>pattern { action }
+pattern { action }
+...
+</code></pre></div></div>
+
+<p>awk的基本操作是一行一行地扫描输入，搜索匹配任意程序中模式的行。词语“匹配”的准确意义是视具体的模式而言，对于模式 $3 &gt;0 来说，意思是“条件为真”。</p>
+
+<p>每个模式依次测试每个输入行。对于匹配到行的模式，其对应的动作（也许包含多步）得到执行，然后读取下一行并继续匹配，直到所有的输入读取完毕。</p>
+
+<p>上面的程序都是模式与动作的典型示例。:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$3 == 0 { print $1 }
+</code></pre></div></div>
+
+<p>是单个模式-动作语句；对于第三个字段为0的每行，打印其第一个字段。</p>
+
+<p>模式-动作语句中的模式或动作（但不是同时两者）都可以省略。如果某个模式没有动作，例如：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$3 == 0
+</code></pre></div></div>
+
+<p>那么模式匹配到的每一行（即，对于该行，条件为真）都会被打印出来。该程序会打印 emp.data 文件中第三个字段为0的两行</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Beth 4.00 0
+Dan 3.75 0
+</code></pre></div></div>
+
+<p>如果有个没有模式的动作，例如：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print $1 }
+</code></pre></div></div>
+
+<p>那么这种情况下的动作会打印每个输入行的第一列。</p>
+
+<p>由于模式和动作两者任一都是可选的，所以需要使用大括号包围动作以区分于其他模式。</p>
+
+<h6 id="执行awk程序"><a href="index.html#run">执行AWK程序</a></h6>
+
+<p>执行awk程序的方式有多种。你可以输入如下形式的命令行：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk 'program' input files
+</code></pre></div></div>
+
+<p>从而在每个指定的输入文件上执行这个program。例如，你可以输入：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk '$3 == 0 { print $1 }' file1 file2
+</code></pre></div></div>
+
+<p>打印file1和file2文件中第三个字段为0的每一行的第一个字段。</p>
+
+<p>你可以省略命令行中的输入文件，仅输入：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk 'program'
+</code></pre></div></div>
+
+<p>这种情况下，awk会将program应用于你在终端中接着输入的任意数据行，直到你输入一个文件结束信号（Unix系统上为control-d）。如下是Unix系统的一个会话示例：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ awk ‘$3 == 0 { print $1 }’
+Beth 4.00 0
+Beth
+
+Dan 3.75 0
+Dan
+
+Kathy 3.75 10
+Kathy 3.75 0
+Kathy
+
+...
+</code></pre></div></div>
+
+<p>最后一行的字符是计算机打印的。</p>
+
+<p>这个动作非常便于尝试awk：输入你的程序，然后输入数据，观察发生了什么。我们再次鼓励你尝试这些示例并进行改动。</p>
+
+<p>注意命令行中的程序是用单引号包围着的。这会防止shell解释程序中 $ 这样的字符，也允许程序的长度超过一行。</p>
+
+<p>当程序比较短小（几行的长度）的时候，这种约定会很方便。然而，如果程序较长，将程序写到一个单独的文件中会更加方便。假设存在程序 progfile ，输入命令行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk -f progfile     optional list of input files
+</code></pre></div></div>
+
+<p>其中 -f 选项指示awk从指定文件中获取程序。可以使用任意文件名替换 progfile 。</p>
+
+<h6 id="错误"><a href="index.html#error">错误</a></h6>
+
+<p>如果你的awk程序存在错误，awk会给你一段诊断信息。例如，如果你打错了大括号，如下所示：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk '$3 == 0 [ print $1 }' emp.data
+</code></pre></div></div>
+
+<p>你会得到如下信息：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk: syntax error at source line 1
+context is
+$3 == 0 &gt;&gt;&gt; [ &lt;&lt;&lt;
+extra }
+missing ]
+awk: bailing out at source line 1
+</code></pre></div></div>
+
+<p>“Syntax error”意味着在 »&gt; «&lt; 标记的地方检测到语法错误。“Bailing out”意味着没有试图恢复。有时你会得到更多的帮助-关于错误是什么，比如大括号或括弧不匹配。</p>
+
+<p>因为存在句法错误，awk就不会尝试执行这个程序。然而，有些错误，直到你的程序被执行才会检测出来。例如，如果你试图用零去除某个数，awk会在这个除法的地方停止处理并报告输入行的行号以及在程序中的行号（这话是什么意思？难道输入行的行号是忽略空行后的行号？）。</p>
+
+<h5 id="简单输出"><a href="index.html#output">简单输出</a></h5>
+
+<p>这一节接下来的部分包含了一些短小，典型的awk程序，基于操纵上文中提到的 emp.data 文件. 我们会简单的解释程序在做什么，但这些例子主要是为了介绍 awk 中常见的一些简单有用的操作 – 打印字段, 选择输入, 转换数据. 我们并 没有展现 awk 程序能做的所有事情, 也并不打算深入的去探讨例子中的一些细节. 但在你读完这一节之后, 你将能够完成一些简单的任务, 并且你将发现在阅读后 面章节的时候会变的容易的多.</p>
+
+<p>我们通常只会列出程序部分, 而不是整个命令行. 在任何情况下, 程序都可以用 引号包含起来放到 awk 命令的地一个参数中运行, 就像上文中展示的那样, 或者 把它放到一个文件中使用 awk 的 -f 参数调用它.</p>
+
+<p>在 awk 中仅仅只有两种数据类型: 数值 和 字符构成的字符串. emp.data 是 一个包含这类信息的典型文件 – 混合了被空格和(或)制表符分割的数字和词语.</p>
+
+<p>Awk 程序一次从输入文件的中读取一行内容并把它分割成一个个字段, 通常默认 情况下, 一个字段是一个不包含任何空格或制表符的连续字符序列. 当前输入的 行中的地一个字段被称做 $1, 第二个是 $2, 以此类推. 整个行的内容被定 义为 $0. 每一行的字段数量可以不同.</p>
+
+<p>通常, 我们要做的仅仅只是打印出每一行中的某些字段, 也许还要做一些计算. 这一节的程序基本上都是这种形式.</p>
+
+<h6 id="打印每一行"><a href="index.html#everyline">打印每一行</a></h6>
+
+<p>如果一个动作没有任何模式, 这个动作会对所有输入的行进行操作. print 语 句用来打印(输出)当前输入的行, 所以程序</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print }
+</code></pre></div></div>
+
+<p>会输出所有输入的内容到标准输出. 由于 $0 表示整行,</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print $0 }
+</code></pre></div></div>
+
+<p>也会做一样的事情.</p>
+
+<h6 id="打印特定字段"><a href="index.html#specialline">打印特定字段</a></h6>
+
+<p>使用一个 print 语句可以在同一行中输出不止一个字段. 下面的程序输出了每 行输入中的第一和第三个字段</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print $1, $3 }
+</code></pre></div></div>
+
+<p>使用 emp.data 作为输入, 它将会得到</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Beth 0
+Dan 0
+Kathy 10
+Mark 20
+Mary 22
+Susie 18
+</code></pre></div></div>
+
+<p>在 print 语句中被逗号分割的表达式, 在默认情况下他们将会用一个空格分割 来输出. 每一行 print 生成的内容都会以一个换行符作为结束. 但这些默认行 为都可以自定义; 我们将在第二章中介绍具体的方法.</p>
+
+<h6 id="nf-字段数量"><a href="index.html#nf">NF, 字段数量</a></h6>
+
+<p>很显然你可能会发现你总是需要通过 $1, $2 这样来指定不同的字段, 但任何表 达式都可以使用在$之后来表达一个字段的序号; 表达式会被求值并用于表示字段 序号. Awk会对当前输入的行有多少个字段进行计数, 并且将当前行的字段数量存 储在一个内建的称作 NF 的变量中. 因此, 下面的程序</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print NF, $1, $NF }
+</code></pre></div></div>
+
+<p>会依次打印出每一行的字段数量, 第一个字段的值, 最后一个字段的值.</p>
+
+<h6 id="计算和打印"><a href="index.html#print">计算和打印</a></h6>
+
+<p>你也可以对字段的值进行计算后再打印出来. 下面的程序</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print $1, $2 * $3 }
+</code></pre></div></div>
+
+<p>是一个典型的例子. 它会打印出姓名和员工的合计支出(以小时计算):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Beth 0
+Dan 0
+Kathy 40
+Mark 100
+Mary 121
+Susie 76.5
+</code></pre></div></div>
+
+<p>我们马上就会学到怎么让这个输出看起来更漂亮.</p>
+
+<h6 id="打印行号"><a href="index.html#printpagenum">打印行号</a></h6>
+
+<p>Awk提供了另一个内建变量, 叫做 NR, 它会存储当前已经读取了多少行的计数. 我们可以使用 NR 和 $0 给 emp.data 的没一行加上行号:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print NR, $0 }
+</code></pre></div></div>
+
+<p>打印的输出看起来会是这样:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>1 Beth   4.00     0
+2 Dan    3.75     0
+3 Kathy  4.00    10
+4 Mark   5.00    20
+5 Mary   5.50    22
+6 Susie  4.25   1 8
+</code></pre></div></div>
+
+<h6 id="在输出中添加内容"><a href="index.html#withelse">在输出中添加内容</a></h6>
+
+<p>你当然也可以在字段中间或者计算的值中间打印输出想要的内容:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print "total pay for", $1, "is", $2 * $3 }
+</code></pre></div></div>
+
+<p>输出</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>total pay for Beth is 0
+total pay for Dan is 0
+total pay for Kathy is 40
+total pay for Mark is 100
+total pay for Mary is 121
+total pay for Susie is 76.5
+</code></pre></div></div>
+
+<p>在打印语句中, 双引号内的文字将会在字段和计算的值中插入输出.</p>
+
+<h5 id="高级输出"><a href="index.html#senioroutput">高级输出</a></h5>
+
+<p>print 语句可用于快速而简单的输出。若要严格按照你所想的格式化输出，则需要使用 printf 语句。正如我将在2.4节所见， printf 几乎可以产生任何形式的输出，但在本节中，我们仅展示其部分功能。</p>
+
+<h6 id="字段排队"><a href="index.html#format">字段排队</a></h6>
+
+<p>printf 语句的形式如下：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>printf(format, value1, value2, ..., valuen)
+</code></pre></div></div>
+
+<p>其中 format 是字符串，包含要逐字打印的文本，穿插着 format 之后的每个值该如何打印的规格(specification)。一个规格是一个 % 符，后面跟着一些字符，用来控制一个 value 的格式。第一个规格说明如何打印 value1 ，第二个说明如何打印 value2 ，… 。因此，有多少 value 要打印，在 format 中就要有多少个 % 规格。</p>
+
+<p>这里有个程序使用 printf 打印每位员工的总薪酬：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ printf("total pay for %s is $%.2f\n", $1, $2 * $3) }
+</code></pre></div></div>
+
+<p>printf 语句中的规格字符串包含两个 % 规格。第一个是 %s ，说明以字符串的方式打印第一个值 $1 。第二个是 %.2f ，说明以数字的方式打印第二个值 <code class="highlighter-rouge">$2*$3</code> ，并保留小数点后面两位。规格字符串中其他东西，包括美元符号，仅逐字打印。字符串尾部的 \n 代表开始新的一行，使得后续输出将从下一行开始。以 emp.data 为输入，该程序产生：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>total pay for Beth is $0.00
+total pay for Dan is $0.00
+total pay for Kathy is $40.00
+total pay for Mark is $100.00
+total pay for Mary is $121.00
+total pay for Susie is $76.50
+</code></pre></div></div>
+
+<p>printf 不会自动产生空格或者新的行，必须是你自己来创建，所以不要忘了 <code class="highlighter-rouge">\n</code> 。</p>
+
+<p>另一个程序是打印每位员工的姓名与薪酬：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ printf("%-8s $%6.2f\n", $1, $2 * $3) }
+</code></pre></div></div>
+
+<p>第一个规格 %-8s 将一个姓名以字符串形式在8个字符宽度的字段中左对齐输出。第二个规格 %6.2f 将薪酬以数字的形式，保留小数点后两位，在6个字符宽度的字段中输出。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Beth     $  0.00
+Dan      $  0.00
+Kathy    $ 40.00
+Mark     $100.00
+Mary     $121.00
+Susie    $ 76.50
+</code></pre></div></div>
+
+<p>之后我们将展示更多的 printf 示例。一切精彩尽在2.4小节。</p>
+
+<h6 id="排序输出"><a href="index.html#rangeoutput">排序输出</a></h6>
+
+<p>假设你想打印每位员工的所有数据，包括他或她的薪酬，并以薪酬递增的方式进行排序输出。最简单的方式是使用awk将每位员工的总薪酬置于其记录之前，然后利用一个排序程序来处理awk的输出。Unix上，命令行如下:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk '{ printf("%6.2f    %s\n", $2 * $3, $0) }' emp.data | sort
+</code></pre></div></div>
+
+<p>将awk的输出通过管道传给 sort 命令，输出为：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  0.00    Beth  4.00 0
+  0.00    Dan   3.75 0
+ 40.00    Kathy 4.00 10
+ 76.50    Susie 4.25 18
+100.00    Mark  5.00 20
+121.00    Mary  5.50 22
+</code></pre></div></div>
+
+<h5 id="选择"><a href="index.html#select">选择</a></h5>
+
+<p>Awk的模式适合用于为进一步的处理从输入中选择相关的数据行。由于不带动作的模式会打印所有匹配模式的行，所以很多awk程序仅包含一个模式。本节将给出一些有用的模式示例。</p>
+
+<h6 id="通过对比选择"><a href="index.html#bycompare">通过对比选择</a></h6>
+
+<p>这个程序使用一个对比模式来选择每小时赚5美元或更多的员工记录，也就是，第二个字段大于等于5的行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$2 &gt;= 5
+</code></pre></div></div>
+
+<p>从 emp.data 中选出这些行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Mark    5.00    20
+Mary    5.50    22
+</code></pre></div></div>
+
+<h6 id="通过计算选择"><a href="index.html#bycompute">通过计算选择</a></h6>
+
+<p>程序</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$2 * $3 &gt; 50 { printf("$%.2f for %s\n", $2 * $3, $1) }
+</code></pre></div></div>
+
+<p>打印出总薪资超过50美元的员工的薪酬。</p>
+
+<h6 id="通过文本内容选择"><a href="index.html#bytext">通过文本内容选择</a></h6>
+
+<p>除了数值测试，你还可以选择包含特定单词或短语的输入行。这个程序会打印所有第一个字段为 Susie 的行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$1 == "Susie"
+</code></pre></div></div>
+
+<p>操作符 == 用于测试相等性。你也可以使用称为 正则表达式 的模式查找包含任意字母组合，单词或短语的文本。这个程序打印任意位置包含 Susie 的行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/Susie/
+</code></pre></div></div>
+
+<p>输出为这一行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Susie   4.25    18
+</code></pre></div></div>
+
+<p>正则表达式可用于指定复杂的多的模式；2.1节将会有全面的论述。</p>
+
+<h6 id="模式组合"><a href="index.html#or">模式组合</a></h6>
+
+<table>
+  <tbody>
+    <tr>
+      <td>可以使用括号和逻辑操作符与 &amp;&amp; ， 或</td>
+      <td> </td>
+      <td>， 以及非 ! 对模式进行组合。程序:</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$2 &gt;= 4 || $3 &gt;= 20
+</code></pre></div></div>
+
+<p>会打印 $2 (第二个字段) 大于等于 4 或者 $3 (第三个字段) 大于等于 20 的行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Beth    4.00    0
+kathy   4.00    10
+Mark    5.00    20
+Mary    5.50    22
+Susie   4.25    18
+</code></pre></div></div>
+
+<p>两个条件都满足的行仅打印一次。与如下包含两个模式程序相比：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$2 &gt;= 4
+$3 &gt;= 20
+</code></pre></div></div>
+
+<p>如果某个输入行两个条件都满足，这个程序会打印它两遍：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Beth    4.00    0
+Kathy   4.00    10
+Mark    5.00    20
+Mark    5.00    20
+Mary    5.50    22
+Mary    5.50    22
+Susie   4.25    18
+</code></pre></div></div>
+
+<p>注意如下程序:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>!($2 &lt; 4 &amp;&amp; $3 &lt; 20)
+</code></pre></div></div>
+
+<p>会打印极不满足 $2 小于4也不满足 $3 小于20的行；这个条件与上面第一个模式组合等价，虽然也许可读性差了点。</p>
+
+<h6 id="数据验证"><a href="index.html#datasure">数据验证</a></h6>
+
+<p>实际的数据中总是会存在错误的。在数据验证-检查数据的值是否合理以及格式是否正确-方面，Awk是个优秀的工具。</p>
+
+<p>数据验证本质上是否定的：不是打印具备期望属性的行，而是打印可疑的行。如下程序使用对比模式 将5个数据合理性测试应用于 emp.data 的每一行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>NF != 3     { print $0, "number of fields is not equal to 3" }
+$2 &lt; 3.35   { print $0, "rate is below minimum wage" }
+$2 &gt; 10     { print $0, "rate exceeds $10 per hour" }
+$3 &lt; 0      { print $0, "negative hours worked" }
+$3 &gt; 60     { print $0, "too many hours worked" }
+</code></pre></div></div>
+
+<p>如果没有错误，则没有输出。</p>
+
+<h6 id="begin与end"><a href="index.html#beginend">BEGIN与END</a></h6>
+
+<p>特殊模式 BEGIN 用于匹配第一个输入文件的第一行之前的位置， END 则用于匹配处理过的最后一个文件的最后一行之后的位置。这个程序使用 BEGIN 来输出一个标题：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>BEGIN { print "Name    RATE    HOURS"; print ""}
+      { print }
+</code></pre></div></div>
+
+<p>输出为：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>NAME    RATE    HOURS
+
+Beth    4.00    0
+Dan     3.75    0
+Kathy   4.00    10
+Mark    5.00    20
+Mary    5.50    22
+Susie   4.25    18
+</code></pre></div></div>
+
+<p>程序的动作部分你可以在一行上放多个语句，不过要使用分号进行分隔。注意 普通的 print 是打印当前输入行，与之不同的是 print “” 会打印一个空行。</p>
+
+<h5 id="使用awk进行计算"><a href="index.html#compute">使用AWK进行计算</a></h5>
+
+<p>一个动作就是一个以新行或者分号分隔的语句序列。你已经见过一些其动作仅是单个 print 语句的例子。本节将提供一些执行简单的数值以及字符串计算的语句示例。在这些语句中，你不仅可以使用像 NF 这样的内置变量，还可以创建自己的变量用于计算、存储数据诸如此类的操作。awk中，用户创建的变量不需要声明。</p>
+
+<h6 id="计数"><a href="index.html#number">计数</a></h6>
+
+<p>这个程序使用一个变量 emp 来统计工作超过15个小时的员工的数目：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$3 &gt; 15 { emp = emp + 1 }
+END     { print emp, "employees worked more than 15 hours" }
+</code></pre></div></div>
+
+<p>对于第三个字段超过15的每行， emp 的前一个值加1。以 emp.data 为输入，该程序产生：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>3 employees worked more than 15 hours
+</code></pre></div></div>
+
+<p>用作数字的awk变量的默认初始值为0，所以我们不需要初始化 emp 。</p>
+
+<h6 id="求和与平均值"><a href="index.html#sum">求和与平均值</a></h6>
+
+<p>为计算员工的数目，我们可以使用内置变量 NR ，它保存着到目前位置读取的行数；在所有输入的结尾它的值就是所读的所有行数。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>END { print NR, "employees" }
+</code></pre></div></div>
+
+<p>输出为：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>6 employees
+</code></pre></div></div>
+
+<p>如下是一个使用 NR 来计算薪酬均值的程序：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    { pay = pay + $2 * $3 }
+END { print NR, "employees"
+      print "total pay is", pay
+      print "average pay is", pay/NR
+    }
+</code></pre></div></div>
+
+<p>第一个动作累计所有员工的总薪酬。 END 动作打印出</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>6 employees
+total pay is 337.5
+average pay is 56.25
+</code></pre></div></div>
+
+<p>很明显， printf 可用来产生更简洁的输出。并且该程序也有个潜在的错误：在某种不太可能发生的情况下， NR 等于0，那么程序会试图执行零除，从而产生错误信息。</p>
+
+<h6 id="处理文本"><a href="index.html#checktext">处理文本</a></h6>
+
+<p>awk的优势之一是能像大多数语言处理数字一样方便地处理字符串。awk变量可以保存数字也可以保存字符串。这个程序会找出时薪最高的员工：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$2 &gt; maxrate { maxrate = $2; maxemp = $1 }
+END { print "highest hourly rate:", maxrate, "for", maxemp }
+</code></pre></div></div>
+
+<p>输出</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>highest hourly rate: 5.50 for Mary
+</code></pre></div></div>
+
+<p>这个程序中，变量 maxrate 保存着一个数值，而变量 maxemp 则是保存着一个字符串。（如果有几个员工都有着相同的最大时薪，该程序则只找出第一个。）</p>
+
+<h6 id="字符串连接"><a href="index.html#strformat">字符串连接</a></h6>
+
+<p>可以合并老字符串来创建新字符串。这种操作称为 连接（concatenation） 。程序</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    { names = names $1 " "}
+END { print names }
+</code></pre></div></div>
+
+<p>通过将每个姓名和一个空格附加到变量 names 的前一个值， 来将所有员工的姓名收集进单个字符串中。最后 END 动作打印出 names 的值：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Beth Dan Kathy Mark Mary Susie
+</code></pre></div></div>
+
+<p>awk程序中，连接操作的表现形式是将字符串值一个接一个地写出来。对于每个输入行，程序的第一个语句先连接三个字符串： names 的前一个值、当前行的第一个字段以及一个空格，然后将得到的字符串赋值给 names 。因此，读取所有的输入行之后， names 就是个字符串，包含所有员工的姓名，每个姓名后面跟着一个空格。用于保存字符串的变量的默认初始值是空字符串(也就是说该字符串包含零个字符)，因此这个程序中的 names 不需要显式初始化。</p>
+
+<h6 id="打印最后一个输入行"><a href="index.html#printlast">打印最后一个输入行</a></h6>
+
+<p>虽然在 END 动作中 NR 还保留着它的值，但 $0 没有。程序</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    { last = $0 }
+END { print last }
+</code></pre></div></div>
+
+<p>是打印最后一个输入行的一种方式：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Susie   4.25    18
+</code></pre></div></div>
+
+<h6 id="内置函数"><a href="index.html#innerfunction">内置函数</a></h6>
+
+<p>我们已看到awk提供了内置变量来保存某些频繁使用的数量，比如：字段的数量和输入行的数量。类似地，也有内置函数用来计算其他有用的数值。除了平方根、对数、随机数诸如此类的算术函数，也有操作文本的函数。其中之一是 length ，计算一个字符串中的字符数量。例如，这个程序会计算每个人的姓名的长度：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{ print $1, length($1) }
+</code></pre></div></div>
+
+<p>结果：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Beth 4
+Dan 3
+Kathy 5
+Mark 4
+Mary 4
+Susie 5
+</code></pre></div></div>
+
+<h6 id="行单词以及字符的计数"><a href="index.html#linewords">行、单词以及字符的计数</a></h6>
+
+<p>这个程序使用了 length 、 NF 、以及 NR 来统计输入中行、单词以及字符的数量。为了简便，我们将每个字段看作一个单词。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>    { nc = nc + length($0) + 1
+      nw = nw + NF
+    }
+END { print NR, "lines,", nw, "words,", nc, "characters" }
+</code></pre></div></div>
+
+<p>文件 emp.data 有:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>6 lines, 18 words, 77 characters
+</code></pre></div></div>
+
+<p>$0 并不包含每个输入行的末尾的换行符，所以我们要另外加个1。</p>
+
+<h5 id="控制语句"><a href="index.html#contral">控制语句</a></h5>
+
+<p>Awk为选择提供了一个 if-else 语句，以及为循环提供了几个语句，所以都效仿C语言中对应的控制语句。它们仅可以在动作中使用。</p>
+
+<h6 id="if-else语句"><a href="index.html#ifelse">if-else语句</a></h6>
+
+<p>如下程序将计算时薪超过6美元的员工的总薪酬与平均薪酬。它使用一个 if 来防范计算平均薪酬时的零除问题。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$2 &gt; 6 { n = n + 1; pay = pay + $2 * $3 }
+END    { if (n &gt; 0)
+            print n, "employees, total pay is", pay,
+                     "average pay is", pay/n
+         else
+             print "no employees are paid more than $6/hour"
+        }
+</code></pre></div></div>
+
+<p>emp.data 的输出是：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>no employees are paid more than $6/hour
+</code></pre></div></div>
+
+<p>if-else 语句中，if 后的条件会被计算。如果为真，执行第一个 print 语句。否则，执行第二个 print 语句。注意我们可以使用一个逗号将一个长语句截断为多行来书写。</p>
+
+<h6 id="while语句"><a href="index.html#while">while语句</a></h6>
+
+<p>一个 while 语句有一个条件和一个执行体。条件为真时执行体中的语句会被重复执行。这个程序使用公式 value=amount(1+rate)yearsvalue=amount(1+rate)years</p>
+
+<p>来演示以特定的利率投资一定量的钱，其数值是如何随着年数增长的。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># interest1 - 计算复利
+#   输入: 钱数    利率    年数
+#   输出: 复利值
+
+{   i = 1
+    while (i &lt;= $3) {
+        printf("\t%.2f\n", $1 * (1 + $2) ^ i)
+        i = i + 1
+    }
+}
+</code></pre></div></div>
+
+<p>条件是 while 后括弧包围的表达式；循环体是条件后大括号包围的两个表达式。 printf 规格字符串中的 \t 代表制表符； ^ 是指数操作符。从 # 开始到行尾的文本是注释，会被awk忽略，但能帮助程序的读者理解程序做的事情。</p>
+
+<p>你可以为这程序输入三个一组的数字，看看不一样的钱数、利率、以及年数会产生什么。例如，如下事务演示了1000美元，利率为6%与12%，5年的复利分别是如何增长的：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ awk -f interest1
+1000 .06 5
+        1060.00
+        1123.60
+        1191.02
+        1262.48
+        1338.23
+1000 .12 5
+        1120.00
+        1254.40
+        1404.93
+        1573.52
+        1762.34
+</code></pre></div></div>
+
+<h6 id="for语句"><a href="index.html#for">for语句</a></h6>
+
+<p>另一个语句， for ，将大多数循环都包含的初始化、测试、以及自增压缩成一行。如下是之前利息计算的 for 版本：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># interest1 - 计算复利
+#   输入: 钱数    利率    年数
+#   输出: 每年末的复利
+
+{ for (i = 1; i &lt;= $3; i = i + 1)
+    printf("\t%.2f\n", $1 * (1 + $2) ^ i)
+}
+</code></pre></div></div>
+
+<p>初始化 i = 1 只执行一次。接下来，测试条件 i &lt;= $3 ；如果为真，则执行循环体的 printf 语句。循环体执行结束后执行自增 i = i + 1 ，接着由另一次条件测试开始下一个循环迭代。代码更加紧凑，并且由于循环体仅是一条语句，所以不需要大括号来包围它。</p>
+
+<h5 id="数组"><a href="index.html#array">数组</a></h5>
+
+<p>awk为存储一组相关的值提供了数组。虽然数组给予了awk很强的能力，但在这里我们仅展示一个简单的例子。如下程序将按行逆序打印输入。第一个动作将输入行存为数组 line 的连续元素；即第一行放在 line[1] ，第二行放在 line[2] , 依次继续。 END 动作使用一个 while 语句从后往前打印数组中的输入行：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 反转 - 按行逆序打印输入
+
+    { line[NR] = $0 }  # 记下每个输入行
+
+END { i = NR           # 逆序打印
+      while (i &gt; 0) {
+        print line[i]
+        i = i - 1
+      }
+    }
+</code></pre></div></div>
+
+<p>以 emp.data 为输入，输出为</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Susie    4.25   18
+Mary     5.50   22
+Mark     5.00   20
+Kathy    4.00   10
+Dan      3.75   0
+Beth     4.00   0
+</code></pre></div></div>
+
+<p>如下是使用 for 语句实现的相同示例：:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># 反转 - 按行逆序打印输入
+
+    { line[NR] = $0 }   # 记下每个输入行
+
+END { for (i = NR; i &gt; 0; i = i - 1)
+        print line[i]
+    }
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../28/flume-service/index.html" data-toggle="tooltip" data-placement="top" title="将Flume做成Service">
+                        Previous<br>
+                        <span>将Flume做成Service</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../click-command/index.html" data-toggle="tooltip" data-placement="top" title="Python Click Command 快速入门">
+                        Next<br>
+                        <span>Python Click Command 快速入门</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

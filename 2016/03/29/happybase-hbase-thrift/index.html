@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>使用HappyBase处理HBase数据 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/03/29/happybase-hbase-thrift/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#HappyBase" title="HappyBase">HappyBase</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#Python" title="Python">Python</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#HBase" title="HBase">HBase</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#Thrift" title="Thrift">Thrift</a>
+                        
+                    </div>
+                    <h1>使用HappyBase处理HBase数据</h1>
+                    
+                    
+                    <h2 class="subheading">Happybase通过HBase的Thrift服务处理数据</h2>
+                    
+                    <span class="meta">Posted by xiaoh on March 29, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#hbasehbasetablestructure">HBase的表结构</a>
+    <ol>
+      <li><a href="index.html#row-keyrowkey">Row Key</a></li>
+      <li><a href="index.html#columnfamily">列族</a></li>
+      <li><a href="index.html#timestamp">时间戳</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#thriftthriftsummary">thrift简介</a></li>
+  <li><a href="index.html#hbasethriftstartthrift">为HBase开启Thrift服务</a></li>
+  <li><a href="index.html#happybasehappybase">HappyBase相关介绍</a></li>
+</ol>
+
+<hr />
+
+<blockquote>
+  <p>最近有需求需要在Python下处理HBase数据，查了一下，Happybase这个库还不错，就简单的学习了一下，这篇文章主要介绍了Happybase的使用方法</p>
+</blockquote>
+
+<hr />
+
+<h3 id="hbase的表结构"><a href="index.html#hbasetablestructure">HBase的表结构</a></h3>
+
+<p>详细的HBase文档参见 <a href="https://hbase.apache.org/book.html">官方文档</a>
+如果英文不够好的话，可以看看这篇 <a href="http://abloz.com/hbase/book.html">http://abloz.com/hbase/book.html</a></p>
+
+<h5 id="row-key"><a href="index.html#rowkey">Row Key</a></h5>
+
+<p>Row key行键 (Row key)可以是任意字符串(最大长度是 64KB，实际应用中长度一般为 10-100bytes)，在hbase内部，row key保存为字节数组。</p>
+
+<h5 id="列族"><a href="index.html#columnfamily">列族</a></h5>
+
+<p>hbase表中的每个列，都归属与某个列族。列族是表的chema的一部分(而列不是)，必须在使用表之前定义。列名都以列族作为前缀。例如courses:history ， courses:math 都属于 courses 这个列族。</p>
+
+<h5 id="时间戳"><a href="index.html#timestamp">时间戳</a></h5>
+
+<p>HBase中通过row和columns确定的为一个存贮单元称为cell。每个 cell都保存着同一份数据的多个版本。版本通过时间戳来索引。时间戳的类型是 64位整型。时间戳可以由hbase(在数据写入时自动 )赋值，此时时间戳是精确到毫秒的当前系统时间。时间戳也可以由客户显式赋值。如果应用程序要避免数据版本冲突，就必须自己生成具有唯一性的时间戳。每个 cell中，不同版本的数据按照时间倒序排序，即最新的数据排在最前面。</p>
+
+<p>为了避免数据存在过多版本造成的的管理 (包括存贮和索引)负担，hbase提供了两种数据版本回收方式。一是保存数据的最后n个版本，二是保存最近一段时间内的版本（比如最近七天）。用户可以针对每个列族进行设置。</p>
+
+<p><strong>对Hbase而言，表结构设计会对系统的性能以及开销上造成很大的区别</strong></p>
+
+<hr />
+
+<h3 id="thrift简介"><a href="index.html#thriftsummary">thrift简介</a></h3>
+
+<p>一个软件框架，用来进行可扩展且跨语言的服务的开发。最初由Facebook开发，作为Hadoop的一个工具，提供跨语言服务开发；</p>
+
+<ul>
+  <li>资料介绍：<a href="http://www.xiaoh.me/2016/03/28/thrift-summary/">http://www.xiaoh.me/2016/03/28/thrift-summary/</a></li>
+  <li>官方使用手册：<a href="https://thrift.apache.org/">https://thrift.apache.org/</a></li>
+</ul>
+
+<p>我们项目里客户端是用python开发，因此需要Thrift提供server端，经过thrift对Hbase进行数据读写操作，性能非常不错，并且可以在Hadoop集群上做并行拓展，稳定性高，Facebook内部通信也是采用thrift来做</p>
+
+<hr />
+
+<h3 id="为hbase开启thrift服务"><a href="index.html#startthrift">为HBase开启Thrift服务</a></h3>
+
+<pre><code class="language-Shell">./bin/start-hbase.sh
+./bin/hbase-daemon.sh start thrift
+</code></pre>
+
+<p>thrift默认的监听端口是9090，可以用 <code class="highlighter-rouge">netstat -nl | grep 9090</code> 看看该端口是否有服务。</p>
+
+<ul>
+  <li>关于Thrift2和Thrift的对比可以参看这篇文章: <a href="http://blog.csdn.net/guxch/article/details/12163047">http://blog.csdn.net/guxch/article/details/12163047</a></li>
+</ul>
+
+<p>这里使用了thrift的服务，其实hbase还有一个thrift2的服务，而且，thrift会渐渐的被取消支持转到thrift2上面。奈何，今天我要用的是happybase，这个库是基于thrift来编写的。所以在这里使用了thrift的服务而没有选择thrift2</p>
+
+<hr />
+
+<h3 id="happybase相关介绍"><a href="index.html#happybase">HappyBase相关介绍</a></h3>
+
+<p>相关文档可以参考：<a href="https://happybase.readthedocs.org/en/latest/index.html">https://happybase.readthedocs.org/en/latest/index.html</a></p>
+
+<p>其实文档中讲的相当详细了，所以我这里也不多说废话，简单写了一些例子，来使用happybase，简单直观的解释一下使用happybase的方法</p>
+
+<p>使用pip来安装即可 <code class="highlighter-rouge">pip install happybase</code></p>
+
+<p>使用起来相当简单：</p>
+
+<pre><code class="language-Python">#!/usr/bin/python
+#-*- coding:utf-8 -*-
+
+#############################################
+# File Name: happybase_examply.py
+# Author: xiaoh
+# Mail: xiaoh@about.me
+# Created Time:  2016-03-28 10:51:20
+#############################################
+
+import happybase
+
+hostname = '192.168.1.81'
+table_name = 'xiaoh_test'
+column_family = 'info'
+row_key = 'row_test'
+
+conn = happybase.Connection(hostname)
+
+def pretty_print(msg):
+    print msg.ljust(80, '*')
+
+def show_rows(table, row_keys=None):
+    if row_keys:
+        pretty_print('show value of row named %s' % row_keys)
+        if len(row_keys) == 1:
+            print table.row(row_keys[0])
+        else:
+            print table.rows(row_keys)
+    else:
+        pretty_print('show all row values of table named %s' % table.name)
+        for key, value in table.scan():
+            print key, value
+
+def put_row(table, column_family, row_key, value):
+    pretty_print('insert one row to hbase')
+    table.put(row_key, {'%s:name' % column_family:'name_%s' % value})
+
+def put_rows(table, column_family, row_lines=3):
+    pretty_print('insert rows to hbase now')
+    for i in range(row_lines):
+        put_row(table, column_family, 'row_%s' % i, i)
+
+def delete_row(table, row_key, column_family=None, keys=None):
+    if keys:
+        pretty_print('delete keys:%s from row_key:%s' % (keys, row_key))
+        key_list = ['%s:%s' % (column_family, key) for key in keys]
+        table.delete(row_key, key_list)
+    else:
+        pretty_print('delete row(column_family:) from hbase')
+        table.delete(row_key)
+
+def create_table(table_name, column_family):
+    pretty_print('create table %s' % table_name)
+    conn.create_table(table_name, {column_family:dict()})
+
+def show_tables():
+    pretty_print('show all tables now')
+    print conn.tables()
+
+def delete_table(table_name):
+    pretty_print('delete table %s now.' % table_name)
+    conn.delete_table(table_name, True)
+
+def counter(table, row_key, column_family):
+    pretty_print('test counter now.')
+····
+    print table.counter_inc(row_key, '%s:counter' % column_family)  # prints 1
+    print table.counter_inc(row_key, '%s:counter' % column_family)  # prints 2
+    print table.counter_inc(row_key, '%s:counter' % column_family)  # prints 3
+    print table.counter_dec(row_key, '%s:counter' % column_family)  # prints 2
+    print table.counter_inc(row_key, '%s:counter' % column_family, value=3)  # prints 5
+    print table.counter_get(row_key, '%s:counter' % column_family)  # prints 5
+    table.counter_set(row_key, '%s:counter' % column_family, 12)
+    print table.counter_get(row_key, '%s:counter' % column_family)  # prints 5
+
+def pool():
+    pretty_print('test pool connection now.')
+    pool = happybase.ConnectionPool(size=3, host=hostname)
+    with pool.connection() as connection:
+        print connection.tables()
+
+def main():
+    show_tables()
+    create_table(table_name, column_family)
+    show_tables()
+
+    table = conn.table(table_name)
+    show_rows(table)
+    put_rows(table, column_family)
+    show_rows(table)
+
+    put_row(table, column_family, row_key, 'xiaoh.me')
+    show_rows(table, [row_key])
+
+    delete_row(table, row_key)
+    show_rows(table, [row_key])
+
+    delete_row(table, row_key, column_family, ['name'])
+    show_rows(table, [row_key])
+
+    counter(table, row_key, column_family)
+
+    delete_table(table_name)
+    show_tables()
+
+    pool()
+
+    pretty_print('all works have done.')
+
+if __name__ == "__main__":
+    main()
+</code></pre>
+
+<p>输出如下:</p>
+
+<pre><code class="language-Shell">show all tables now*************************************************************
+['SYSTEM.CATALOG', 'SYSTEM.FUNCTION', 'SYSTEM.SEQUENCE', 'SYSTEM.STATS']
+create table xiaoh_test*********************************************************
+show all tables now*************************************************************
+['SYSTEM.CATALOG', 'SYSTEM.FUNCTION', 'SYSTEM.SEQUENCE', 'SYSTEM.STATS', 'xiaoh_test']
+show all row values of table named xiaoh_test***********************************
+insert rows to hbase now********************************************************
+insert one row to hbase*********************************************************
+insert one row to hbase*********************************************************
+insert one row to hbase*********************************************************
+show all row values of table named xiaoh_test***********************************
+row_0 {'info:name': 'name_0'}
+row_1 {'info:name': 'name_1'}
+row_2 {'info:name': 'name_2'}
+insert one row to hbase*********************************************************
+show value of row named ['row_test']********************************************
+{'info:name': 'name_xiaoh.me'}
+delete row(column_family:) from hbase*******************************************
+show value of row named ['row_test']********************************************
+{'info:name': 'name_xiaoh.me', 'info:': ''}
+delete keys:['name'] from row_key:row_test**************************************
+show value of row named ['row_test']********************************************
+{'info:name': '', 'info:': ''}
+test counter now.***************************************************************
+1
+2
+3
+2
+5
+5
+12
+delete table xiaoh_test now.****************************************************
+show all tables now*************************************************************
+['SYSTEM.CATALOG', 'SYSTEM.FUNCTION', 'SYSTEM.SEQUENCE', 'SYSTEM.STATS']
+test pool connection now.*******************************************************
+['SYSTEM.CATALOG', 'SYSTEM.FUNCTION', 'SYSTEM.SEQUENCE', 'SYSTEM.STATS']
+all works have done.************************************************************
+</code></pre>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../28/thrift-summary/index.html" data-toggle="tooltip" data-placement="top" title="Thrift架构介绍">
+                        Previous<br>
+                        <span>Thrift架构介绍</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../31/python-regex/index.html" data-toggle="tooltip" data-placement="top" title="Python正则表达式简介">
+                        Next<br>
+                        <span>Python正则表达式简介</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

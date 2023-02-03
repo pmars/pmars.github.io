@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>Thrift架构介绍 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/03/28/thrift-summary/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Thrift" title="Thrift">Thrift</a>
+                        
+                    </div>
+                    <h1>Thrift架构介绍</h1>
+                    
+                    
+                    <h2 class="subheading">跨语言服务部署架构之Thrift简介</h2>
+                    
+                    <span class="meta">Posted by xiaoh on March 28, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#arthitecture">架构</a></li>
+  <li><a href="index.html#translate">传输</a>
+    <ol>
+      <li><a href="index.html#supportformat">支持的传输格式</a></li>
+      <li><a href="index.html#supportmode">支持的数据传输方式</a></li>
+      <li><a href="index.html#supportservice">支持的服务模型</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#thriftinstall">Thrift安装</a></li>
+  <li><a href="index.html#basicsyntax">基本语法</a>
+    <ol>
+      <li><a href="index.html#types">类型</a></li>
+      <li><a href="index.html#enum">枚举类型</a></li>
+      <li><a href="index.html#comment">注释</a></li>
+      <li><a href="index.html#namespace">命名空间</a></li>
+      <li><a href="index.html#include">文件包含</a></li>
+      <li><a href="index.html#constant">常量</a></li>
+      <li><a href="index.html#structs">定义结构体</a></li>
+      <li><a href="index.html#designservice">定义服务</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#generatecode">生成代码</a>
+    <ol>
+      <li><a href="index.html#transporttransport">Transport</a></li>
+      <li><a href="index.html#protocolprotocol">Protocol</a></li>
+      <li><a href="index.html#processorprocessor">Processor</a></li>
+      <li><a href="index.html#serverserver">Server</a></li>
+      <li><a href="index.html#examples">应用举例</a></li>
+      <li><a href="index.html#realexample">实践经验</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#thriftdeployservice">利用Thrift部署服务</a>
+    <ol>
+      <li><a href="index.html#thriftwritefile">thrift文件编写</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#clientservercoding">client端和server端代码编写</a></li>
+  <li><a href="index.html#learningfrom">参考资料</a></li>
+</ol>
+
+<hr />
+
+<blockquote>
+  <p>Thrift是一个跨语言的服务部署框架，最初由Facebook于2007年开发，2008年进入Apache开源项目。Thrift通过一个中间语言(IDL, 接口定义语言)来定义RPC的接口和数据类型，然后通过一个编译器生成不同语言的代码（目前支持C++,Java, Python, PHP, Ruby, Erlang, Perl, Haskell, C#, Cocoa, Smalltalk和OCaml）,并由生成的代码负责RPC协议层和传输层的实现。</p>
+</blockquote>
+
+<hr />
+
+<h3 id="架构"><a href="index.html#arthitecture">架构</a></h3>
+
+<p>Thrift实际上是实现了C/S模式，通过代码生成工具将接口定义文件生成服务器端和客户端代码（可以为不同语言），从而实现服务端和客户端跨语言的支持。用户在Thirft描述文件中声明自己的服务，这些服务经过编译后会生成相应语言的代码文件，然后用户实现服务（客户端调用服务，服务器端提供服务）便可以了。其中protocol（协议层, 定义数据传输格式，可以为二进制或者XML等）和transport（传输层，定义数据传输方式，可以为TCP/IP传输，内存共享或者文件共享等）被用作运行时库。</p>
+
+<p><img src="../../../../img/post-thrift-arthitecture.jpg" alt="" /></p>
+
+<hr />
+
+<h3 id="传输"><a href="index.html#translate">传输</a></h3>
+
+<h5 id="支持的传输格式"><a href="index.html#supportformat">支持的传输格式</a></h5>
+
+<ul>
+  <li>TBinaryProtocol – 二进制格式.</li>
+  <li>TCompactProtocol – 压缩格式</li>
+  <li>TJSONProtocol – JSON格式</li>
+  <li>TSimpleJSONProtocol –提供JSON只写协议, 生成的文件很容易通过脚本语言解析。</li>
+  <li>TDebugProtocol – 使用易懂的可读的文本格式，以便于debug</li>
+</ul>
+
+<h5 id="支持的数据传输方式"><a href="index.html#supportmode">支持的数据传输方式</a></h5>
+
+<ul>
+  <li>TSocket -阻塞式socker</li>
+  <li>TFramedTransport – 以frame为单位进行传输，非阻塞式服务中使用。</li>
+  <li>TFileTransport – 以文件形式进行传输。</li>
+  <li>TMemoryTransport – 将内存用于I/O. java实现时内部实际使用了简单的ByteArrayOutputStream。</li>
+  <li>TZlibTransport – 使用zlib进行压缩， 与其他传输方式联合使用。当前无java实现。</li>
+</ul>
+
+<h5 id="支持的服务模型"><a href="index.html#supportservice">支持的服务模型</a></h5>
+
+<ul>
+  <li>TSimpleServer – 简单的单线程服务模型，常用于测试</li>
+  <li>TThreadPoolServer – 多线程服务模型，使用标准的阻塞式IO。</li>
+  <li>TNonblockingServer – 多线程服务模型，使用非阻塞式IO（需使用TFramedTransport数据传输方式）</li>
+</ul>
+
+<hr />
+
+<h3 id="thrift安装"><a href="index.html#install">Thrift安装</a></h3>
+
+<p>下载地址：<a href="http://incubator.apache.org/thrift/download/">http://incubator.apache.org/thrift/download/</a></p>
+
+<ul>
+  <li>安装要求：Unix/linux 系统，windows+cygwin</li>
+  <li>C++语言：g++、boost</li>
+  <li>java 语言：JDK、Apache Ant</li>
+  <li>其他语言：Python、PHP、Perl, etc…</li>
+</ul>
+
+<p>编译安装：</p>
+
+<pre><code class="language-Shell">./configure 
+make
+make install
+</code></pre>
+
+<hr />
+
+<h3 id="基本语法"><a href="index.html#basicsyntax">基本语法</a></h3>
+
+<h5 id="类型"><a href="index.html#types">类型</a></h5>
+
+<p>Thrift类型系统包括预定义基本类型，用户自定义结构体，容器类型，异常和服务定义</p>
+
+<h6 id="基本类型">基本类型</h6>
+
+<ul>
+  <li>bool：布尔类型(true or value)，占一个字节</li>
+  <li>byte：有符号字节</li>
+  <li>i16:16位有符号整型</li>
+  <li>i32:32位有符号整型</li>
+  <li>i64:64位有符号整型</li>
+  <li>double：64位浮点数</li>
+  <li>string：未知编码或者二进制的字符串</li>
+</ul>
+
+<p>注意，thrift不支持无符号整型，因为很多目标语言不存在无符号整型（如java）。</p>
+
+<h5 id="容器类型">容器类型</h5>
+
+<p>Thrift容器与类型密切相关，它与当前流行编程语言提供的容器类型相对应，采用java泛型风格表示的。Thrift提供了3种容器类型：</p>
+
+<ul>
+  <li>List<t1>：一系列t1类型的元素组成的有序表，元素可以重复</t1></li>
+  <li>Set<t1>：一系列t1类型的元素组成的无序表，元素唯一</t1></li>
+  <li>Map&lt;t1,t2&gt;：key/value对（key的类型是t1且key唯一，value类型是t2）。</li>
+</ul>
+
+<p>容器中的元素类型可以是除了service意外的任何合法thrift类型（包括结构体和异常）。</p>
+
+<h6 id="结构体和异常">结构体和异常</h6>
+
+<p>Thrift结构体在概念上同C语言结构体类型—-一种将相关属性聚集（封装）在一起的方式。在面向对象语言中，thrift结构体被转换成类。</p>
+
+<p>异常在语法和功能上类似于结构体，只不过异常使用关键字exception而不是struct关键字声明。但它在语义上不同于结构体—当定义一个RPC服务时，开发者可能需要声明一个远程方法抛出一个异常。</p>
+
+<h6 id="服务">服务</h6>
+
+<p>服务的定义方法在语法上等同于面向对象语言中定义接口。Thrift编译器会产生实现这些接口的client和server桩。</p>
+
+<h6 id="类型定义">类型定义</h6>
+
+<p>Thrift支持C/C++风格的typedef:</p>
+
+<pre><code class="language-C">typedef i32 MyInteger   \\a
+typedef Tweet ReTweet  \\b
+</code></pre>
+
+<p>说明：</p>
+
+<ol>
+  <li>末尾没有逗号</li>
+  <li>struct可以使用typedef</li>
+</ol>
+
+<h5 id="枚举类型"><a href="index.html#enum">枚举类型</a></h5>
+
+<p>可以像C/C++那样定义枚举类型，如：</p>
+
+<pre><code class="language-C">enum TweetType {
+    TWEET,       //a
+    RETWEET = 2, //b
+    DM = 0xa,  //c
+    REPLY
+}        //d
+struct Tweet {
+    required i32 userId;
+    required string userName;
+    required string text;
+    optional Location loc;
+    optional TweetType tweetType = TweetType.TWEET // e
+    optional string language = "english"
+}
+</code></pre>
+
+<p>说明：</p>
+
+<ul>
+  <li>编译器默认从0开始赋值</li>
+  <li>可以赋予某个常量某个整数</li>
+  <li>允许常量是十六进制整数</li>
+  <li>末尾没有逗号</li>
+  <li>给常量赋缺省值时，使用常量的全称</li>
+</ul>
+
+<p>注意，不同于protocol buffer，thrift不支持枚举类嵌套，枚举常量必须是32位的正整数</p>
+
+<h5 id="注释"><a href="index.html#comment">注释</a></h5>
+
+<p>Thrfit支持shell注释风格，C/C++语言中单行或者多行注释风格</p>
+
+<pre><code class="language-Shell"># This is a valid comment.
+/*
+* This is a multi-line comment.
+* Just like in C.
+*/
+// C++/Java style single-line comments work just as well.
+</code></pre>
+
+<h5 id="命名空间"><a href="index.html#namespace">命名空间</a></h5>
+
+<p>Thrift中的命名空间同C++中的namespace和java中的package类似，它们均提供了一种组织（隔离）代码的方式。因为每种语言均有自己的命名空间定义方式（如python中有module），thrift允许开发者针对特定语言定义namespace：</p>
+
+<pre><code class="language-C">namespace cpp com.example.project  // a
+namespace java com.example.project // b
+</code></pre>
+
+<p>说明：</p>
+
+<ol>
+  <li>转化成namespace com { namespace example { namespace project {</li>
+  <li>转换成package com.example.project</li>
+</ol>
+
+<h5 id="文件包含"><a href="index.html#include">文件包含</a></h5>
+
+<p>Thrift允许thrift文件包含，用户需要使用thrift文件名作为前缀访问被包含的对象，如：</p>
+
+<pre><code class="language-C">include "tweet.thrift"           // a
+...
+struct TweetSearchResult {
+    list&lt;tweet.Tweet&gt; tweets; // b
+}
+</code></pre>
+
+<p>说明：</p>
+
+<ol>
+  <li>thrift文件名要用双引号包含，末尾没有逗号或者分号</li>
+  <li>注意tweet前缀</li>
+</ol>
+
+<h5 id="常量"><a href="index.html#constant">常量</a></h5>
+
+<p>Thrift允许用户定义常量，复杂的类型和结构体可使用JSON形式表示。</p>
+
+<pre><code class="language-C">const i32 INT_CONST = 1234;    // a
+const map&lt;string,string&gt; MAP_CONST = {"hello": "world", "goodnight": "moon"}
+</code></pre>
+
+<p>说明：分号是可选的，可有可无；支持十六进制赋值。</p>
+
+<h5 id="定义结构体"><a href="index.html#structs">定义结构体</a></h5>
+
+<p>结构体由一系列域组成，每个域有唯一整数标识符，类型，名字和可选的缺省参数组成。如：</p>
+
+<pre><code class="language-C">struct Tweet {
+    required i32 userId;                  // a
+    required string userName;             // b
+    required string text;
+    optional Location loc;                // c
+    optional string language = "english" // d
+}
+struct Location {                            // e
+    required double latitude;
+    required double longitude;
+}
+</code></pre>
+
+<p>说明：</p>
+
+<ol>
+  <li>每个域有一个唯一的，正整数标识符</li>
+  <li>每个域可以标识为required或者optional（也可以不注明）</li>
+  <li>结构体可以包含其他结构体</li>
+  <li>域可以有缺省值</li>
+  <li>一个thrift中可定义多个结构体，并存在引用关系</li>
+</ol>
+
+<p>规范的struct定义中的每个域均会使用required或者optional关键字进行标识。如果required标识的域没有赋值，thrift将给予提示。如果optional标识的域没有赋值，该域将不会被序列化传输。如果某个optional标识域有缺省值而用户没有重新赋值，则该域的值一直为缺省值。</p>
+
+<p>与service不同，结构体不支持继承，即，一个结构体不能继承另一个结构体。</p>
+
+<h5 id="定义服务"><a href="index.html#designservice">定义服务</a></h5>
+
+<p>在流行的序列化/反序列化框架（如protocol buffer）中，thrift是少有的提供多语言间RPC服务的框架。</p>
+
+<p>Thrift编译器会根据选择的目标语言为server产生服务接口代码，为client产生桩代码。</p>
+
+<pre><code class="language-C">//“Twitter”与“{”之间需要有空格！！！
+service Twitter {
+// 方法定义方式类似于C语言中的方式，它有一个返回值，一系列参数和可选的异常
+// 列表. 注意，参数列表和异常列表定义方式与结构体中域定义方式一致.
+void ping(),                                    // a
+bool postTweet(1:Tweet tweet);                  // b
+TweetSearchResult searchTweets(1:string query); // c
+// ”oneway”标识符表示client发出请求后不必等待回复（非阻塞）直接进行下面的操作，
+// ”oneway”方法的返回值必须是void
+oneway void zip()                               // d
+}
+</code></pre>
+
+<p>说明：</p>
+
+<ol>
+  <li>函数定义可以使用逗号或者分号标识结束</li>
+  <li>参数可以是基本类型或者结构体，参数是只读的（const），不可以作为返回值！！！</li>
+  <li>返回值可以是基本类型或者结构体</li>
+  <li>返回值可以是void</li>
+</ol>
+
+<p>注意，<strong>函数中参数列表的定义方式与struct完全一样</strong></p>
+
+<p>Service支持继承，一个service可使用extends关键字继承另一个service</p>
+
+<h3 id="生成代码"><a href="index.html#generatecode">生成代码</a></h3>
+
+<p>本节介绍thrift产生各种目标语言代码的方式。本节从几个基本概念开始，逐步引导开发者了解产生的代码是怎么样组织的，进而帮助开发者更快地明白thrift的使用方法。
+概念</p>
+
+<p>Thrift的网络栈如下所示：</p>
+
+<p><img src="../../../../img/post-thrift-stack.jpg" alt="" /></p>
+
+<h5 id="transport"><a href="index.html#transport">Transport</a></h5>
+
+<p>Transport层提供了一个简单的网络读写抽象层。这使得thrift底层的transport从系统其它部分（如：序列化/反序列化）解耦。以下是一些Transport接口提供的方法：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>open
+close
+read
+write
+flush
+</code></pre></div></div>
+
+<p>除了以上几个接口，Thrift使用ServerTransport接口接受或者创建原始transport对象。正如名字暗示的那样，ServerTransport用在server端，为到来的连接创建Transport对象。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>open
+listen
+accept
+close
+</code></pre></div></div>
+
+<h5 id="protocol"><a href="index.html#protocol">Protocol</a></h5>
+
+<p>Protocol抽象层定义了一种将内存中数据结构映射成可传输格式的机制。换句话说，Protocol定义了datatype怎样使用底层的Transport对自己进行编解码。因此，Protocol的实现要给出编码机制并负责对数据进行序列化。</p>
+
+<p>Protocol接口的定义如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>writeMessageBegin(name, type, seq)
+writeMessageEnd()
+writeStructBegin(name)
+writeStructEnd()
+writeFieldBegin(name, type, id)
+writeFieldEnd()
+writeFieldStop()
+writeMapBegin(ktype, vtype, size)
+writeMapEnd()
+writeListBegin(etype, size)
+writeListEnd()
+writeSetBegin(etype, size)
+writeSetEnd()
+writeBool(bool)
+writeByte(byte)
+writeI16(i16)
+writeI32(i32)
+writeI64(i64)
+writeDouble(double)
+writeString(string)
+name, type, seq = readMessageBegin()
+readMessageEnd()
+name = readStructBegin()
+readStructEnd()
+name, type, id = readFieldBegin()
+readFieldEnd()
+k, v, size = readMapBegin()
+readMapEnd()
+etype, size = readListBegin()
+readListEnd()
+etype, size = readSetBegin()
+readSetEnd()
+bool = readBool()
+byte = readByte()
+i16 = readI16()
+i32 = readI32()
+i64 = readI64()
+double = readDouble()
+string = readString()
+</code></pre></div></div>
+
+<p>下面是一些对大部分thrift支持的语言均可用的protocol：</p>
+
+<ol>
+  <li>binary：简单的二进制编码</li>
+  <li>Compact：具体见THRIFT-11</li>
+  <li>Json</li>
+</ol>
+
+<h5 id="processor"><a href="index.html#processor">Processor</a></h5>
+
+<p>Processor封装了从输入数据流中读数据和向数据数据流中写数据的操作。读写数据流用Protocol对象表示。Processor的结构体非常简单:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>interface TProcessor {
+    bool process(TProtocol in, TProtocol out) throws TException
+}
+</code></pre></div></div>
+
+<p>与服务相关的processor实现由编译器产生。Processor主要工作流程如下：从连接中读取数据（使用输入protocol），将处理授权给handler（由用户实现），最后将结果写到连接上（使用输出protocol）。</p>
+
+<h5 id="server"><a href="index.html#server">Server</a></h5>
+
+<p>Server将以上所有特性集成在一起：</p>
+
+<ol>
+  <li>创建一个transport对象</li>
+  <li>为transport对象创建输入输出protocol</li>
+  <li>基于输入输出protocol创建processor</li>
+  <li>等待连接请求并将之交给processor处理</li>
+</ol>
+
+<h5 id="应用举例"><a href="index.html#examples">应用举例</a></h5>
+
+<p>下面，我们讨论thrift文件产生的特定语言代码。下面给出thrift文件描述：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>namespace cpp thrift.example
+namespace java thrift.example
+enum TweetType {
+    TWEET,
+    RETWEET = 2,
+    DM = 0xa,
+    REPLY
+}
+struct Location {
+    required double latitude;
+    required double longitude;
+}
+struct Tweet {
+    required i32 userId;
+    required string userName;
+    required string text;
+    optional Location loc;
+    optional TweetType tweetType = TweetType.TWEET;
+    optional string language = "english";
+}
+typedef list&lt;Tweet&gt; TweetList
+struct TweetSearchResult {
+    TweetList tweets;
+}
+const i32 MAX_RESULTS = 100;
+service Twitter {
+    void ping(),
+    bool postTweet(1:Tweet tweet);
+    TweetSearchResult searchTweets(1:string query);
+    oneway void zip()
+}
+</code></pre></div></div>
+
+<h6 id="java语言">Java语言</h6>
+
+<p><strong>产生的文件</strong></p>
+
+<p>一个单独的文件（Constants.java）包含所有的常量定义。</p>
+
+<p>每个结构体，枚举或者服务各占一个文件</p>
+
+<pre><code class="language-Shell">$ tree gen-java
+`– thrift
+    `– example
+    |– Constants.java
+    |– Location.java
+    |– Tweet.java
+    |– TweetSearchResult.java
+    |– TweetType.java
+    `– Twitter.java
+</code></pre>
+
+<p><strong>类型</strong></p>
+
+<p>thrift将各种基本类型和容器类型映射成java类型：</p>
+
+<pre><code class="language-C">bool: boolean
+byte: byte
+i16: short
+i32: int
+i64: long
+double: double
+string: String
+list&lt;t1&gt;: List&lt;t1&gt;
+set&lt;t1&gt;: Set&lt;t1&gt;
+map&lt;t1,t2&gt;: Map&lt;t1, t2&gt;
+</code></pre>
+
+<p><strong>typedef</strong></p>
+
+<p>Java不支持typedef，它只使用原始类型，如，在上面的例子中，产生的代码中，TweetSearchResult会被还原成list<Tweet> tweets</Tweet></p>
+
+<p><strong>Enum</strong></p>
+
+<p>Thrift直接将枚举类型映射成java的枚举类型。用户可以使用geValue方法获取枚举常量的值。此外，编译器会产生一个findByValue方法获取枚举对应的数值。</p>
+
+<p><strong>常量</strong></p>
+
+<p>Thrift把所有的常量放在一个叫Constants的public类中，每个常量修饰符是public static final。</p>
+
+<h6 id="c语言">C++语言</h6>
+
+<p><strong>产生的文件</strong></p>
+
+<p>所有变量均存放在一个.cpp/.h文件对中</p>
+
+<p>所有的类型定义（枚举或者结构体）存放到另一个.cpp/.h文件对中</p>
+
+<p>每一个service有自己的.cpp/.h文件</p>
+
+<pre><code class="language-C">$ tree gen-cpp
+|– example_constants.cpp
+|– example_constants.h
+|– example_types.cpp
+|– example_types.h
+|– Twitter.cpp
+|– Twitter.h
+`– Twitter_server.skeleton.cpp
+</code></pre>
+
+<h6 id="其他语言">其他语言</h6>
+
+<p>Python，Ruby，javascript等</p>
+
+<h5 id="实践经验"><a href="index.html#realexample">实践经验</a></h5>
+
+<p>thrift文件内容可能会随着时间变化的。如果已经存在的消息类型不再符合设计要求，比如，新的设计要在message格式中添加一个额外字段，但你仍想使用以前的thrift文件产生的处理代码。如果想要达到这个目的，只需：</p>
+
+<ul>
+  <li>不要修改已存在域的整数编号</li>
+  <li>新添加的域必须是optional的，以便格式兼容。对于一些语言，如果要为optional的字段赋值，需要特殊处理，比如对于C++语言，要为</li>
+</ul>
+
+<pre><code class="language-C">struct Example{
+    i32 id,
+    string name,
+    optional age,
+}
+</code></pre>
+
+<p>中的optional字段age赋值，需要将它的 <code class="highlighter-rouge">__isset</code> 值设为true，这样才能序列化并传输或者存储（不然optional字段被认为不存在，不会被传输或者存储），</p>
+
+<p>如：</p>
+
+<pre><code class="language-Shell">Example example;
+example.age=10,
+example.__isset.age = true; //__isset是每个thrift对象的自带的public成员，来指定optional字段是否启用并赋值。
+</code></pre>
+<ul>
+  <li>非required域可以删除，前提是它的整数编号不会被其他域使用。对于删除的字段，名字前面可添加 <code class="highlighter-rouge">OBSOLETE_</code>以防止其他字段使用它的整数编号。</li>
+  <li>thrift文件应该是unix格式的（windows下的换行符与unix不同，可能会导致你的程序编译不过），如果是在window下编写的，可使用dos2unix转化为unix格式。</li>
+  <li>貌似当前的thrift版本（0.6.1）不支持常量表达式的定义（如 const i32 DAY = 24 * 60 * 60），这可能是考虑到不同语言，运算符不尽相同。</li>
+</ul>
+
+<hr />
+
+<h3 id="利用thrift部署服务"><a href="index.html#deployservice">利用Thrift部署服务</a></h3>
+
+<p>主要流程：</p>
+
+<ol>
+  <li>编写服务说明，保存到.thrift文件</li>
+  <li>根据需要， 编译.thrift文件，生成相应的语言源代码</li>
+  <li>根据实际需要， 编写client端和server端代码。</li>
+</ol>
+
+<h5 id="thrift文件编写"><a href="index.html#writefile">thrift文件编写</a></h5>
+
+<p>一般将服务放到一个.thrift文件中，服务的编写语法与C语言语法基本一致，在.thrift文件中有主要有以下几个内容：</p>
+
+<ol>
+  <li>变量声明</li>
+  <li>数据声明（struct）</li>
+  <li>服务接口声明（service, 可以继承其他接口）。</li>
+</ol>
+
+<p>下面分析Thrift的tutorial中带的例子tutorial.thrift</p>
+
+<ul>
+  <li>包含头文件：59行：<code class="highlighter-rouge">include “shared.thrift”</code></li>
+  <li>指定目标语言：65行：<code class="highlighter-rouge">namespace cpp tutorial</code></li>
+  <li>定义变量：80行：<code class="highlighter-rouge">const i32 INT32CONSTANT = 9853</code></li>
+  <li>定义结构体：103行：</li>
+</ul>
+
+<pre><code class="language-C">struct Work {
+    i32 num1 = 0,
+    i32 num2,
+    Operation op,
+    optional string comment,
+}
+</code></pre>
+
+<p>定义服务：</p>
+
+<pre><code class="language-C">service Calculator extends shared.SharedService {
+void ping(),
+    i32 add(1:i32 num1, 2:i32 num2),
+    i32 calculate(1:i32 logid, 2:Work w) throws (1:InvalidOperation ouch),
+    oneway void zip()
+}
+</code></pre>
+
+<ul>
+  <li>要生成C++代码：./thrift –gen cpp tutorial.thrift，结果代码存放在gen-cpp目录下</li>
+  <li>要生成java代码：./thrift –gen java tutorial.thrift，结果代码存放在gen-java目录下</li>
+</ul>
+
+<hr />
+
+<h3 id="client端和server端代码编写"><a href="index.html#coding">client端和server端代码编写</a></h3>
+
+<p>client端和sever端代码要调用编译.thrift生成的中间文件。下面分析cpp文件下面的CppClient.cpp和CppServer.cpp代码</p>
+
+<p><img src="../../../../img/post-thrift-coding.jpg" alt="" /></p>
+
+<p>在client端，用户自定义CalculatorClient类型的对象（用户在.thrift文件中声明的服务名称是Calculator， 则生成的中间代码中的主类为CalculatorClient）， 该对象中封装了各种服务，可以直接调用（如client.ping()）, 然后thrift会通过封装的rpc调用server端同名的函数。</p>
+
+<p>在server端，需要实现在.thrift文件中声明的服务中的所有功能，以便处理client发过来的请求。</p>
+
+<hr />
+
+<h3 id="参考资料"><a href="index.html#learningfrom">参考资料</a></h3>
+
+<ol>
+  <li><a href="http://diwakergupta.github.com/thrift-missing-guide/#_versioning_compatibility">http://diwakergupta.github.com/thrift-missing-guide/#_versioning_compatibility</a></li>
+  <li><a href="http://dongxicheng.org/search-engine/thrift-framework-intro/">http://dongxicheng.org/search-engine/thrift-framework-intro/</a></li>
+  <li><a href="http://dongxicheng.org/search-engine/thrift-guide/">http://dongxicheng.org/search-engine/thrift-guide/</a></li>
+  <li><a href="http://dongxicheng.org/search-engine/search-engine/thrift-rpc/">http://dongxicheng.org/search-engine/search-engine/thrift-rpc/</a></li>
+  <li><a href="http://dongxicheng.org/search-engine/thrift-internals/">http://dongxicheng.org/search-engine/thrift-internals/</a></li>
+  <li><a href="http://wiki.apache.org/thrift/">http://wiki.apache.org/thrift/</a></li>
+  <li><a href="http://jnb.ociweb.com/jnb/jnbJun2009.html">http://jnb.ociweb.com/jnb/jnbJun2009.html</a></li>
+  <li><a href="http://blog.rushcj.com/tag/thrift/">http://blog.rushcj.com/tag/thrift/</a></li>
+  <li><a href="http://www.vvcha.cn/c.aspx?id=31984">http://www.vvcha.cn/c.aspx?id=31984</a></li>
+</ol>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../27/python-decorator/index.html" data-toggle="tooltip" data-placement="top" title="Python装饰器入门与提高">
+                        Previous<br>
+                        <span>Python装饰器入门与提高</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../29/happybase-hbase-thrift/index.html" data-toggle="tooltip" data-placement="top" title="使用HappyBase处理HBase数据">
+                        Next<br>
+                        <span>使用HappyBase处理HBase数据</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

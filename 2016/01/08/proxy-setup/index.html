@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>代理服务器的搭建方法 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/01/08/proxy-setup/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-proxy-setup.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-proxy-setup.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Proxy" title="Proxy">Proxy</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#代理" title="代理">代理</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#服务器" title="服务器">服务器</a>
+                        
+                    </div>
+                    <h1>代理服务器的搭建方法</h1>
+                    
+                    
+                    <h2 class="subheading">自己搭建翻墙工具，再也不用担心被墙了</h2>
+                    
+                    <span class="meta">Posted by xiaoh on January 8, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>最近搞了一个代理服务器，把方法分享一下</p>
+</blockquote>
+
+<hr />
+
+<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#squidsquid">squid</a></li>
+  <li><a href="index.html#autosshprivoxyautosshprivoxy">autossh+privoxy</a></li>
+  <li><a href="index.html#proxy">代理方法</a></li>
+  <li><a href="index.html#re-proxy">反向代理</a></li>
+</ol>
+
+<hr />
+
+<p>既然是服务器，你必须有一台吧，否则玩啥。</p>
+
+<p>如果是想翻墙，你的服务器还得在墙外，否则玩不起来。</p>
+
+<p>所以，我起了一台 Azure 上的服务器来做代理服务器。</p>
+
+<p>下面介绍一下做代理服务器的方法</p>
+
+<hr />
+
+<h3 id="squid"><a href="index.html#squid">squid</a></h3>
+
+<p>前言：这个组件我安装了，用来上 google 还是可以的，但如果上 facebook 这种网站就上不去了，而且会让代理停上一段时间，我估摸着应该是绕不过墙，被封了得缘故。</p>
+
+<p>不过，既然用过也将方法写在这里。</p>
+
+<h6 id="安装">安装</h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get install squid3
+$ which squid3
+/usr/sbin/squid3
+</code></pre></div></div>
+
+<h6 id="配置">配置</h6>
+
+<p>简单解释下配置里面的内容：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>acl SSL_ports port 443          # 将端口添加到 SSL_ports 变量中
+http_access deny !Safe_ports    # 阻止 SSL_ports 以外的端口进行连接（默认都可以连接？）
+http_access allow localhost     # 允许本机进行连接（所以需要修改配置，否则别人用不了）
+http_access deny all            # 阻止除已经允许的IP进行访问
+http_port 3128                  # 服务端口
+</code></pre></div></div>
+
+<p>其他的就没什么可以解释的了，知道这些，配置一下就可以使用了。</p>
+
+<p>既然默认配置无法提供代理，得修改一下 <code class="highlighter-rouge">sudo vi /etc/squid3/squid.conf</code> 需要修改以下几点：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>acl my_network src 192.168.1.111 192.168.1.112
+http_access allow my_network
+</code></pre></div></div>
+
+<p>按照上面的解释就是，给你需要用代理的 IP 添加到 <code class="highlighter-rouge">my_network</code> 里面，之后设置成允许就可以了。</p>
+
+<h6 id="重启服务">重启服务</h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo service squid3 restart
+</code></pre></div></div>
+
+<h6 id="测试">测试</h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>你可以自己去测试一下，方式我会在下面也说一下。
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="autosshprivoxy"><a href="index.html#autosshprivoxy">autossh+privoxy</a></h3>
+
+<p>这个方法是我现在使用的，实际上就是建立了一个 ssh 隧道，先看一下 <code class="highlighter-rouge">ssh隧道</code>:</p>
+
+<h4 id="ssh隧道">SSH隧道</h4>
+
+<p>Internet上去主动连接一台内网是不可能的，一般的解决方案分两种，一种是端口映射（Port Forwarding），将内网主机的某个端口Open出防火墙，相当于两个外网主机通信；另一种是内网主机主动连接到外网主机，又被称作反向连接（Reverse Connection），这样NAT路由/防火墙就会在内网主机和外网主机之间建立映射，自然可以相互通信了。但是，这种映射是NAT路由自动维持的，不会持续下去，如果连接断开或者网络不稳定都会导致通信失败，这时内网主机需要再次主动连接到外网主机，建立连接。</p>
+
+<h6 id="建立隧道">建立隧道</h6>
+
+<p>有两台主机，相关信息如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>A，外网，IP：1.1.1.1，ssh端口为1111
+B，内网，ssh端口为2222
+</code></pre></div></div>
+
+<p>两台主机都需要运行 <code class="highlighter-rouge">ssh daemon</code></p>
+
+<p>在 B 主机上运行</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ ssh -NfR 3333:localhost:2222 user@1.1.1.1 -p 1111
+</code></pre></div></div>
+
+<p>这句话的意思是，将 A 主机的 3333 端口和 B 主机的 2222 端口进行绑定，相当于远程端口映射。</p>
+
+<p>在连接的过程中需要输入 A 主机用户 user 的密码，可以通过设置 ssh key 来解决（将 B 主机的 public sshkey 放到 A 主机的 <code class="highlighter-rouge">authorized_keys</code> 文件夹中），不再多说。</p>
+
+<p>这时在 A 主机上会 listen 端口 3333，你可以自己试一下。</p>
+
+<p>只要上面执行成功，之后去连接 A 主机的 3333 端口，就可以操作 B 主机了。这就是所谓的 SSH隧道</p>
+
+<h6 id="autossh">AutoSSH</h6>
+
+<p>然而上面的方式并不稳定，这就需要 autossh 出场了，这个家伙可以在断开之后重连，完美解决断开问题。</p>
+
+<h4 id="代理方案">代理方案</h4>
+
+<p>那么有了这个 SSH 隧道，怎么来做代理呢，其实理解一下就可以了，既然是隧道，也就是说，从 B 主机的数据可依传到 A 主机进行执行，那么这个方式可以作为代理的。</p>
+
+<p>在你的主机上可以执行以下命令:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>autossh -CND 0.0.0.0:9050 -p 1111 user@1.1.1.1
+</code></pre></div></div>
+
+<p>这样可以将本地的 9050 端口绑定到 A 主机上，这个就可以做代理了，可以通过下面要降到的代理方法来测试一下。</p>
+
+<h4 id="http代理">HTTP代理</h4>
+
+<p>上面这个代理方式为 socks5 类型，对于经常在控制台上活动的人来说不太方便，这就需要 privoxy 来进行转换一下。</p>
+
+<p>privoxy 是一个 HTTP 代理，但这个可以将 HTTP 的代理转换为 Socks5 的。</p>
+
+<p>安装 privoxy，<code class="highlighter-rouge">sudo apt-get install privoxy</code>，之后需要修改配置文件，<code class="highlighter-rouge">sudo vi /etc/privoxy/config</code> 添加</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>forward-socks5  /  127.0.0.1:9050   .
+</code></pre></div></div>
+
+<p>这句话就是将 HTTP(端口为8118) 的数据转换为 Socks5, 之后传给 127.0.0.1:9050 ，这时，SSH 的服务正在监听 9050 这个端口，就直接发到了 A 主机，A 主机是可以连接外网的，就实现了代理的功能。</p>
+
+<h4 id="测试-1">测试</h4>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ export http_proxy=127.0.0.1:8118
+$ curl http://www.google.com | wc -l
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                   Dload  Upload   Total   Spent    Left  Speed
+    100  7991  100  7991    0     0   858k      0 --:--:-- --:--:-- --:--:--  975k
+    226
+</code></pre></div></div>
+
+<p>数据太多就直接 wc 显示了。</p>
+
+<h4 id="服务执行">服务执行</h4>
+
+<p>上面的命令会阻塞在控制台，所以最好是做成服务的形式来提供服务，具体执行方式：</p>
+
+<p>待我弄好再写。。。TODO</p>
+
+<hr />
+
+<h3 id="代理方法"><a href="index.html#proxy">代理方法</a></h3>
+
+<p>最近我在 Chrome 里面使用的代理叫：SwitchyOmega，他可以设置多个代理，之后选择自动切换代理模式，可以处理不同的网站通过不同的代理来进行连接。</p>
+
+<hr />
+
+<h3 id="反向代理"><a href="index.html#re-proxy">反向代理</a></h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ssh -fCNR 1122:127.0.0.1:22 bs.xiaoh.me
+ssh bs.xiaoh.me
+ssh -p 1122 127.0.0.1
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../requests-advanced/index.html" data-toggle="tooltip" data-placement="top" title="Requests高级用法">
+                        Previous<br>
+                        <span>Requests高级用法</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../25/django-summary/index.html" data-toggle="tooltip" data-placement="top" title="Django Web应用架构">
+                        Next<br>
+                        <span>Django Web应用架构</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>Flask学习笔记 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2015/12/15/flask-summary/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-flask-summary.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-flask-summary.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Flask" title="Flask">Flask</a>
+                        
+                    </div>
+                    <h1>Flask学习笔记</h1>
+                    
+                    
+                    <h2 class="subheading">Flask的使用方法和代码分享</h2>
+                    
+                    <span class="meta">Posted by xiaoh on December 15, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#fastin">最快入手</a></li>
+  <li><a href="index.html#route">路由</a></li>
+  <li><a href="index.html#httphttp">HTTP方法</a></li>
+  <li><a href="index.html#static">静态文件</a></li>
+  <li><a href="index.html#requests">请求对象</a></li>
+  <li><a href="index.html#upload">文件上传</a></li>
+  <li><a href="index.html#cookiescookies">Cookies</a></li>
+  <li><a href="index.html#error">重定向和错误</a></li>
+  <li><a href="index.html#sessions">会话</a></li>
+  <li><a href="index.html#log">日志</a></li>
+</ol>
+
+<hr />
+
+<blockquote>
+  <p>本来想一起把 <code class="highlighter-rouge">flask</code> 和 <code class="highlighter-rouge">celery</code> 一起写一下的，后来看 <code class="highlighter-rouge">flask</code> 还有挺多的内容的，就先罗列一下 <code class="highlighter-rouge">flask</code> 的使用方法</p>
+</blockquote>
+
+<hr />
+
+<h3 id="最快入手"><a href="index.html#fastin">最快入手</a></h3>
+
+<p>一个最简单的 <code class="highlighter-rouge">Flask</code> 的应用：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from flask import Flask
+app = Flask(__name__)
+
+@app.route('/')
+def hello_world():
+    return 'Hello World!'
+
+if __name__ == '__main__':
+    app.run()
+</code></pre></div></div>
+
+<p>把上面的代码放到一个文件里面，我起的名字是 <code class="highlighter-rouge">main.py</code>，这个名字只要不是 <code class="highlighter-rouge">flask.py</code> 就可以，怕冲突。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python main.py
+ * Running on http://127.0.0.1:5000/
+</code></pre></div></div>
+
+<p>之后可以通过 <code class="highlighter-rouge">curl</code> 来看看这个接口</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl http://127.0.0.1:5000
+Hello World!
+</code></pre></div></div>
+
+<p>具体的就不解释了，可以看下面的博客。</p>
+
+<p>这段代码由于没有指定访问的 <code class="highlighter-rouge">IP</code>，所以只能本机访问，如果想让服务器被公开访问，需要改一下 <code class="highlighter-rouge">run()</code>：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>app.run(host='0.0.0.0')
+</code></pre></div></div>
+
+<p>如果你是在调试代码，那么打开调试模式会更好：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>app.debug = True
+app.run()
+</code></pre></div></div>
+
+<p>或者直接传递参数：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>app.run(debug=True)
+</code></pre></div></div>
+
+<p><strong>调试模式允许执行任意代码，所以绝对不能在生产环境 中使用调试器</strong></p>
+
+<p>想使用其他调试器？请参阅 <a href="https://dormousehole.readthedocs.org/en/latest/errorhandling.html#working-with-debuggers">使用调试器</a> 。</p>
+
+<hr />
+
+<h3 id="路由"><a href="index.html#route">路由</a></h3>
+
+<p>根目录，无参数，有参数，参数规则等见代码：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@app.route('/')
+def index():
+    return 'Index Page'
+
+@app.route('/hello')
+def hello():
+    return 'Hello World'
+
+@app.route('/user/&lt;username&gt;')
+def show_user_profile(username):
+    # show the user profile for that user
+    return 'User %s' % username
+
+@app.route('/post/&lt;int:post_id&gt;')
+def show_post(post_id):
+    # show the post with the given id, the id is an integer
+    return 'Post %d' % post_id
+</code></pre></div></div>
+
+<p>参数规则也叫转换器：</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>int</th>
+      <th>float</th>
+      <th>path</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>接受整数</td>
+      <td>接受浮点数</td>
+      <td>缺省设置，也接受斜杠</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Flask 的 URL 规则都是基于 Werkzeug 的路由模块的。其背后的理念是保证漂亮的 外观和唯一的 URL 。这个理念来自于 Apache 和更早期的服务器。</p>
+
+<p>假设有如下两条规则:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@app.route('/projects/')
+def projects():
+    return 'The project page'
+
+@app.route('/about')
+def about():
+    return 'The about page'
+</code></pre></div></div>
+
+<p>第一个后面有个斜杠，第二个没有，这样在访问的时候如果 <code class="highlighter-rouge">URL</code> 一样的话，相安无事。<strong>区别就是</strong>：第一个没有斜杠访问的时候会重定向过去，第二个就直接反回 <code class="highlighter-rouge">404</code></p>
+
+<p>之后提到了 <code class="highlighter-rouge">URL</code> 构建的规则，就是说，通过 <code class="highlighter-rouge">url_for()</code> 函数可以查出来一个函数的 <code class="highlighter-rouge">URL</code>，来检查用吧，具体的请参考 <a href="index.html#https://dormousehole.readthedocs.org/en/latest/quickstart.html#url">URL构建</a></p>
+
+<hr />
+
+<h3 id="http方法"><a href="index.html#http">HTTP方法</a></h3>
+
+<p>接口如果不指定访问方式，默认是 <code class="highlighter-rouge">GET</code>，具体还有多种，看下样例：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@app.route('/login', methods=['GET', 'POST', 'HEAD', 'PUT', 'DELETE', 'OPTIONS'])
+def login():
+    show_the_login_form()
+</code></pre></div></div>
+
+<p>HTTP 方法（通常也被称为“动作”）告诉服务器一个页面请求要 做 什么。以下是常见 的方法：</p>
+
+<p>GET</p>
+
+<blockquote>
+  <p>浏览器告诉服务器只要 得到 页面上的信息并发送这些信息。这可能是最常见的 方法。</p>
+</blockquote>
+
+<p>HEAD</p>
+
+<blockquote>
+  <p>浏览器告诉服务器想要得到信息，但是只要得到 信息头 就行了，页面内容不要。 一个应用应该像接受到一个 GET 请求一样运行，但是不传递实际的内容。在 Flask 中，你根本不必理会这个，下层的 Werkzeug 库会为你处理好。</p>
+</blockquote>
+
+<p>POST</p>
+
+<blockquote>
+  <p>浏览器告诉服务器想要向 URL 发表 一些新的信息，服务器必须确保数据被保存好 且只保存了一次。 HTML 表单实际上就是使用这个访求向服务器传送数据的。</p>
+</blockquote>
+
+<p>PUT</p>
+
+<blockquote>
+  <p>与 POST 方法类似，不同的是服务器可能触发多次储存过程而把旧的值覆盖掉。你 可能会问这样做有什么用？这样做是有原因的。假设在传输过程中连接丢失的情况 下，一个处于浏览器和服务器之间的系统可以在不中断的情况下安全地接收第二次 请求。在这种情况下，使用 POST 方法就无法做到了，因为它只被触发一次。</p>
+</blockquote>
+
+<p>DELETE</p>
+
+<blockquote>
+  <p>删除给定位置的信息。</p>
+</blockquote>
+
+<p>OPTIONS</p>
+
+<blockquote>
+  <p>为客户端提供一个查询 URL 支持哪些方法的捷径。从 Flask 0.6 开始，自动为你 实现了这个方法。</p>
+</blockquote>
+
+<hr />
+
+<h3 id="静态文件"><a href="index.html#static">静态文件</a></h3>
+
+<p><code class="highlighter-rouge">Flask</code> 提供了对页面访问的支持，不过我觉得这些我很喜欢用 <code class="highlighter-rouge">Nginx</code>，所以就不多说了，可以去看 <a href="index.html#https://dormousehole.readthedocs.org/en/latest/quickstart.html#id6">官方文档</a></p>
+
+<hr />
+
+<h3 id="请求对象"><a href="index.html#requests">请求对象</a></h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from flask import request
+</code></pre></div></div>
+
+<p>通过使用 method 属性可以操作当前请求方法，通过使用 form 属性处理表单数据。以下是使用两个属性的例子:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>@app.route('/login', methods=['POST', 'GET'])
+def login():
+    error = None
+    if request.method == 'POST':
+        if valid_login(request.form['username'],
+                       request.form['password']):
+            return log_the_user_in(request.form['username'])
+        else:
+            error = 'Invalid username/password'
+    # 如果请求访求是 GET 或验证未通过就会执行下面的代码
+    return render_template('login.html', error=error)
+</code></pre></div></div>
+
+<p>当 form 属性中不存在这个键时会发生什么？会引发一个 KeyError 。如果你不 像捕捉一个标准错误一样捕捉 KeyError ，那么会显示一个 HTTP 400 Bad Request 错误页面。因此，多数情况下你不必处理这个问题。</p>
+
+<p>要操作 URL （如 ?key=value ）中提交的参数可以使用 args 属性:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>searchword = request.args.get('key', '')
+</code></pre></div></div>
+
+<p>用户可能会改变 URL 导致出现一个 400 请求出错页面，这样降低了用户友好度。因此， 我们推荐使用 get 或通过捕捉 KeyError 来访问 URL 参数。</p>
+
+<p>完整的请求对象方法和属性参见 <a href="index.html#https://dormousehole.readthedocs.org/en/latest/api.html#flask.request">request</a> 文档</p>
+
+<hr />
+
+<h3 id="文件上传"><a href="index.html#upload">文件上传</a></h3>
+
+<p>通过 <code class="highlighter-rouge">Flask</code> 来处理文件上传的请求，需要在 <code class="highlighter-rouge">HTML</code> 表单里面设置 <code class="highlighter-rouge">enctype="multipart/form-data"</code></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from flask import request
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        f = request.files['the_file']
+        f.save('/var/www/uploads/uploaded_file.txt') 如果想要知道文件上传之前其在客户端系统中的名称，可以使用 filename 属性。但是请牢记这个值是 可以伪造的，永远不要信任这个值。如果想要把客户端的文件名作为服务器上的文件名， 可以通过 Werkzeug 提供的 secure_filename() 函数:
+
+from flask import request
+from werkzeug import secure_filename
+
+@app.route('/upload', methods=['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        f = request.files['the_file']
+        f.save('/var/www/uploads/' + secure_filename(f.filename))
+</code></pre></div></div>
+
+<p>更好的例子参见 <a href="index.html#https://dormousehole.readthedocs.org/en/latest/patterns/fileuploads.html#uploading-files">上传文件</a> 方案。</p>
+
+<hr />
+
+<h3 id="cookies"><a href="index.html#cookies">Cookies</a></h3>
+
+<p>能用 <code class="highlighter-rouge">Sessions</code> 不要用 <code class="highlighter-rouge">Cookies</code></p>
+
+<p>读取 <code class="highlighter-rouge">Cookies</code>：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from flask import request
+
+@app.route('/')
+def index():
+    username = request.cookies.get('username')
+    # 使用 cookies.get(key) 来代替 cookies[key] ，
+    # 以避免当 cookie 不存在时引发 KeyError 。
+</code></pre></div></div>
+
+<p>储存 cookies:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from flask import make_response
+
+@app.route('/')
+def index():
+    resp = make_response(render_template(...))
+    resp.set_cookie('username', 'the username')
+    return resp
+</code></pre></div></div>
+
+<p>注意， cookies 设置在响应对象上。通常只是从视图函数返回字符串， Flask 会把它们 转换为响应对象。如果你想显式地转换，那么可以使用 make_response() 函数，然后再修改它。</p>
+
+<hr />
+
+<h3 id="重定向和错误"><a href="index.html#error">重定向和错误</a></h3>
+
+<p>使用 <code class="highlighter-rouge">redirect()</code> 函数可以重定向。使用 <code class="highlighter-rouge">abort()</code> 可以更早 退出请求，并返回错误代码:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from flask import abort, redirect, url_for
+
+@app.route('/')
+def index():
+    return redirect(url_for('login'))
+
+@app.route('/login')
+def login():
+    abort(401)
+    this_is_never_executed()
+</code></pre></div></div>
+
+<p>缺省情况下每种出错代码都会对应显示一个黑白的出错页面。使用 errorhandler() 装饰器可以定制出错页面:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from flask import render_template
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 404
+</code></pre></div></div>
+
+<p>注意 render_template() 后面的 404 ，这表示页面对就的出错代码是 404 ，即页面不存在。缺省情况下 200 表示一切正常。</p>
+
+<p>更多关于错误信息反馈的信息，请查看 <a href="index.html#https://dormousehole.readthedocs.org/en/latest/quickstart.html#about-responses">关于响应</a></p>
+
+<hr />
+
+<h3 id="会话"><a href="index.html#sessions">会话</a></h3>
+
+<p>除了请求对象之外还有一种称为 session 的对象，允许你在不同请求 之间储存信息。这个对象相当于用密钥签名加密的 cookie ，即用户可以查看你的 cookie ，但是如果没有密钥就无法修改它。</p>
+
+<p>使用会话之前你必须设置一个密钥。举例说明:使用会话之前你必须设置一个密钥。举例说明:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from flask import Flask, session, redirect, url_for, escape, request
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    if 'username' in session:
+        return 'Logged in as %s' % escape(session['username'])
+    return 'You are not logged in'
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        session['username'] = request.form['username']
+        return redirect(url_for('index'))
+    return '''
+        &lt;form action="" method="post"&gt;
+            &lt;p&gt;&lt;input type=text name=username&gt;
+            &lt;p&gt;&lt;input type=submit value=Login&gt;
+        &lt;/form&gt;
+    '''
+
+@app.route('/logout')
+def logout():
+    # 如果会话中有用户名就删除它。
+    session.pop('username', None)
+    return redirect(url_for('index'))
+
+# 设置密钥，复杂一点：
+app.secret_key = 'A0Zr98j/3yX R~XHH!jmN]LWX/,?RT'
+</code></pre></div></div>
+
+<p>这里用到的 escape() 是用来转义的。如果不使用模板引擎就可以像上例 一样使用这个函数来转义。</p>
+
+<p>密钥的生成方法：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&gt;&gt;&gt; import os
+&gt;&gt;&gt; os.urandom(24)
+</code></pre></div></div>
+
+<p>基于 cookie 的会话的说明： Flask 会把会话对象中的值储存在 cookie 中。在打开 cookie 的情况下，如果你访问会话对象中没有的值，那么会得到模糊的错误信息：请检查 页面 cookie 的大小是否与网络浏览器所支持的大小一致。</p>
+
+<hr />
+
+<h3 id="日志"><a href="index.html#log">日志</a></h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>app.logger.debug('A value for debugging')
+app.logger.warning('A warning occurred (%d apples)', 42)
+app.logger.error('An error occurred')
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../docker-summary/index.html" data-toggle="tooltip" data-placement="top" title="Docker简介">
+                        Previous<br>
+                        <span>Docker简介</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../16/python-config/index.html" data-toggle="tooltip" data-placement="top" title="Python读取Config配置文件">
+                        Next<br>
+                        <span>Python读取Config配置文件</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

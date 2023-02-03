@@ -1,0 +1,31 @@
+---
+layout:     post
+title:      "常见问题汇总"
+subtitle:   "开发过程中遇到的小问题"
+date:       2016-01-30 10:59:33
+author:     "xiaoh"
+header-img: "img/post-bg-default.jpg"
+tags:
+    - Bugs
+---
+
+### 目录
+
+0. [Pypi register auth failed](#pypi-register-auth-failedpypiauthfailed)
+
+---
+
+> 平时工作中遇到过不少问题，有的顺手就解决了，有的得去google一下，更不爽的是，以前貌似遇到过的问题，还总是可以遇到，这篇文章就是将遇到的问题，顺手写到这里，以便查阅
+
+---
+
+### [Pypi register auth failed](#pypiauthfailed)
+
+
+昨天写了一个Python Module，结果在注册的时候出现了 Auth failed, 原因是我以前注册过别的模块，之后记住了账号密码，而这几天我登陆pypi官网的时候又更新了密码，所以以前记得账号就错了。
+
+解决方法很简单，记住账号的信息卸载了 $HOME/.pypirc 里面，你打开直接修改账号密码即可（这里面是明文记住的）
+
+---
+
+

@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>将Flume做成Service - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/01/28/flume-service/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Flume" title="Flume">Flume</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#Supervisor" title="Supervisor">Supervisor</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#服务器" title="服务器">服务器</a>
+                        
+                    </div>
+                    <h1>将Flume做成Service</h1>
+                    
+                    
+                    <h2 class="subheading">源码分享--Supervisor服务形式启动Flume做Web服务</h2>
+                    
+                    <span class="meta">Posted by xiaoh on January 28, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>这篇文章主要解决了，将FLume做成服务的形式，通过RestAPI来创建服务，监听不同的端口，来接受网络的数据。
+需要解决的一点是，不同的服务（不同的数据表）需要启动不同的端口，而这端口不能公开出来，也就是说需要和表名称做一个映射
+需要有用户权限检测，需要获取服务的状态</p>
+</blockquote>
+
+<hr />
+
+<h5 id="简单分析一下">简单分析一下</h5>
+
+<ol>
+  <li>RestAPI 我打算用Python来做</li>
+  <li>不同的端口，需要检测端口是否被占用，并且，需要指定可用端口空间</li>
+  <li>端口不能公开，需要动态的通过表名称来获取端口，这就需要一个缓存的地方，这里用到Redis</li>
+  <li>用户检测，这部分需要用户传递TOKEN来进行验证，而TOKEN必须可变，所以不能将其写死，这就需要用到Nginx+Lua，所以这里用到了OpenResty</li>
+  <li>获取服务状态，就是可以监控Flume的运行，所以我用到了Supervisor</li>
+</ol>
+
+<hr />
+
+<h5 id="supervisor配置">Supervisor配置</h5>
+
+<p>这整个设计感觉亮点最重要，Supervisor和OpenResty，首先看一下我Supervisor的配置</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># modify [program:flume-flask-service].directory
+# modify [include].files
+
+[unix_http_server]
+file=/tmp/flume_services_supervisor.sock          ; path to your socket file
+
+[supervisord]
+logfile=%(here)s/supervisord.log                ; supervisord log file
+logfile_maxbytes=100MB                          ; maximum size of logfile before rotation
+logfile_backups=10                              ; number of backed up logfiles
+loglevel=debug                                  ; info, debug, warn, trace
+pidfile=%(here)s/supervisord.pid                ; pidfile location
+nodaemon=false                                  ; run supervisord as a daemon
+minfds=1024                                     ; number of startup file descriptors
+minprocs=200                                    ; number of process descriptors
+user=root                                       ; default user
+childlogdir=%(here)s                            ; where child log files will live
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+[supervisorctl]
+serverurl=unix:///tmp/flume_services_supervisor.sock  ; use a unix:// URL  for a unix socket
+
+[program:flume-flask-service]
+command=python flumeAPI.py
+directory=/path/to/service
+user = centos
+autorestart = true
+startsecs = 3
+stderr_logfile=/tmp/flume-flask-service.err
+stdout_logfile=/tmp/flume-flask-service.out
+
+[include]
+#files=%(here)s/conf.d/*.conf                  ; not work
+files=/path/to/service/conf.d/*.conf
+</code></pre></div></div>
+
+<p>关键是最后一行的设置，制定了所有的配置文件的目录，这样每次执行 <code class="highlighter-rouge">supervisor reload</code> 和 <code class="highlighter-rouge">supervisor update</code> 即可重新加载最新的配置。</p>
+
+<p>启动supervisor：<code class="highlighter-rouge">supervisor -c /path/to/conf/supervisor.conf</code></p>
+
+<hr />
+
+<h5 id="openresty">OpenResty</h5>
+
+<p>这一部分就不多说了，其中用到的内容都在我另一篇博客里面有写，传送门：<a href="http://www.xiaoh.me/2016/01/05/nginx-lua-redis/">高并发服务器构建方案</a></p>
+
+<hr />
+
+<h5 id="flume-service">Flume Service</h5>
+
+<p>之后就是将启动Flume的功能携程RestAPI了，这部分直接分享源码：</p>
+
+<p>具体见源码</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/home/xingming/pyvirt/bin/python</span>
+<span class="c">#-*- coding:utf-8 -*-</span>
+
+<span class="c">#############################################</span>
+<span class="c"># File Name: flumeAPI.py</span>
+<span class="c"># Author: xiaoh</span>
+<span class="c"># Mail: xiaoh@about.me·</span>
+<span class="c"># Created Time:  2016-01-20 16:50:20</span>
+<span class="c">#############################################</span>
+
+<span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">jsonify</span>
+<span class="kn">from</span> <span class="nn">flumeHelper</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">cmd</span> <span class="o">=</span> <span class="s">"python -c 'from flumeHelper import {function}; {function}(</span><span class="se">\"</span><span class="s">{db}</span><span class="se">\"</span><span class="s">,</span><span class="se">\"</span><span class="s">{table}</span><span class="se">\"</span><span class="s">);'"</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">'/v1/api/&lt;dbname&gt;/&lt;tablename&gt;/create'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="n">dbname</span><span class="p">,</span> <span class="n">tablename</span><span class="p">):</span>
+    <span class="k">print</span> <span class="s">'create api running now.'</span>
+
+    <span class="n">out</span> <span class="o">=</span> <span class="n">runCmd</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s">'start'</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">dbname</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">tablename</span><span class="p">))</span>
+    <span class="k">print</span> <span class="n">out</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">formatOutput</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">status</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">'/v1/api/&lt;dbname&gt;/&lt;tablename&gt;/start'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">dbname</span><span class="p">,</span> <span class="n">tablename</span><span class="p">):</span>
+    <span class="k">print</span> <span class="s">'start api running now.'</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">runCmd</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s">'start'</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">dbname</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">tablename</span><span class="p">))</span>
+    <span class="k">print</span> <span class="n">out</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">formatOutput</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">status</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">'/v1/api/&lt;dbname&gt;/&lt;tablename&gt;/stop'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">dbname</span><span class="p">,</span> <span class="n">tablename</span><span class="p">):</span>
+    <span class="k">print</span> <span class="s">'stop api running now.'</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">runCmd</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s">'stop'</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">dbname</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">tablename</span><span class="p">))</span>
+    <span class="k">print</span> <span class="n">out</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">formatOutput</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">status</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">'/v1/api/&lt;dbname&gt;/&lt;tablename&gt;/restart'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="n">dbname</span><span class="p">,</span> <span class="n">tablename</span><span class="p">):</span>
+    <span class="k">print</span> <span class="s">'restart api running now.'</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">runCmd</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s">'restart'</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">dbname</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">tablename</span><span class="p">))</span>
+    <span class="k">print</span> <span class="n">out</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">formatOutput</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">status</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">'/v1/api/&lt;dbname&gt;/&lt;tablename&gt;/status'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="n">dbname</span><span class="p">,</span> <span class="n">tablename</span><span class="p">):</span>
+    <span class="k">print</span> <span class="s">'status api running now.'</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">runCmd</span><span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">function</span><span class="o">=</span><span class="s">'status'</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">dbname</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="n">tablename</span><span class="p">))</span>
+    <span class="k">print</span> <span class="n">out</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">formatOutput</span><span class="p">(</span><span class="n">out</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">status</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s">'/v1/api/token'</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s">'POST'</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">token</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">:</span>
+        <span class="k">print</span> <span class="s">'not json'</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">(</span><span class="s">'no json format'</span><span class="p">,</span> <span class="mi">10001</span><span class="p">)</span>
+    <span class="n">username</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">'username'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">token</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">'token'</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="k">print</span> <span class="n">username</span><span class="p">,</span> <span class="n">token</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">username</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">status</span><span class="p">(</span><span class="s">'Please provide a username and token'</span><span class="p">,</span> <span class="mi">10002</span><span class="p">)</span>
+    <span class="n">redis_set</span><span class="p">(</span><span class="n">username</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">status</span><span class="p">(</span><span class="s">'set token done.'</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">jsonify</span><span class="p">({</span><span class="s">'message'</span><span class="p">:</span><span class="n">msg</span><span class="p">,</span> <span class="s">'code'</span><span class="p">:</span><span class="n">code</span><span class="p">})</span>
+
+<span class="k">def</span> <span class="nf">formatOutput</span><span class="p">(</span><span class="n">out</span><span class="p">):</span>
+    <span class="n">sl</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">'</span><span class="se">\n</span><span class="s">'</span><span class="p">)</span>
+    <span class="n">state</span> <span class="o">=</span> <span class="n">sl</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">state</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s">"</span><span class="si">%</span><span class="s">s:</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">state</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="s">"</span><span class="si">%</span><span class="s">s:</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s">'Exception'</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">getToken</span><span class="p">():</span>
+    <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">'http://hosttoservice/api/ehc/gettoken'</span><span class="p">)</span>
+    <span class="k">pass</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="p">:</span>
+    <span class="n">app</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">'0.0.0.0'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8001</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>以上就是所有公开出来的RestAPI，用Flask编写，Flask这个鬼真的适合小规模的服务器搭建哦。</p>
+
+<p>下面是用到的关于Supervisor操作Flume的函数，觉得这里才是关键好么。。。。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/home/xingming/pyvirt/bin/python</span>
+<span class="c">#-*- coding:utf-8 -*-</span>
+
+<span class="c">#############################################</span>
+<span class="c"># File Name: flumeHelper.py</span>
+<span class="c"># Author: xiaoh</span>
+<span class="c"># Mail: xiaoh@about.me·</span>
+<span class="c"># Created Time:  2016-01-20 16:30:58</span>
+<span class="c">#############################################</span>
+
+<span class="kn">import</span> <span class="nn">redis</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">os</span><span class="p">,</span> <span class="n">errno</span>
+<span class="kn">import</span> <span class="nn">ConfigParser</span>
+<span class="kn">from</span> <span class="nn">supervisor.supervisorctl</span> <span class="kn">import</span> <span class="n">main</span> <span class="k">as</span> <span class="n">supervisor_ctl_main</span>
+
+<span class="n">rd</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">Redis</span><span class="p">()</span>
+<span class="n">flumePorts</span> <span class="o">=</span> <span class="s">'FLUME_PORTS'</span>
+
+<span class="n">serviceRoot</span> <span class="o">=</span> <span class="s">'/path/to/service/'</span>
+<span class="n">superConfFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">serviceRoot</span><span class="p">,</span> <span class="s">"supervisor.conf"</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_update_conf</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">):</span>
+    <span class="n">serviceName</span> <span class="o">=</span> <span class="s">"</span><span class="si">%</span><span class="s">s_</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">)</span>
+    <span class="c">########################</span>
+    <span class="c"># generate flume.conf</span>
+    <span class="c">########################</span>
+    <span class="n">rootDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">serviceRoot</span><span class="p">,</span> <span class="s">'services'</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">)</span>
+    <span class="n">varDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">serviceRoot</span><span class="p">,</span> <span class="s">'var'</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">)</span>
+    <span class="n">_mkdir_p</span><span class="p">(</span><span class="n">rootDir</span><span class="p">)</span>
+    <span class="n">_mkdir_p</span><span class="p">(</span><span class="n">varDir</span><span class="p">)</span>
+    <span class="n">flumeConf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootDir</span><span class="p">,</span> <span class="s">"flume.conf"</span><span class="p">)</span>
+    <span class="n">checkpointDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">varDir</span><span class="p">,</span> <span class="s">'file-channel'</span><span class="p">,</span> <span class="s">'checkpoint'</span><span class="p">)</span>
+    <span class="n">dataDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">varDir</span><span class="p">,</span> <span class="s">'file-channel'</span><span class="p">,</span> <span class="s">'data'</span><span class="p">)</span>
+    <span class="n">newPort</span> <span class="o">=</span> <span class="n">_get_new_port</span><span class="p">()</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">flumeConf</span><span class="p">,</span> <span class="s">'w'</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">flumeTemplate</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">localPort</span><span class="o">=</span><span class="n">newPort</span><span class="p">,</span> <span class="n">dbName</span><span class="o">=</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="o">=</span><span class="n">tableName</span><span class="p">,</span> <span class="n">checkpointDir</span><span class="o">=</span><span class="n">checkpointDir</span><span class="p">,</span> <span class="n">dataDir</span><span class="o">=</span><span class="n">dataDir</span><span class="p">))</span>
+
+    <span class="c">##############################</span>
+    <span class="c"># generate supervisor handler</span>
+    <span class="c">##############################</span>
+    <span class="n">superConfDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">serviceRoot</span><span class="p">,</span> <span class="s">'conf.d'</span><span class="p">)</span>
+    <span class="n">flumeCmd</span> <span class="o">=</span> <span class="s">"flume-ng agent --conf {confPath} --conf-file {confFile} --name a1 -Dflume.root.logger=INFO,console -Djava.net.preferIPv4Stack=true"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">confPath</span><span class="o">=</span><span class="n">rootDir</span><span class="p">,</span> <span class="n">confFile</span><span class="o">=</span><span class="n">flumeConf</span><span class="p">)</span>
+    <span class="n">superConf</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">"command"</span> <span class="p">:</span> <span class="n">flumeCmd</span><span class="p">,</span>
+        <span class="s">"process_name"</span> <span class="p">:</span> <span class="n">serviceName</span><span class="p">,</span>
+        <span class="s">"directory"</span> <span class="p">:</span> <span class="n">rootDir</span><span class="p">,</span>
+        <span class="s">"stdout_logfile"</span> <span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootDir</span><span class="p">,</span> <span class="s">"stdout_log"</span><span class="p">),</span>
+        <span class="s">"stderr_logfile"</span> <span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rootDir</span><span class="p">,</span> <span class="s">"stderr_log"</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">config</span> <span class="o">=</span> <span class="n">ConfigParser</span><span class="o">.</span><span class="n">RawConfigParser</span><span class="p">()</span>
+    <span class="n">sectionName</span> <span class="o">=</span> <span class="s">"program:"</span><span class="o">+</span><span class="n">serviceName</span>
+    <span class="n">config</span><span class="o">.</span><span class="n">add_section</span><span class="p">(</span><span class="n">sectionName</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">superConf</span><span class="p">:</span>
+        <span class="n">config</span><span class="o">.</span><span class="nb">set</span><span class="p">(</span><span class="n">sectionName</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">superConf</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+    <span class="n">superConfPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">superConfDir</span><span class="p">,</span> <span class="n">serviceName</span> <span class="o">+</span> <span class="s">".conf"</span><span class="p">)</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">superConfPath</span><span class="p">,</span> <span class="s">"wb"</span><span class="p">)</span> <span class="k">as</span> <span class="n">configfile</span><span class="p">:</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">configfile</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">newPort</span>
+
+<span class="k">def</span> <span class="nf">restart</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">):</span>
+    <span class="n">stop</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">)</span>
+    <span class="n">start</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">):</span>
+    <span class="n">serviceName</span> <span class="o">=</span> <span class="s">"</span><span class="si">%</span><span class="s">s_</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">)</span>
+    <span class="n">newPort</span> <span class="o">=</span> <span class="n">_update_conf</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">"Executing : supervisorctl reread '</span><span class="si">%</span><span class="s">s' ..."</span> <span class="o">%</span> <span class="n">serviceName</span>
+    <span class="n">supervisor_ctl_main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s">"-c"</span><span class="p">,</span> <span class="n">superConfFile</span><span class="p">,</span> <span class="s">"reread"</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">])</span>
+    <span class="k">print</span> <span class="s">"Executing : supervisorctl update '</span><span class="si">%</span><span class="s">s' ..."</span> <span class="o">%</span> <span class="n">serviceName</span>
+    <span class="n">supervisor_ctl_main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s">"-c"</span><span class="p">,</span> <span class="n">superConfFile</span><span class="p">,</span> <span class="s">"update"</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">])</span>
+    <span class="k">print</span> <span class="s">"Executing : supervisorctl start '</span><span class="si">%</span><span class="s">s' ..."</span> <span class="o">%</span> <span class="n">serviceName</span>
+    <span class="n">supervisor_ctl_main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s">"-c"</span><span class="p">,</span> <span class="n">superConfFile</span><span class="p">,</span> <span class="s">"start"</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">])</span>
+    <span class="k">print</span> <span class="s">"Executing : supervisorctl status '</span><span class="si">%</span><span class="s">s' ..."</span> <span class="o">%</span> <span class="n">serviceName</span>
+    <span class="n">supervisor_ctl_main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s">"-c"</span><span class="p">,</span> <span class="n">superConfFile</span><span class="p">,</span> <span class="s">"status"</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">])</span>
+    <span class="n">redis_set</span><span class="p">(</span><span class="n">serviceName</span><span class="p">,</span> <span class="n">newPort</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">stop</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">):</span>
+    <span class="n">serviceName</span> <span class="o">=</span> <span class="s">"</span><span class="si">%</span><span class="s">s_</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">)</span>
+    <span class="n">_redis_del_port</span><span class="p">(</span><span class="n">serviceName</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">"Executing : supervisorctl stop '</span><span class="si">%</span><span class="s">s' ..."</span> <span class="o">%</span> <span class="n">serviceName</span>
+    <span class="n">supervisor_ctl_main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s">"-c"</span><span class="p">,</span> <span class="n">superConfFile</span><span class="p">,</span> <span class="s">"stop"</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">])</span>
+    <span class="k">print</span> <span class="s">"Executing : supervisorctl status '</span><span class="si">%</span><span class="s">s' ..."</span> <span class="o">%</span> <span class="n">serviceName</span>
+    <span class="n">supervisor_ctl_main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s">"-c"</span><span class="p">,</span> <span class="n">superConfFile</span><span class="p">,</span> <span class="s">"status"</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">])</span>
+
+    <span class="n">_clear_files</span><span class="p">(</span><span class="n">serviceName</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">status</span><span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">):</span>
+    <span class="n">serviceName</span> <span class="o">=</span> <span class="s">"</span><span class="si">%</span><span class="s">s_</span><span class="si">%</span><span class="s">s"</span> <span class="o">%</span> <span class="p">(</span><span class="n">dbName</span><span class="p">,</span> <span class="n">tableName</span><span class="p">)</span>
+
+    <span class="k">print</span> <span class="s">"Executing : supervisorctl status '</span><span class="si">%</span><span class="s">s' ..."</span> <span class="o">%</span> <span class="n">serviceName</span>
+    <span class="n">supervisor_ctl_main</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="s">"-c"</span><span class="p">,</span> <span class="n">superConfFile</span><span class="p">,</span> <span class="s">"status"</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">])</span>
+
+<span class="k">def</span> <span class="nf">_clear_files</span><span class="p">(</span><span class="n">serviceName</span><span class="p">):</span>
+    <span class="n">rootDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">serviceRoot</span><span class="p">,</span> <span class="s">'services'</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">)</span>
+    <span class="n">varDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">serviceRoot</span><span class="p">,</span> <span class="s">'var'</span><span class="p">,</span> <span class="n">serviceName</span><span class="p">)</span>
+    <span class="n">superConf</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">serviceRoot</span><span class="p">,</span> <span class="s">'conf.d'</span><span class="p">,</span> <span class="n">serviceName</span> <span class="o">+</span> <span class="s">'.conf'</span><span class="p">)</span>
+    <span class="n">runCmd</span><span class="p">(</span><span class="s">'rm -rf </span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">rootDir</span><span class="p">)</span>
+    <span class="n">runCmd</span><span class="p">(</span><span class="s">'rm -rf </span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">varDir</span><span class="p">)</span>
+    <span class="n">runCmd</span><span class="p">(</span><span class="s">'rm -rf </span><span class="si">%</span><span class="s">s'</span> <span class="o">%</span> <span class="n">superConf</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">runCmd</span><span class="p">(</span><span class="n">cmd</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">_get_new_port</span><span class="p">(</span><span class="n">startPort</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">endPort</span><span class="o">=</span><span class="mi">60000</span><span class="p">):</span>
+    <span class="n">usedPorts</span> <span class="o">=</span> <span class="n">_redis_list_ports</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">port</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">startPort</span><span class="p">,</span> <span class="n">endPort</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="ow">in</span> <span class="n">usedPorts</span> <span class="ow">or</span> <span class="n">port_is_openning</span><span class="p">(</span><span class="n">port</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">return</span> <span class="n">port</span>
+    <span class="k">raise</span> <span class="nb">Exception</span><span class="p">(</span><span class="s">'PortOver'</span><span class="p">,</span> <span class="s">'all port used'</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">redis_set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">token</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span><span class="p">:</span>
+        <span class="n">rd</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">flumePorts</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+    <span class="n">rd</span><span class="o">.</span><span class="nb">set</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_redis_get_port</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">rd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_redis_del_port</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">_redis_get_port</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">rd</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">rd</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">flumePorts</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_redis_list_ports</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">rd</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">flumePorts</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">port_is_openning</span><span class="p">(</span><span class="n">port</span><span class="p">):</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">runCmd</span><span class="p">(</span><span class="s">'netstat -an | grep </span><span class="si">%</span><span class="s">s | wc -l'</span> <span class="o">%</span> <span class="n">port</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">print</span> <span class="s">'Port:</span><span class="si">%</span><span class="s">s is Listen: (</span><span class="si">%</span><span class="s">s)'</span> <span class="o">%</span> <span class="p">(</span><span class="n">port</span><span class="p">,</span> <span class="n">line</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">line</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">_mkdir_p</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="nb">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span> <span class="c"># Python &gt;2.5</span>
+        <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span><span class="err">·</span>
+            <span class="k">raise</span>
+
+<span class="n">flumeTemplate</span> <span class="o">=</span> <span class="s">"""
+# Web ------&gt; Logger
+
+# Name the components on this agent
+a1.sources = r1
+a1.sinks = k1
+a1.channels = c1
+
+# Describe/configure the source
+a1.sources.r1.type = http
+a1.sources.r1.port = {localPort}
+a1.sources.r1.interceptors = i1
+a1.sources.r1.interceptors.i1.type = timestamp
+
+#######################
+# Sink : HDFS
+#######################
+a1.sinks.k1.type = hdfs
+a1.sinks.k1.hdfs.path = /ingestion/{dbName}/{tableName}/</span><span class="si">%</span><span class="s">Y-</span><span class="si">%</span><span class="s">m-</span><span class="si">%</span><span class="s">d/</span><span class="si">%</span><span class="s">H
+a1.sinks.k1.hdfs.filePrefix = ing
+a1.sinks.k1.hdfs.round = true
+a1.sinks.k1.hdfs.roundValue = 10
+a1.sinks.k1.hdfs.roundUnit = minute
+
+a1.sinks.k1.hdfs.rollInterval = 60
+a1.sinks.k1.hdfs.rollCount = 8192
+a1.sinks.k1.hdfs.idleTimeout = 60
+a1.sinks.k1.hdfs.writeFormat = Text
+a1.sinks.k1.hdfs.fileType = DataStream
+a1.sinks.k1.hdfs.fileSuffix = .json
+a1.sinks.k1.hdfs.rollSize = 1024000
+
+
+#######################
+# Channel
+#######################
+a1.channels.c1.capacity = 10000000
+a1.channels.c1.transactionCapacity = 100000
+a1.channels.c1.type = file
+a1.channels.c1.checkpointDir = {checkpointDir}
+a1.channels.c1.dataDirs = {dataDir}
+
+# Bind the source and sink to the channel
+a1.sources.r1.channels = c1
+a1.sinks.k1.channel = c1
+"""</span>
+</code></pre></div></div>
+
+<hr />
+
+<p>上面所有组件配合起来就完成了需求。具体不多说了，代码说明一切的节奏。</p>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../27/flask-restful/index.html" data-toggle="tooltip" data-placement="top" title="Flask-Restful 快速入门">
+                        Previous<br>
+                        <span>Flask-Restful 快速入门</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../29/awk-summary/index.html" data-toggle="tooltip" data-placement="top" title="快速了解AWK">
+                        Next<br>
+                        <span>快速了解AWK</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

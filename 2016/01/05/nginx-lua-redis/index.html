@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>高并发服务器构建方案 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/01/05/nginx-lua-redis/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-nginx-lua-redis.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-nginx-lua-redis.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#服务器" title="服务器">服务器</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#Nginx" title="Nginx">Nginx</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#Redis" title="Redis">Redis</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#Lua" title="Lua">Lua</a>
+                        
+                    </div>
+                    <h1>高并发服务器构建方案</h1>
+                    
+                    
+                    <h2 class="subheading">Nginx+Lua+Redis(OpenResty)配合使用</h2>
+                    
+                    <span class="meta">Posted by xiaoh on January 5, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>项目里面需要限制访问，之后采用 <code class="highlighter-rouge">token</code> 的方式来访问，这就需要验证这个 <code class="highlighter-rouge">token</code> 是否合法，之后有个想法就是在 <code class="highlighter-rouge">nginx</code> 里面就做一次 <code class="highlighter-rouge">token</code> 的判断，后来这个想法觉得也不是很靠谱，因为有的时候我们需要将所有的访问都打日志，所以一直就放下去了。
+最近有时间，就研究了一下。</p>
+</blockquote>
+
+<hr />
+
+<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#openrestyinstall">OpenResty安装</a></li>
+  <li><a href="index.html#using">使用</a></li>
+  <li><a href="index.html#testing">测试</a></li>
+  <li><a href="index.html#request">我的需求</a></li>
+</ol>
+
+<hr />
+
+<p>最近在找能够让三者可以在一起工作的方式，网上也有很多的解决方案，大致分为两种：</p>
+
+<ul>
+  <li>每个模块分别安装，这样需要在安装 <code class="highlighter-rouge">nginx</code> 的时候将所有的 <code class="highlighter-rouge">lua</code> 模块，<code class="highlighter-rouge">redis</code> 模块都编译进去，这样就是比较麻烦</li>
+  <li>有个简单的方法，就是用大神的 <a href="http://openresty.org/">OpenResty</a> 这个模块有详细的文档，他里面包含了需要的 <code class="highlighter-rouge">nginx</code> <code class="highlighter-rouge">lua</code> <code class="highlighter-rouge">redis</code> 模块，我们可以直接安装这个来使用</li>
+</ul>
+
+<h3 id="openresty安装"><a href="index.html#install">OpenResty安装</a></h3>
+
+<p>具体的安装方法，在 <a href="http://openresty.org/">OpenResty</a> 有详细的说明，首先我们需要下载源码，你可以在 <code class="highlighter-rouge">OpenResty</code> 的官方页面去选择一个版本，之后解压，安装即可。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ apt-get install libreadline-dev libncurses5-dev libpcre3-dev libssl-dev perl make build-essential
+$ wget https://openresty.org/download/ngx_openresty-1.9.7.1.tar.gz
+$ tar xvf ngx_openresty-1.9.7.1.tar.gz
+$ cd ngx_openresty-1.9.7.1
+$ ./configure
+$ make
+$ make install
+</code></pre></div></div>
+
+<p>安装之后，会在 <code class="highlighter-rouge">/usr/local/openresty</code> 下面生成相关的文件，下面会有一个 <code class="highlighter-rouge">/usr/local/openresty/nginx/sbin/nginx</code>，我们可以使用这个来做代理。</p>
+
+<p>先设置一下环境变量 <code class="highlighter-rouge">export PATH=/usr/local/openresty/nginx/sbin:$PATH</code>，之后就可以使用了</p>
+
+<hr />
+
+<h3 id="使用"><a href="index.html#using">使用</a></h3>
+
+<p>先查看一下使用方法 <code class="highlighter-rouge">nginx -h</code></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ nginx -h
+nginx version: openresty/1.9.7.1
+Usage: nginx [-?hvVtTq] [-s signal] [-c filename] [-p prefix] [-g directives]
+
+Options:
+  -?,-h         : this help
+  -v            : show version and exit
+  -V            : show version and configure options then exit
+  -t            : test configuration and exit
+  -T            : test configuration, dump it and exit
+  -q            : suppress non-error messages during configuration testing
+  -s signal     : send signal to a master process: stop, quit, reopen, reload
+  -p prefix     : set prefix path (default: /usr/local/openresty/nginx/)
+  -c filename   : set configuration file (default: conf/nginx.conf)
+  -g directives : set global directives out of configuration file
+</code></pre></div></div>
+
+<p>之后选择一个运行 <code class="highlighter-rouge">nginx</code> 的位置，因为启动之后会生成好多临时文件夹：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mkdir work
+$ cd work
+$ mkdir logs conf
+</code></pre></div></div>
+
+<p>写一个配置文件，因为用的其实是 <code class="highlighter-rouge">nginx</code>，所以配置文件和 <code class="highlighter-rouge">nginx</code> 的其实是一样的。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat conf/nginx.conf
+worker_processes  1;
+error_log logs/error.log;
+events {
+    worker_connections 1024;
+}
+http {
+    server {
+        listen 8080;
+        location / {
+            default_type text/html;
+            content_by_lua '
+                ngx.say("hello, world")
+            ';
+        }
+    }
+}
+</code></pre></div></div>
+
+<p>启动 <code class="highlighter-rouge">nginx</code> :</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ nginx -p `pwd` -c `pwd`/conf/nginx.conf
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="测试"><a href="index.html#testing">测试</a></h3>
+
+<p>具体的测试方法昨天的博客已经有所介绍，可以参考 <a href="http://www.xiaoh.me/2016/01/04/web-testing/">四种服务器测试方法</a>，博客里面的测试的服务就是用 <code class="highlighter-rouge">openresty</code> 搭建的。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ curl http://localhost:8080
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="我的需求"><a href="index.html#request">我的需求</a></h3>
+
+<p>具体来说我的需求分为几点：</p>
+
+<ul>
+  <li>能够在 <code class="highlighter-rouge">nginx</code> 里面获取到 <code class="highlighter-rouge">token</code> 数据</li>
+  <li>在 <code class="highlighter-rouge">lua</code> 里面获取 <code class="highlighter-rouge">redis</code> 里面的数据</li>
+  <li>判断两个 <code class="highlighter-rouge">token</code> 是否一致</li>
+  <li>返回相应的结果，之后给 <code class="highlighter-rouge">nginx</code></li>
+  <li><code class="highlighter-rouge">nginx</code> 针对结果执行不同的逻辑</li>
+</ul>
+
+<p>具体的配置文件我卸载了两个文件里面：</p>
+
+<p><code class="highlighter-rouge">nginx</code> 配置文件，<code class="highlighter-rouge">$ cat conf/nginx.conf</code>：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>worker_processes  4;
+error_log /path/to/service/logs/error.log;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    client_max_body_size 10M;
+    client_body_buffer_size 10M;
+
+    server {
+        listen 8000;
+        lua_code_cache on;
+
+        location ~* ^/proxy/([0-9]+) {
+            internal;
+            proxy_pass http://127.0.0.1:$1;
+        }
+
+        location ~* ^/v1/api {
+            proxy_pass http://127.0.0.1:8001;
+        }
+
+        location ~* ^/v1/([^/]+)/([^/]+)/?$ {
+            content_by_lua_file /path/to/service/conf/flume.lua;
+        }
+    }
+}
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">lua</code> 代码文件，<code class="highlighter-rouge">$ cat conf/flume.lua</code>：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>local redis = require "resty.redis"
+local cjson = require "cjson"
+local fun = require "fun"
+local cache = redis:new()
+local ok, err = cache:connect("127.0.0.1", "6379")
+local header = ngx.req.get_headers()
+local user = header["X-USERNAME"]
+local token = header["X-AUTH-TOKEN"]
+local uri = ngx.var.uri
+ngx.req.read_body()
+local body = ngx.req.get_body_data()
+local request_method = ngx.var.request_method
+
+if body == ngx.null or body == nil then
+    ngx.say(header['Content-Length'])
+    ngx.say('body is nil')
+    ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+end
+
+if not ok then
+    ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+end
+
+if request_method == "GET" then
+    ngx.exit(ngx.HTTP_FORBIDDEN)
+end
+
+cache:set_timeout(60000)
+local res, err = cache:get(user)
+
+if res == ngx.null or res == nil then
+    ngx.exit(ngx.HTTP_FORBIDDEN)
+end
+
+if res ~= token then
+    ngx.exit(ngx.HTTP_FORBIDDEN)
+end
+
+db_table_name = uri
+db_table_name = db_table_name:gsub("/[vV]1/", "")
+db_table_name = db_table_name:gsub("/$", "")
+db_table_name = db_table_name:gsub("/", "_")
+
+local port, err = cache:get(db_table_name)
+if port == ngx.null or port == nil then
+    ngx.say("table:\'"..uri.."\' not set any port now.")
+end
+
+function cvt(x)
+    return {body=cjson.encode(x)}
+end
+
+body_json = cjson.decode(body)
+body_fun = fun.map(cvt, body_json)
+body_str = cjson.encode(fun.totable(body_fun))
+
+local proxy_url = "/proxy/"..port
+local res = ngx.location.capture(proxy_url, {
+        method = ngx.HTTP_POST,
+        body = body_str
+    })
+
+ngx.say(res.status)
+ngx.say(res.body)
+
+if res.status ~= ngx.HTTP_OK then
+    ngx.say("service run failed, proxy pass failed")
+    return
+end
+
+local pool_max_idle_time = 10000
+local pool_size = 100
+local ok, err = cache:set_keepalive(pool_max_idle_time, pool_size)
+</code></pre></div></div>
+
+<p>这段代码其实和Flume的RestAPI相配合的，详细的 FLUME RESTAPI 请查看：<a href="http://www.xiaoh.me/2016/01/28/flume-service/">http://www.xiaoh.me/2016/01/28/flume-service/</a></p>
+
+<p>lua 代码里面引用了一个 openresty 没有的组件，fun，这个文件我会更新到github上面，如果你想用的话，需要下载下来，之后放到 <code class="highlighter-rouge">/usr/local/openresty/lualib/</code> 文件夹下，文件内容详情参见 <a href="https://github.com/pmars/tools/tree/master/lualib">https://github.com/pmars/tools/tree/master/lualib</a></p>
+
+<p>具体的就不多解释了，写的比较简单，不过完成了我的需求，如果有更多的应用需求，我会继续更新。</p>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../04/web-testing/index.html" data-toggle="tooltip" data-placement="top" title="Linux下服务器压力测试工具介绍">
+                        Previous<br>
+                        <span>Linux下服务器压力测试工具介绍</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../08/requests-summary/index.html" data-toggle="tooltip" data-placement="top" title="Requests快速入门">
+                        Next<br>
+                        <span>Requests快速入门</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

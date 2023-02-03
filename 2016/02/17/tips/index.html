@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>小但有用的知识点 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/02/17/tips/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Tips" title="Tips">Tips</a>
+                        
+                    </div>
+                    <h1>小但有用的知识点</h1>
+                    
+                    
+                    <h2 class="subheading">收集一些平时用到的不喜欢记忆的点</h2>
+                    
+                    <span class="meta">Posted by xiaoh on February 17, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#vimdiffvimdiff">VIMDIFF操作</a></li>
+  <li><a href="index.html#nginx-body-sizengxbodysize">Nginx Body Size</a></li>
+  <li><a href="index.html#amazingregex">令人惊艳的正则</a></li>
+  <li><a href="index.html#unixlinuxhotkey">Unix/Linux快捷键</a></li>
+  <li><a href="index.html#linuxlinuxntpdate">Linux同步时间</a></li>
+  <li><a href="index.html#merge-fork-mergefork">Merge fork 的项目</a></li>
+  <li><a href="index.html#github-pages-jekyll-tipsgithubjekyll">Github Pages Jekyll Tips</a></li>
+  <li><a href="index.html#shell-default-paramsshellparams">Shell Default Params</a></li>
+  <li><a href="index.html#python-loggingpythonlogging">Python Logging</a></li>
+</ol>
+
+<hr />
+
+<blockquote>
+  <p>这篇博客里面记录一些平时能够用到的，比较小的知识点</p>
+</blockquote>
+
+<hr />
+
+<h3 id="vimdiff操作"><a href="index.html#vimdiff">VIMDIFF操作</a></h3>
+
+<p>You can use the following basic commands to merge:</p>
+
+<ul>
+  <li><code class="highlighter-rouge">do</code> Get changes from other window into the current window.</li>
+  <li><code class="highlighter-rouge">dp</code> Put the changes from current window into the other window.</li>
+  <li><code class="highlighter-rouge">]c</code> Jump to the next change.</li>
+  <li><code class="highlighter-rouge">[c</code> Jump to the previous change.</li>
+  <li><code class="highlighter-rouge">zo</code> open folded lines.</li>
+  <li><code class="highlighter-rouge">zc</code> close folded lines.</li>
+  <li><code class="highlighter-rouge">Ctrl+w,w</code> change window.</li>
+  <li><code class="highlighter-rouge">:only | wq</code> quit other windows, write and quit.</li>
+</ul>
+
+<p>See more details at: <a href="http://amjith.blogspot.com/2008/08/quick-and-dirty-vimdiff-tutorial.html">http://amjith.blogspot.com/2008/08/quick-and-dirty-vimdiff-tutorial.html</a></p>
+
+<hr />
+
+<h3 id="nginx-body-size"><a href="index.html#ngxbodysize">Nginx Body Size</a></h3>
+
+<p>在用Nginx处理上传数据时，可以指定最大的Post Body的大小:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>client_max_body_size 50k;
+client_body_buffer_size 50k;
+</code></pre></div></div>
+
+<p>我在使用 lua 去处理 body 的时候，通过 <code class="highlighter-rouge">ngx.req.read_body();local body = ngx.req.get_body_data()</code> 来读取内容，这个时候 buffer 的大小尤为关键，默认只能读取11k多一些的内容，所以需要指定一下。</p>
+
+<hr />
+
+<h3 id="令人惊艳的正则"><a href="index.html#amazingregex">令人惊艳的正则</a></h3>
+
+<ul>
+  <li>判断一个数字是否可以被3整除</li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>^([0369]+|[147]([0369]*[147][0369]*[258])*([0369]*[258]|[0369]*[147][0369]*[147])|[258]([0369]*[258][0369]*[147])*([0369]*[147]|[0369]*[258][0369]*[258]))+$
+</code></pre></div></div>
+
+<ul>
+  <li>
+    <p>判断一个数字是否是素数</p>
+
+    <p>^(?!(xx+?)\1+$)</p>
+  </li>
+</ul>
+
+<hr />
+
+<h3 id="unixlinux快捷键"><a href="index.html#hotkey">Unix/Linux快捷键</a></h3>
+
+<ul>
+  <li>Ctrl-a : 行首</li>
+  <li>Ctrl-e : 行尾</li>
+  <li>Ctrl-b : 光标前移</li>
+  <li>Ctrl-f : 光标后移</li>
+  <li>Ctrl-l : clear, 清屏</li>
+  <li>Ctrl-p : 上一个命令</li>
+  <li>Ctrl-n : 下一个命令</li>
+  <li>Ctrl-c : SIGINT中断程序</li>
+  <li>Ctrl-\ : 发送SIGQUIT信号中断程序</li>
+  <li>Ctrl-h : 删除光标前的一个字符</li>
+  <li>Ctrl-d : 删除光标后的一个字符</li>
+  <li>Ctrl-w : 删除光标前的一个词</li>
+  <li>Ctrl-u : 删除行首到光标的所有内容</li>
+  <li>Ctrl-k : 删除光标到行尾的所有内容</li>
+  <li>Ctrl-y : 粘贴刚才删除的所有字符</li>
+  <li>Ctrl-r : 在历史命令中查找</li>
+  <li>Ctrl-z : 转入后台运行(不过，由Ctrl + z转入后台运行的进程在当前用户退出后就会终止，所以用这个不如用nohup命令&amp;，因为nohup命令的作用就是用户退出之后进程仍然继续运行，而现在许多脚本和命令都要求在root退出时仍然有效)</li>
+  <li>!!  重复执行最后一条命令</li>
+  <li>history 显示你所有执行过的编号+历史命令。这个可以配合!编辑来执行某某命令</li>
+  <li>!$ 显示系统最近的一条参数</li>
+</ul>
+
+<hr />
+
+<h3 id="linux同步时间"><a href="index.html#linuxntpdate">Linux同步时间</a></h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>sudo ntpdate time.nist.gov
+</code></pre></div></div>
+
+<p>上面的命令就可以同步时间了，如果想做成自动的，如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>*/10 * * * * ntpdate time.nist.gov   #域名或IP  
+</code></pre></div></div>
+
+<p>每隔十分钟同步一次。推荐几个时间服务器。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>time.nist.gov
+time.nuri.net
+0.asia.pool.ntp.org
+1.asia.pool.ntp.org
+2.asia.pool.ntp.org
+3.asia.pool.ntp.org
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="merge-fork-的项目"><a href="index.html#mergefork">Merge fork 的项目</a></h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git remote add remote_xx xx_url
+git fetch remote_xx
+git merge remote_xx/master
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="github-pages-jekyll-tips"><a href="index.html#githubjekyll">Github Pages Jekyll Tips</a></h3>
+
+<p>如果出现更新的博客在 Jekyll 生成之后不能显示，试着给博客的时间减去8个小时</p>
+
+<p>如果还是不能显示，则需要查看一下是否修改后的时间和其他的博客的时间有冲突，比如 ，他们最好是一个顺序的关系（后生成的博客最好不要比之前的时间早）等等。</p>
+
+<hr />
+
+<h3 id="shell-default-params"><a href="index.html#shellparams">Shell Default Params</a></h3>
+
+<ul>
+  <li><code class="highlighter-rouge">$#</code> 是传给脚本的参数个数</li>
+  <li><code class="highlighter-rouge">$0</code> 是脚本本身的名字</li>
+  <li><code class="highlighter-rouge">$1</code> 是传递给该shell脚本的第一个参数 $2 是传递给该shell脚本的第二个参数</li>
+  <li><code class="highlighter-rouge">$@</code> 是传给脚本的所有参数的列表</li>
+  <li><code class="highlighter-rouge">$*</code> 是以一个单字符串显示所有向脚本传递的参数，与位置变量不同，参数可超过9个</li>
+  <li><code class="highlighter-rouge">$$</code> 是脚本运行的当前进程ID号</li>
+  <li><code class="highlighter-rouge">$?</code> 是显示最后命令的退出状态，0表示没有错误，其他表示有错误</li>
+</ul>
+
+<hr />
+
+<h3 id="python-logging"><a href="index.html#pythonlogging">Python Logging</a></h3>
+
+<p>Python的日志输出模块：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>import logging, logging.handlers
+
+logging.basicConfig(format='%(asctime)s %(levelname)s %(lineno)d] %(message)s', datefmt='%m-%d %H:%M')
+logger = logging.getLogger('class_name')
+handler = logging.handlers.RotatingFileHandler(
+        filename='/dev/null',
+        maxBytes=10 * 1024 * 1024,
+        backupCount=5)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(handler)
+
+for i in range(1000000):
+    logger.debug('alksdf;laksdf;laksdf;lkasd;flasd;fl%d' % i)
+</code></pre></div></div>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../16/python-email/index.html" data-toggle="tooltip" data-placement="top" title="Python 操作电子邮件方法">
+                        Previous<br>
+                        <span>Python 操作电子邮件方法</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../24/switch-capslock-ctrl/index.html" data-toggle="tooltip" data-placement="top" title="Ctrl与Caps Lock键的交换">
+                        Next<br>
+                        <span>Ctrl与Caps Lock键的交换</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

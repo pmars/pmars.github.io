@@ -1,0 +1,1320 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>Docker简介 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2015/12/15/docker-summary/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-docker-summary.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-docker-summary.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Docker" title="Docker">Docker</a>
+                        
+                    </div>
+                    <h1>Docker简介</h1>
+                    
+                    
+                    <h2 class="subheading">总结Docker的安装部署，配置实用</h2>
+                    
+                    <span class="meta">Posted by xiaoh on December 15, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>最近项目中用到 <code class="highlighter-rouge">docker</code> 的地方有很多，最近有时间打算总结一下相关的命令</p>
+</blockquote>
+
+<hr />
+
+<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#docker-summary">Docker 简介</a></li>
+  <li><a href="index.html#install">安装</a>
+    <ol>
+      <li><a href="index.html#install-version">确认版本号</a></li>
+      <li><a href="index.html#apt-install-apt">更新 APT 源</a></li>
+      <li><a href="index.html#dockerinstall-docker">安装Docker</a></li>
+      <li><a href="index.html#install-version">特定版本安装</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#images">镜像</a>
+    <ol>
+      <li><a href="index.html#images-summary">简介</a></li>
+      <li><a href="index.html#images-look">查看镜像</a></li>
+      <li><a href="index.html#images-pull">下载镜像</a></li>
+      <li><a href="index.html#images-create">创建镜像</a>
+        <ol>
+          <li><a href="index.html#images-create-hand">修改已有镜像</a></li>
+          <li><a href="index.html#dockerfileimages-create-dockerfile">通过Dockerfile</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#images-tag">镜像标签</a></li>
+      <li><a href="index.html#images-sl">存储和载入镜像</a>
+        <ol>
+          <li><a href="index.html#images-sl-save">存储镜像</a></li>
+          <li><a href="index.html#images-sl-load">载入镜像</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#images-rmi">移除镜像</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#container">容器</a>
+    <ol>
+      <li><a href="index.html#container-summary">简介</a></li>
+      <li><a href="index.html#container-run">启动容器</a>
+        <ol>
+          <li><a href="index.html#container-run-one">一次运行模式</a></li>
+          <li><a href="index.html#container-run-many">交互运行方式</a></li>
+          <li><a href="index.html#container-run-back">后台运行方式</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#container-in">进入容器</a>
+        <ol>
+          <li><a href="index.html#attachcontainer-in-attach">attach</a></li>
+          <li><a href="index.html#execcontainer-in-exec">exec</a></li>
+        </ol>
+      </li>
+      <li><a href="index.html#container-stop">停止容器</a></li>
+      <li><a href="index.html#container-rm">删除容器</a></li>
+      <li><a href="index.html#container-start">启动容器</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#repository">仓库</a>
+    <ol>
+      <li><a href="index.html#repository-public">公共仓库</a></li>
+      <li><a href="index.html#repository-personal">私有仓库</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#dockerfiledockerfile">Dockerfile</a>
+    <ol>
+      <li><a href="index.html#fromdockerfile-from">FROM</a></li>
+      <li><a href="index.html#maintainerdockerfile-maintainer">MAINTAINER</a></li>
+      <li><a href="index.html#rundockerfile-run">RUN</a></li>
+      <li><a href="index.html#cmddockerfile-cmd">CMD</a></li>
+      <li><a href="index.html#exposedockerfile-expose">EXPOSE</a></li>
+      <li><a href="index.html#envdockerfile-env">ENV</a></li>
+      <li><a href="index.html#adddockerfile-add">ADD</a></li>
+      <li><a href="index.html#copydockerfile-copy">COPY</a></li>
+      <li><a href="index.html#entrypointdockerfile-entrypoint">ENTRYPOINT</a></li>
+      <li><a href="index.html#volumedockerfile-volume">VOLUME</a></li>
+      <li><a href="index.html#workdirdockerfile-workdir">WORKDIR</a></li>
+      <li><a href="index.html#onbuilddockerfile-onbuild">ONBUILD</a></li>
+    </ol>
+  </li>
+</ol>
+
+<hr />
+
+<blockquote>
+  <p>关于 <code class="highlighter-rouge">Docker</code> 的所有介绍，看 <a href="https://docs.docker.com/">官方文档</a> 是最好的选择。
+如果你觉得英语有困难，可以下载这本开源的书籍，<a href="http://pan.baidu.com/s/1pKz9hqF">http://pan.baidu.com/s/1pKz9hqF</a></p>
+</blockquote>
+
+<h2 id="docker-简介"><a href="index.html#summary">Docker 简介</a></h2>
+
+<p>Docker 是一个开源项目，诞生于 2013 年初，最初是 dotCloud 公司内部的一个业余项目。它基于 Google 公司推出的 Go 语言实现。 项目后来加入了 Linux 基金会，遵从了 Apache 2.0 协议，项目代码在 GitHub 上进行维护。</p>
+
+<p>Docker 自开源后受到广泛的关注和讨论，以至于 dotCloud 公司后来都改名为 Docker Inc。Redhat 已经在其 RHEL6.5 中集中支持 Docker；Google 也在其 PaaS 产品中广泛应用。</p>
+
+<p>Docker 项目的目标是实现轻量级的操作系统虚拟化解决方案。 Docker 的基础是 Linux 容器（LXC）等技术。</p>
+
+<p>在 LXC 的基础上 Docker 进行了进一步的封装，让用户不需要去关心容器的管理，使得操作更为简便。用户操作 Docker 的容器就像操作一个快速轻量级的虚拟机一样简单。</p>
+
+<p>下面的图片比较了 Docker 和传统虚拟化方式的不同之处，可见容器是在操作系统层面上实现虚拟化，直接复用本地主机的操作系统，而传统方式则是在硬件层面实现。</p>
+
+<p><img src="http://www.xiaoh.me/img/post-docker-summary.jpg" alt="" /></p>
+
+<hr />
+
+<h2 id="安装"><a href="index.html#install">安装</a></h2>
+
+<p>具体的安装步骤可以参见 <a href="https://docs.docker.com/engine/installation/ubuntulinux/">官方安装步骤</a></p>
+
+<h5 id="确认版本号"><a href="index.html#install-version">确认版本号</a></h5>
+<p>首先需要检查你的系统版本号：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ uname -r
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">Docker</code> 需要你的最低版本号为 <code class="highlighter-rouge">3.10</code>，否则会出现数据丢失等一系列问题。</p>
+
+<h5 id="更新-apt-源"><a href="index.html#install-apt">更新 APT 源</a></h5>
+
+<p>随后需要更新你的 <code class="highlighter-rouge">apt</code> 源来使用最新版本的 <code class="highlighter-rouge">Docker</code></p>
+
+<p>添加新的 <code class="highlighter-rouge">gpg</code> 密钥：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys 58118E89F3A912897C070ADBF76221572C52609D
+</code></pre></div></div>
+
+<p>打开或创建文件 <code class="highlighter-rouge">/etc/apt/sources.list.d/docker.list</code>，如果有内容需要清空，之后写入内容：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat /etc/apt/sources.list.d/docker.list
+deb https://apt.dockerproject.org/repo ubuntu-trusty main
+</code></pre></div></div>
+
+<p>这句话只适合 <code class="highlighter-rouge">Ubuntu 14.04</code> 版本，如果你是其他版本，需要看下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>On Ubuntu Precise 12.04 (LTS)
+deb https://apt.dockerproject.org/repo ubuntu-precise main
+
+On Ubuntu Trusty 14.04 (LTS)
+deb https://apt.dockerproject.org/repo ubuntu-trusty main
+
+On Ubuntu Vivid 15.04
+deb https://apt.dockerproject.org/repo ubuntu-vivid main
+
+Ubuntu Wily 15.10
+deb https://apt.dockerproject.org/repo ubuntu-wily main
+</code></pre></div></div>
+
+<p>需要检查一下是否已经安装过以前的版本，如果有，则需要清理一下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ apt-get purge lxc-docker
+</code></pre></div></div>
+
+<p>之后为了确保你的 <code class="highlighter-rouge">APT</code> 源正确，需要执行：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ apt-cache policy docker-engine
+</code></pre></div></div>
+
+<p>上面一系列步骤执行过后，可以确保以后 <code class="highlighter-rouge">Docker</code> 都会从新的源来进行下载了。</p>
+
+<h5 id="安装docker"><a href="index.html#install-docker">安装Docker</a></h5>
+
+<p>安装只需要几条命令：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get update
+$ sudo apt-get install docker-engine
+$ sudo service docker start
+</code></pre></div></div>
+
+<p>这样 <code class="highlighter-rouge">Docker</code> 的服务也启动了。</p>
+
+<p>我系统为 <code class="highlighter-rouge">Ubuntu</code>，如果你的系统不一样，可以参考官方文档的方法，按步骤进行即可。</p>
+
+<h5 id="特定版本安装"><a href="index.html#install-version">特定版本安装</a></h5>
+
+<p>这样安装的 <code class="highlighter-rouge">Docker</code> 为最新的版本，如果你想安装特定版本，等我试过再议 TODO</p>
+
+<hr />
+
+<h2 id="镜像"><a href="index.html#images">镜像</a></h2>
+
+<h5 id="简介"><a href="index.html#images-summary">简介</a></h5>
+
+<p>和虚拟机镜像一样，可以想象它就是安装系统的那个ISO文件。但这个是可以变化的，可以打包成各种版本的镜像。</p>
+
+<h5 id="查看镜像"><a href="index.html#images-look">查看镜像</a></h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+</code></pre></div></div>
+
+<p>可以看到，目前没有任何的镜像存在</p>
+
+<h5 id="下载镜像"><a href="index.html#images-pull">下载镜像</a></h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker pull ubuntu:14.04
+</code></pre></div></div>
+
+<p>如果第一次 <code class="highlighter-rouge">pull</code> 需要一段时间来等待，之后再 <code class="highlighter-rouge">pull</code> 有重叠的镜像时就会快很多，因为镜像是增量式存储的。</p>
+
+<p>下载完之后查看一下现有的镜像：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu              14.04               d55e68e6cc9c        4 days ago          187.9 MB
+</code></pre></div></div>
+
+<h5 id="创建镜像"><a href="index.html#images-create">创建镜像</a></h5>
+
+<p>创建镜像有很多方法，用户可以从 Docker Hub 获取已有镜像并更新，也可以利用本地文件系统创建一个。</p>
+
+<h6 id="修改已有镜像"><a href="index.html#images-create-hand">修改已有镜像</a></h6>
+
+<p>先使用下载的镜像启动容器</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker run -it ubuntu:14.04 /bin/bash
+root@c4241128e523:/#
+</code></pre></div></div>
+
+<p>注意：记住容器的 ID，稍后还会用到。</p>
+
+<p>给容器添加一个应用 <code class="highlighter-rouge">python-pip</code></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>root@c4241128e523:/# apt-get install python-pip
+</code></pre></div></div>
+
+<p>当结束后，我们使用 exit 来退出，现在我们的容器已经被我们改变了，使用 docker commit 命令来提交更新后的副本。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker commit -a xingming -m 'install pip' c4241128e523 xingming/pip
+450225ccea656d22354cd5e7295c0d7ad15590509129a25e9ca1888c2b282903
+</code></pre></div></div>
+
+<p>之后查看一下刚刚创建的镜像</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+xingming/pip        latest              450225ccea65        7 seconds ago       278.2 MB
+ubuntu              14.04               d55e68e6cc9c        5 days ago          187.9 MB
+</code></pre></div></div>
+
+<h6 id="通过dockerfile"><a href="index.html#images-create-dockerfile">通过Dockerfile</a></h6>
+
+<p><code class="highlighter-rouge">Dockerfile</code> 支持很多种关键词，我在后面部分会详细说一下。</p>
+
+<h5 id="镜像标签"><a href="index.html#images-tag">镜像标签</a></h5>
+
+<p>以用 docker tag 命令来修改镜像的标签。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker tag 5db5f8471261 xingming/pip
+</code></pre></div></div>
+
+<h5 id="存储和载入镜像"><a href="index.html#images-sl">存储和载入镜像</a></h5>
+
+<h6 id="存储镜像"><a href="index.html#images-sl-save">存储镜像</a></h6>
+
+<p>如果要导出镜像到本地文件，可以使用 docker save 命令。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker images
+REPOSITORY TAG IMAGE ID CREATED VIRTUAL SIZE
+ubuntu 14.04 c4ff7513909d 5 weeks ago 225.4 MB
+...
+$sudo docker save -o ubuntu_14.04.tar ubuntu:14.04
+</code></pre></div></div>
+
+<h6 id="载入镜像"><a href="index.html#images-sl-load">载入镜像</a></h6>
+
+<p>可以使用 docker load 从导出的本地文件中再导入到本地镜像库，例如</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker load --input ubuntu_14.04.tar
+</code></pre></div></div>
+
+<p>或</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker load &lt; ubuntu_14.04.tar
+</code></pre></div></div>
+
+<p>这将导入镜像以及其相关的元数据信息（包括标签等）。</p>
+
+<h5 id="移除镜像"><a href="index.html#images-rmi">移除镜像</a></h5>
+
+<p>如果要移除本地的镜像，可以使用 docker rmi 命令。注意 docker rm 命令是移除容器。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker rmi xingming/pip
+</code></pre></div></div>
+
+<blockquote>
+  <p>注意：在删除镜像之前要先用 docker rm 删掉依赖于这个镜像的所有容器。</p>
+</blockquote>
+
+<hr />
+
+<h2 id="容器"><a href="index.html#container">容器</a></h2>
+
+<h5 id="简介-1"><a href="index.html#container-summary">简介</a></h5>
+
+<p>如果再用虚拟机来类比的话，容器就是一个运行起来的虚拟机了，他用的是镜像文件，启动起来就叫容器。</p>
+
+<p>可以把容器看做是一个简易版的 Linux 环境（包括 root 用户权限、进程空间、用户空间和网络空间等）和运行在其中的应用程序。</p>
+
+<blockquote>
+  <p>注：镜像是只读的，容器在启动的时候创建一层可写层作为最上层。</p>
+</blockquote>
+
+<h5 id="启动容器"><a href="index.html#container-run">启动容器</a></h5>
+
+<blockquote>
+  <p>这个地方多说一句，算是这几天使用 Docker 的总结吧
+如果通过 Dockerfile Build 出的镜像，Dockerfile 的最后一句应该是个 CMD 命令，且这个命令应该执行一个守护运行的脚本或者命令
+这样在运行容器的时候就可以不用指定运行的命令了。
+类似 sudo docker run -d -p xxx:xxx –add-host a.b.c:1.2.3.4 –restart=always xingming/pip</p>
+</blockquote>
+
+<p>当利用 docker run 来创建容器时，Docker 在后台运行的标准操作包括：</p>
+
+<blockquote>
+  <p>检查本地是否存在指定的镜像，不存在就从公有仓库下载
+利用镜像创建并启动一个容器
+分配一个文件系统，并在只读的镜像层外面挂载一层可读写层
+从宿主主机配置的网桥接口中桥接一个虚拟接口到容器中去
+从地址池配置一个 ip 地址给容器
+执行用户指定的应用程序
+执行完毕后容器被终止</p>
+</blockquote>
+
+<p>启动容器有多种参数可选，具体的查看 <code class="highlighter-rouge">sudo docker run --help</code>，常用的有三种模式：</p>
+
+<h6 id="一次运行模式"><a href="index.html#container-run-one">一次运行模式</a></h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker run ubuntu:14.04 /bin/echo 'hello, world!'
+hello, world!
+</code></pre></div></div>
+
+<h6 id="交互运行方式"><a href="index.html#container-run-many">交互运行方式</a></h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker run -it ubuntu:14.04 /bin/bash
+root@426d0c491bd9:/# echo 'hello, world!'
+hello, world!
+root@426d0c491bd9:/#
+</code></pre></div></div>
+
+<h6 id="后台运行方式"><a href="index.html#container-run-back">后台运行方式</a></h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker run -d ubuntu:14.04 /bin/sh -c "while true;do echo hello;sleep 1;done;"
+1ca48c01674f384488ad86b45c3b647233bb21da9b2bd61aa9b11fc81ade2833
+</code></pre></div></div>
+
+<p>查看正在运行的容器：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS               NAMES
+1ca48c01674f        ubuntu:14.04        "/bin/sh -c 'while tr"   44 seconds ago      Up 43 seconds                           determined_bhabha
+</code></pre></div></div>
+
+<p>查看某一个容器的日志：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker logs --tail 3 determined_bhabha
+hello
+hello
+hello
+</code></pre></div></div>
+
+<p>还有很多的使用方法请用 <code class="highlighter-rouge">--help</code> 进行查看。</p>
+
+<h5 id="进入容器"><a href="index.html#container-in">进入容器</a></h5>
+
+<p>当容器在后台运行时，有时我们需要进入容器，方法如下：</p>
+
+<h6 id="attach"><a href="index.html#container-in-attach">attach</a></h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker attach determined_bhabha
+hello
+hello
+hello
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">attach</code> 方式有个问题，就是你退出的时候容器也跟着停止了。</p>
+
+<h6 id="exec"><a href="index.html#container-in-exec">exec</a></h6>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker exec -it loving_meninsky /bin/sh
+# pwd
+/
+# ls
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+# exit
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">exec</code> 方式呢，退出的时候容器还依然继续运行。</p>
+
+<p>一般了解这些使用方法在平常应用中就足够了，如果想知道更多有关两者的详细使用可以通过 <code class="highlighter-rouge">--help</code> 来查看，或者 <code class="highlighter-rouge">google</code> 之</p>
+
+<h5 id="停止容器"><a href="index.html#container-stop">停止容器</a></h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker stop dockername
+</code></pre></div></div>
+
+<h5 id="删除容器"><a href="index.html#container-rm">删除容器</a></h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker rm dockername
+</code></pre></div></div>
+
+<h5 id="启动容器-1"><a href="index.html#container-start">启动容器</a></h5>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker start dockername
+</code></pre></div></div>
+
+<hr />
+
+<h2 id="仓库"><a href="index.html#repository">仓库</a></h2>
+
+<p>仓库（Repository）是集中存放镜像的地方。</p>
+
+<p>一个容易混淆的概念是注册服务器（Registry）。实际上注册服务器是管理仓库的具体服务器，每个服务器上可以有多个仓库，而每个仓库下面有多个镜像。从这方面来说，仓库可以被认为是一个具体的项目或目录。例如对于仓库地址 dl.dockerpool.com/ubuntu 来说， dl.dockerpool.com 是注册服务器地址， ubuntu 是仓库名。</p>
+
+<p>大部分时候，并不需要严格区分这两者的概念。</p>
+
+<h5 id="公共仓库"><a href="index.html#repository-public">公共仓库</a></h5>
+
+<p>目前 Docker 官方维护了一个公共仓库 Docker Hub，其中已经包括了超过 15,000 的镜像。大部分需求，都可以通过在 Docker Hub 中直接下载镜像来实现。</p>
+
+<p>先登录一下 <code class="highlighter-rouge">Docker Hub</code> :</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker login
+Username: xingming
+Password:
+Email: p.mars@163.com
+WARNING: login credentials saved in /home/xingming/.docker/config.json
+Login Succeeded
+</code></pre></div></div>
+
+<p>之后使用上面创建的镜像来 <code class="highlighter-rouge">push</code> 到服务器。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker push xingming/pip
+</code></pre></div></div>
+
+<p>经过漫长的等待之后，终于push上去了。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker search xingming
+NAME           DESCRIPTION   STARS     OFFICIAL   AUTOMATED
+xingming/pip                 0
+</code></pre></div></div>
+
+<p>这里 image 没有前缀，所以默认的就是 docker.io 的公有仓库，其实你可以先打一个标签</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker tag xingming/pip registry.xiaoh.me:5000/xingming/pip
+</code></pre></div></div>
+
+<p>这时候，如果 push 这个镜像，他会将前面的 host 提取出来，往这个仓库去提交。</p>
+
+<h5 id="私有仓库"><a href="index.html#repository-personal">私有仓库</a></h5>
+
+<p>安装私有仓库：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo apt-get install -y build-essential python-dev libevent-dev python-pip liblzma-dev swig
+$ sudo pip install docker-registry
+</code></pre></div></div>
+
+<p>TODO</p>
+
+<hr />
+
+<h2 id="dockerfile"><a href="index.html#dockerfile">Dockerfile</a></h2>
+
+<p>使用 <code class="highlighter-rouge">docker commit</code> 来扩展一个镜像比较简单，但是不方便在一个团队中分享。我们可以使用 <code class="highlighter-rouge">docker build</code> 来创建一个新的镜像。为此，首先需要创建一个 <code class="highlighter-rouge">Dockerfile</code>，包含一些如何创建镜像的指令。</p>
+
+<p><code class="highlighter-rouge">Dockerfile</code> 由一行行命令语句组成，并且支持以 # 开头的注释行。一般的，<code class="highlighter-rouge">Dockerfile</code> 分为四部分：基础镜像信息、维护者信息、镜像操作指令和容器启动时执行指令。</p>
+
+<p>新建一个目录和一个 <code class="highlighter-rouge">Dockerfile</code></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mkdir dpip
+$ cd dpip
+$ touch Dockerfile
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">Dockerfile</code> 中每一条指令都创建镜像的一层，例如：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code># This is a comment
+FROM ubuntu:14.04
+MAINTAINER xingming &lt;http://www.xiaoh.me&gt;
+RUN apt-get update
+RUN apt-get -y install python-pip
+</code></pre></div></div>
+
+<p><code class="highlighter-rouge">Dockerfile</code> 基本的语法是</p>
+
+<ul>
+  <li>使用 # 来注释</li>
+  <li><code class="highlighter-rouge">FROM</code> 指令告诉 <code class="highlighter-rouge">Docker</code> 使用哪个镜像作为基础</li>
+  <li>接着是维护者的信息</li>
+  <li><code class="highlighter-rouge">RUN</code> 开头的指令会在创建中运行，比如安装一个软件包，在这里使用 <code class="highlighter-rouge">apt-get</code> 来安装了一些软件</li>
+</ul>
+
+<p>编写完成 <code class="highlighter-rouge">Dockerfile</code> 后可以使用 <code class="highlighter-rouge">docker build</code> 来生成镜像。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker build -t xingming/pip:v2 .
+</code></pre></div></div>
+
+<p>其中 <code class="highlighter-rouge">-t</code> 标记来添加 <code class="highlighter-rouge">tag</code>，指定新的镜像的用户信息。 “.” 是 <code class="highlighter-rouge">Dockerfile</code> 所在的路径（当前目录），也可以替换为一个具体的 <code class="highlighter-rouge">Dockerfile</code> 的路径。</p>
+
+<p>可以看到 <code class="highlighter-rouge">build</code> 进程在执行操作。它要做的第一件事情就是上传这个 <code class="highlighter-rouge">Dockerfile</code> 内容，因为所有的操作都要依据 <code class="highlighter-rouge">Dockerfile</code> 来进行。 然后，<code class="highlighter-rouge">Dockfile</code> 中的指令被一条一条的执行。每一步都创建了一个新的容器，在容器中执行指令并提交修改（就跟之前介绍过的 <code class="highlighter-rouge">docker commit</code> 一样）。当所有的指令都执行完毕之后，返回了最终的镜像 <code class="highlighter-rouge">id</code>。所有的中间步骤所产生的容器都被删除和清理了。</p>
+
+<blockquote>
+  <p>注意一个镜像不能超过 127 层</p>
+</blockquote>
+
+<p>其它的 <code class="highlighter-rouge">Dockerfile</code> 命令：</p>
+
+<p>指令的一般格式为 <code class="highlighter-rouge">INSTRUCTION arguments</code> ，指令包括 <code class="highlighter-rouge">FROM</code> 、 <code class="highlighter-rouge">MAINTAINER</code> 、 <code class="highlighter-rouge">RUN</code> 等。</p>
+
+<h6 id="from"><a href="index.html#dockerfile-from">FROM</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">FROM &lt;image&gt;</code> 或 <code class="highlighter-rouge">FROM &lt;image&gt;:&lt;tag&gt;</code> 。</p>
+
+<p>第一条指令必须为 <code class="highlighter-rouge">FROM</code> 指令。并且，如果在同一个 <code class="highlighter-rouge">Dockerfile</code> 中创建多个镜像时，可以使用多个 <code class="highlighter-rouge">FROM</code> 指令（每个镜像一次）。</p>
+
+<h6 id="maintainer"><a href="index.html#dockerfile-maintainer">MAINTAINER</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">MAINTAINER &lt;name&gt;</code> ，指定维护者信息。</p>
+
+<h6 id="run"><a href="index.html#dockerfile-run">RUN</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">RUN &lt;command&gt;</code> 或 <code class="highlighter-rouge">RUN ["executable", "param1", "param2"]</code> 。</p>
+
+<p>前者将在 <code class="highlighter-rouge">shell</code> 终端中运行命令，即 /bin/sh -c ；后者则使用 <code class="highlighter-rouge">exec</code> 执行。指定使用其它终端可以通过第二种方式实现，例如 <code class="highlighter-rouge">RUN ["/bin/bash", "-c", "echo hello"]</code> 。</p>
+
+<p>每条 RUN 指令将在当前镜像基础上执行指定命令，并提交为新的镜像。当命令较长时可以使用 \ 来换行。</p>
+
+<h6 id="cmd"><a href="index.html#dockerfile-cmd">CMD</a></h6>
+
+<p>支持三种格式</p>
+
+<ul>
+  <li>CMD [“executable”,”param1”,”param2”] 使用 exec 执行，推荐方式；</li>
+  <li>CMD command param1 param2 在 /bin/sh 中执行，提供给需要交互的应用；</li>
+  <li>CMD [“param1”,”param2”] 提供给 ENTRYPOINT 的默认参数；</li>
+</ul>
+
+<p>指定启动容器时执行的命令，每个 <code class="highlighter-rouge">Dockerfile</code> 只能有一条 <code class="highlighter-rouge">CMD</code> 命令。如果指定了多条命令，只有最后一条会被执行。</p>
+
+<p>如果用户启动容器时候指定了运行的命令，则会覆盖掉 <code class="highlighter-rouge">CMD</code> 指定的命令。</p>
+
+<h6 id="expose"><a href="index.html#dockerfile-expose">EXPOSE</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">EXPOSE &lt;port&gt; [&lt;port&gt;...]</code> 。</p>
+
+<p>告诉 <code class="highlighter-rouge">Docker</code> 服务端容器暴露的端口号，供互联系统使用。在启动容器时需要通过 <code class="highlighter-rouge">-P</code>，<code class="highlighter-rouge">Docker</code> 主机会自动分配一个端口转发到指定的端口。</p>
+
+<h6 id="env"><a href="index.html#dockerfile-env">ENV</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">ENV &lt;key&gt; &lt;value&gt;</code> 。 指定一个环境变量，会被后续 <code class="highlighter-rouge">RUN</code> 指令使用，并在容器运行时保持。</p>
+
+<p>例如</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ENV PG_MAJOR 9.3
+ENV PG_VERSION 9.3.4
+RUN curl -SL http://example.com/postgres-$PG_VERSION.tar.xz | tar -xJC /usr/src/postgress &amp;&amp; …
+ENV PATH /usr/local/postgres-$PG_MAJOR/bin:$PATH
+</code></pre></div></div>
+
+<p>运行时指定环境变量：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ sudo docker run -it -e "ENV_DB_PORT=5432" xingming/ubuntu /bin/bash
+</code></pre></div></div>
+
+<h6 id="add"><a href="index.html#dockerfile-add">ADD</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">ADD &lt;src&gt; &lt;dest&gt;</code> 。</p>
+
+<p>该命令将复制指定的 <src> 到容器中的 <dest> 。 其中 <src> 可以是 `Dockerfile` 所在目录的一个相对路径；也可以是一个 `URL`；还可以是一个 `tar` 文件（自动解压为目录）。</src></dest></src></p>
+
+<h6 id="copy"><a href="index.html#dockerfile-copy">COPY</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">COPY &lt;src&gt; &lt;dest&gt;</code> 。</p>
+
+<p>复制本地主机的 <src> （为 `Dockerfile` 所在目录的相对路径）到容器中的 <dest> 。</dest></src></p>
+
+<p>当使用本地目录为源目录时，推荐使用 <code class="highlighter-rouge">COPY</code> 。</p>
+
+<h6 id="entrypoint"><a href="index.html#dockerfile-entrypoint">ENTRYPOINT</a></h6>
+
+<p>两种格式：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ENTRYPOINT ["executable", "param1", "param2"]
+ENTRYPOINT command param1 param2 （shell中执行）。
+</code></pre></div></div>
+
+<p>配置容器启动后执行的命令，并且不可被 <code class="highlighter-rouge">docker run</code> 提供的参数覆盖。</p>
+
+<p>每个 <code class="highlighter-rouge">Dockerfile</code> 中只能有一个 <code class="highlighter-rouge">ENTRYPOINT</code> ，当指定多个时，只有最后一个起效。</p>
+
+<h6 id="volume"><a href="index.html#dockerfile-volume">VOLUME</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">USER daemon</code></p>
+
+<p>指定运行容器时的用户名或 <code class="highlighter-rouge">UID</code>，后续的 <code class="highlighter-rouge">RUN</code> 也会使用指定用户。</p>
+
+<p>当服务不需要管理员权限时，可以通过该命令指定运行用户。并且可以在之前创建所需要的用户，例如： <code class="highlighter-rouge">RUN groupadd -r postgres &amp;&amp; useradd -r -g postgres postgres</code> 。要临时获取管理员权限可以使用 <code class="highlighter-rouge">gosu</code> ，而不推荐 <code class="highlighter-rouge">sudo</code> 。</p>
+
+<h6 id="workdir"><a href="index.html#dockerfile-workdir">WORKDIR</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">WORKDIR /path/to/workdir</code> 。</p>
+
+<p>为后续的 <code class="highlighter-rouge">RUN</code> 、 <code class="highlighter-rouge">CMD</code> 、 <code class="highlighter-rouge">ENTRYPOINT</code> 指令配置工作目录。</p>
+
+<p>可以使用多个 <code class="highlighter-rouge">WORKDIR</code> 指令，后续命令如果参数是相对路径，则会基于之前命令指定的路径。例如</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>WORKDIR /a
+WORKDIR b
+WORKDIR c
+RUN pwd
+</code></pre></div></div>
+
+<p>则最终路径为 <code class="highlighter-rouge">/a/b/c</code> 。</p>
+
+<h6 id="onbuild"><a href="index.html#dockerfile-onbuild">ONBUILD</a></h6>
+
+<p>格式为 <code class="highlighter-rouge">ONBUILD [INSTRUCTION]</code> 。</p>
+
+<p>配置当所创建的镜像作为其它新创建镜像的基础镜像时，所执行的操作指令。</p>
+
+<p>例如，<code class="highlighter-rouge">Dockerfile</code> 使用如下的内容创建了镜像 <code class="highlighter-rouge">image-A</code> 。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[...]
+ONBUILD ADD . /app/src
+ONBUILD RUN /usr/local/bin/python-build --dir /app/src
+[...]
+</code></pre></div></div>
+
+<p>如果基于 <code class="highlighter-rouge">image-A</code> 创建新的镜像时，新的 <code class="highlighter-rouge">Dockerfile</code> 中使用 <code class="highlighter-rouge">FROM image-A</code> 指定基础镜像时，会自动执行 <code class="highlighter-rouge">ONBUILD</code> 指令内容，等价于在后面添加了两条指令。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM image-A
+#Automatically run the following
+ADD . /app/src
+RUN /usr/local/bin/python-build --dir /app/src
+</code></pre></div></div>
+
+<p>使用 <code class="highlighter-rouge">ONBUILD</code> 指令的镜像，推荐在标签中注明，例如 <code class="highlighter-rouge">ruby:1.9-onbuild</code> 。</p>
+
+<hr />
+
+<p>关于 <code class="highlighter-rouge">Docker</code> 就先介绍这些，已经足够日常使用，等有更多的发现，再来补充</p>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../14/markdown-summary/index.html" data-toggle="tooltip" data-placement="top" title="Markdown的基本语法">
+                        Previous<br>
+                        <span>Markdown的基本语法</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../flask-summary/index.html" data-toggle="tooltip" data-placement="top" title="Flask学习笔记">
+                        Next<br>
+                        <span>Flask学习笔记</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

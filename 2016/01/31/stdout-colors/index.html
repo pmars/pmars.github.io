@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>Python 实现终端显示各种颜色，下划线，粗体等效果 - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2016/01/31/stdout-colors/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-default.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-default.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Python" title="Python">Python</a>
+                        
+                    </div>
+                    <h1>Python 实现终端显示各种颜色，下划线，粗体等效果</h1>
+                    
+                    
+                    <h2 class="subheading">如何让你的脚本数据更加炫彩</h2>
+                    
+                    <span class="meta">Posted by xiaoh on January 31, 2016</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<blockquote>
+  <p>最近在项目中用到了输出不同颜色的功能，细想想这个功能有的时候还真有点用处，比如搞个输出警示什么的
+下面就将记录下的和网上找的 <a href="http://blog.csdn.net/gatieme/article/details/45439671">例子</a> 写在这里，留作补习只用</p>
+</blockquote>
+
+<hr />
+
+<h4 id="linux终端颜色设置信息">linux终端颜色设置信息</h4>
+
+<p>在Linux终端中，使用转义序列来进行如上所述的显示，转义序列以ESC开头，即ASCII码下的\033，其格式为：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>\033[显示方式;前景色;背景色m
+</code></pre></div></div>
+
+<blockquote>
+  <p>显示方式、前景色、背景色至少一个存在即可。 
+格式：\033[显示方式;前景色;背景色m</p>
+</blockquote>
+
+<h4 id="说明">说明</h4>
+
+<table>
+  <tbody>
+    <tr>
+      <td>前景色</td>
+      <td>背景色</td>
+      <td>颜色</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td>30</td>
+      <td>40</td>
+      <td>黑色</td>
+    </tr>
+    <tr>
+      <td>31</td>
+      <td>41</td>
+      <td>红色</td>
+    </tr>
+    <tr>
+      <td>32</td>
+      <td>42</td>
+      <td>绿色</td>
+    </tr>
+    <tr>
+      <td>33</td>
+      <td>43</td>
+      <td>黃色</td>
+    </tr>
+    <tr>
+      <td>34</td>
+      <td>44</td>
+      <td>蓝色</td>
+    </tr>
+    <tr>
+      <td>35</td>
+      <td>45</td>
+      <td>紫红色</td>
+    </tr>
+    <tr>
+      <td>36</td>
+      <td>46</td>
+      <td>青蓝色</td>
+    </tr>
+    <tr>
+      <td>37</td>
+      <td>47</td>
+      <td>白色</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4 id="显示方式">显示方式</h4>
+
+<table>
+  <tbody>
+    <tr>
+      <td>显示方式</td>
+      <td>意义</td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td>0</td>
+      <td>终端默认设置</td>
+    </tr>
+    <tr>
+      <td>1</td>
+      <td>高亮显示</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td>使用下划线</td>
+    </tr>
+    <tr>
+      <td>5</td>
+      <td>闪烁</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td>反白显示</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td>不可见</td>
+    </tr>
+  </tfoot>
+</table>
+
+<h4 id="例子">例子</h4>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>\033[1;31;40m    &lt;!--1-高亮显示 31-前景色红色  40-背景色黑色--&gt;
+\033[0m          &lt;!--采用终端默认设置，即取消颜色设置--&gt;
+</code></pre></div></div>
+
+<h4 id="linux下解决">Linux下解决</h4>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>#/usr/bin/python
+#-*- coding: utf-8 -*-
+#
+#   格式：\033[显示方式;前景色;背景色m
+#   说明:
+#
+#   前景色            背景色            颜色
+#   ---------------------------------------
+#     30                40              黑色
+#     31                41              红色
+#     32                42              绿色
+#     33                43              黃色
+#     34                44              蓝色
+#     35                45              紫红色
+#     36                46              青蓝色
+#     37                47              白色
+#
+#   显示方式           意义
+#   -------------------------
+#      0           终端默认设置
+#      1             高亮显示
+#      4            使用下划线
+#      5              闪烁
+#      7             反白显示
+#      8              不可见
+#
+#   例子：
+#   \033[1;31;40m    &lt;!--1-高亮显示 31-前景色红色  40-背景色黑色--&gt;
+#   \033[0m          &lt;!--采用终端默认设置，即取消颜色设置--&gt;]]]
+
+
+STYLE = {
+        'fore':
+        {   # 前景色
+            'black'    : 30,   #  黑色
+            'red'      : 31,   #  红色
+            'green'    : 32,   #  绿色
+            'yellow'   : 33,   #  黄色
+            'blue'     : 34,   #  蓝色
+            'purple'   : 35,   #  紫红色
+            'cyan'     : 36,   #  青蓝色
+            'white'    : 37,   #  白色
+        },
+
+        'back' :
+        {   # 背景
+            'black'     : 40,  #  黑色
+            'red'       : 41,  #  红色
+            'green'     : 42,  #  绿色
+            'yellow'    : 43,  #  黄色
+            'blue'      : 44,  #  蓝色
+            'purple'    : 45,  #  紫红色
+            'cyan'      : 46,  #  青蓝色
+            'white'     : 47,  #  白色
+        },
+
+        'mode' :
+        {   # 显示模式
+            'mormal'    : 0,   #  终端默认设置
+            'bold'      : 1,   #  高亮显示
+            'underline' : 4,   #  使用下划线
+            'blink'     : 5,   #  闪烁
+            'invert'    : 7,   #  反白显示
+            'hide'      : 8,   #  不可见
+        },
+
+        'default' :
+        {
+            'end' : 0,
+        },
+}
+
+
+def UseStyle(string, mode = '', fore = '', back = ''):
+
+    mode  = '%s' % STYLE['mode'][mode] if STYLE['mode'].has_key(mode) else ''
+
+    fore  = '%s' % STYLE['fore'][fore] if STYLE['fore'].has_key(fore) else ''
+
+    back  = '%s' % STYLE['back'][back] if STYLE['back'].has_key(back) else ''
+
+    style = ';'.join([s for s in [mode, fore, back] if s])
+
+    style = '\033[%sm' % style if style else ''
+
+    end   = '\033[%sm' % STYLE['default']['end'] if style else ''
+
+    return '%s%s%s' % (style, string, end)
+
+
+
+def TestColor( ):
+
+    print UseStyle('正常显示')
+    print ''
+
+    print "测试显示模式"
+    print UseStyle('高亮',   mode = 'bold'),
+    print UseStyle('下划线', mode = 'underline'),
+    print UseStyle('闪烁',   mode = 'blink'),
+    print UseStyle('反白',   mode = 'invert'),
+    print UseStyle('不可见', mode = 'hide')
+    print ''
+
+
+    print "测试前景色"
+    print UseStyle('黑色',   fore = 'black'),
+    print UseStyle('红色',   fore = 'red'),
+    print UseStyle('绿色',   fore = 'green'),
+    print UseStyle('黄色',   fore = 'yellow'),
+    print UseStyle('蓝色',   fore = 'blue'),
+    print UseStyle('紫红色', fore = 'purple'),
+    print UseStyle('青蓝色', fore = 'cyan'),
+    print UseStyle('白色',   fore = 'white')
+    print ''
+
+
+    print "测试背景色"
+    print UseStyle('黑色',   back = 'black'),
+    print UseStyle('红色',   back = 'red'),
+    print UseStyle('绿色',   back = 'green'),
+    print UseStyle('黄色',   back = 'yellow'),
+    print UseStyle('蓝色',   back = 'blue'),
+    print UseStyle('紫红色', back = 'purple'),
+    print UseStyle('青蓝色', back = 'cyan'),
+    print UseStyle('白色',   back = 'white')
+    print ''
+if __name__ == '__main__':
+
+    TestColor( )
+</code></pre></div></div>
+
+<p>查看输出</p>
+
+<p><img src="http://www.xiaoh.me/img/post-stdout-colors.jpg" alt="" /></p>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../30/bugs/index.html" data-toggle="tooltip" data-placement="top" title="常见问题汇总">
+                        Previous<br>
+                        <span>常见问题汇总</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../../02/02/lua-summary/index.html" data-toggle="tooltip" data-placement="top" title="Lua 语言快速入门">
+                        Next<br>
+                        <span>Lua 语言快速入门</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>

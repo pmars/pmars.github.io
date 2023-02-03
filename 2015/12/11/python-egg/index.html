@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="google-site-verification" content="xBT4GhYoi5qRD5tr338pgPM5OWHHIDR6mNg1a3euekI" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="死生切阔，与子成说，执子之手，与子偕老。| 这里是 Xiaoh 的个人博客 | 外接各种互联网项目">
+    <meta name="keyword"  content="兴明, xiaoh, pmars, itpmars, topmars, xiaoh's Blog, 博客, 个人网站, 互联网, 开发, 产品, 后端技术，架构">
+    <link rel="shortcut icon" href="../../../../img/favicon.ico">
+
+    <title>怎么制作pip安装包，Python Egg - Xiaoh写文字的地方 | Xiaoh's Blog</title>
+
+    <link rel="canonical" href="http://www.xiaoh.me/2015/12/11/python-egg/">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="../../../../css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="../../../../css/hux-blog.min.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="../../../../css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <!-- <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css"> -->
+    <!-- Hux change font-awesome CDN to qiniu -->
+    <link href="http://cdn.staticfile.org/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+
+    <!-- Hux Delete, sad but pending in China
+    <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/
+    css'>
+    -->
+
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <!-- ga & ba script hoook -->
+    <script></script>
+</head>
+
+
+<!-- hack iOS CSS :active style -->
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="../../../../index.html">Xiaoh's Blog</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div id="huxblog_navbar">
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li>
+                        <a href="../../../../index.html">Home</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../about/index.html">About</a>
+                    </li>
+                    
+                    <li>
+                        <a href="../../../../tags/index.html">Tags</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+<script>
+    // Drop Bootstarp low-performance Navbar
+    // Use customize navbar with high-quality material design animation
+    // in high-perf jank-free CSS3 implementation
+    var $body   = document.body;
+    var $toggle = document.querySelector('.navbar-toggle');
+    var $navbar = document.querySelector('#huxblog_navbar');
+    var $collapse = document.querySelector('.navbar-collapse');
+
+    var __HuxNav__ = {
+        close: function(){
+            $navbar.className = " ";
+            // wait until animation end.
+            setTimeout(function(){
+                // prevent frequently toggle
+                if($navbar.className.indexOf('in') < 0) {
+                    $collapse.style.height = "0px"
+                }
+            },400)
+        },
+        open: function(){
+            $collapse.style.height = "auto"
+            $navbar.className += " in";
+        }
+    }
+
+    // Bind Event
+    $toggle.addEventListener('click', function(e){
+        if ($navbar.className.indexOf('in') > 0) {
+            __HuxNav__.close()
+        }else{
+            __HuxNav__.open()
+        }
+    })
+
+    /**
+     * Since Fastclick is used to delegate 'touchstart' globally
+     * to hack 300ms delay in iOS by performing a fake 'click',
+     * Using 'e.stopPropagation' to stop 'touchstart' event from 
+     * $toggle/$collapse will break global delegation.
+     * 
+     * Instead, we use a 'e.target' filter to prevent handler
+     * added to document close HuxNav.  
+     *
+     * Also, we use 'click' instead of 'touchstart' as compromise
+     */
+    document.addEventListener('click', function(e){
+        if(e.target == $toggle) return;
+        if(e.target.className == 'icon-bar') return;
+        __HuxNav__.close();
+    })
+</script>
+
+
+    <!-- Image to hack wechat -->
+<!-- <img src="/img/icon_wechat.png" width="0" height="0"> -->
+<!-- <img src="/img/post-bg-python-egg.jpg" width="0" height="0"> -->
+
+<!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        position: relative;
+        background-image: url('../../../../img/post-bg-python-egg.jpg')
+    }
+
+    
+</style>
+<header class="intro-header" >
+    <div class="header-mask"></div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="tags">
+                        
+                        <a class="tag" href="../../../../tags/index.html#Python" title="Python">Python</a>
+                        
+                        <a class="tag" href="../../../../tags/index.html#Ubuntu" title="Ubuntu">Ubuntu</a>
+                        
+                    </div>
+                    <h1>怎么制作pip安装包，Python Egg</h1>
+                    
+                    
+                    <h2 class="subheading">制作Python Egg, 上传PyPI，pip安装下载，制作CLI工具</h2>
+                    
+                    <span class="meta">Posted by Xiaoh on December 11, 2015</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+
+    <!-- Post Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                post-container">
+
+				<h3 id="目录">目录</h3>
+
+<ol>
+  <li><a href="index.html#test">安装测试</a></li>
+  <li><a href="index.html#tipstips">Tips</a></li>
+  <li><a href="index.html#clicli">CLI工具制作</a>
+    <ol>
+      <li><a href="index.html#cliclicommand">CLI命令行工具介绍</a></li>
+      <li><a href="index.html#cliclisetup">CLI制作</a></li>
+      <li><a href="index.html#pypiclipypi">制作PyPI</a></li>
+      <li><a href="index.html#clitest">安装测试</a></li>
+    </ol>
+  </li>
+  <li><a href="index.html#setuppysetuppy">setup.py</a></li>
+  <li><a href="index.html#fconpypifcon">记FCON模块的pypi打包过程</a></li>
+</ol>
+
+<hr />
+
+<blockquote>
+  <p>最近项目组在写项目的 CLI 工具，已经接近尾声，想做成 pip 的安装包，所以才有了这篇文章
+1，文章介绍了如何生成 Python Egg ，上传 PyPI 及其 pip 的安装测试
+2，在后面的进阶部分会介绍简单的生成cli工具的方法</p>
+</blockquote>
+
+<p>话说既然研究了如何做包，不想浪费这次机会，干脆水一个博客吧</p>
+
+<hr />
+
+<h1 id="制作-make">[制作] (#make)</h1>
+
+<h4 id="整理项目-project">[整理项目] (#project)</h4>
+
+<p>先创建一个项目的文件夹</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mkdir eds     # eds 是我项目的名称，你随意修改成自己的即可
+$ cd eds
+</code></pre></div></div>
+
+<p>在里面在创建一个 edssdk 的文件夹，这个文件夹的名称我故意创建的和上层目录不一样，以免误会，这个文件夹其实就是包名称了</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ mkdir edssdk     # 这个文件夹就是包名称
+$ cd edssdk
+</code></pre></div></div>
+
+<p>这个时候就是写代码的时候了，如果项目逻辑简单，你可以选择在文件夹里面只创建一个 __init__.py 文件，将所有的函数写到此文件里</p>
+
+<p>当然如果项目复杂，你可以多创建几个文件，这里我繁中取简，只创建一个其他文件。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ touch __init__.py     # 这个文件作用就是给这个文件夹打成包
+$ touch help.py         # 这里是你的逻辑代码了，我就简单写了
+</code></pre></div></div>
+
+<p>我写了两个函数在 help.py 中</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat help.py
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+#############################################
+# File Name: help.py
+# Author: xingming
+# Mail: huoxingming@gmail.com
+# Created Time:  2015-12-11 01:23:50 AM
+#############################################
+
+
+def sum(*values):
+    s = 0
+    for v in values:
+        i = int(v)
+        s = s + i
+    print s
+
+def output():
+    print 'http://xiaoh.me'
+</code></pre></div></div>
+
+<h4 id="制作pypi包-pypi">[制作PyPI包] (#pypi)</h4>
+
+<p>现在项目逻辑已经完成，那么开始做 PyPI 的包了。</p>
+
+<p>在 eds 文件夹中，创建 Egg 的配置文件 setup.py，并填写配置</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat setup.py
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+#############################################
+# File Name: setup.py
+# Author: xingming
+# Mail: huoxingming@gmail.com
+# Created Time:  2015-12-11 01:25:34 AM
+#############################################
+
+
+from setuptools import setup, find_packages
+
+setup(
+    name = "edssdk",
+    version = "0.0.1",
+    keywords = ("pip", "datacanvas", "eds", "xiaoh"),
+    description = "eds sdk",
+    long_description = "eds sdk for python",
+    license = "MIT Licence",
+
+    url = "http://xiaoh.me",
+    author = "xiaoh",
+    author_email = "huoxingming@gmail.com",
+
+    packages = find_packages(),
+    include_package_data = True,
+    platforms = "any",
+    install_requires = []
+)
+</code></pre></div></div>
+
+<p>当你的包很复杂的时候，势必会引用其他的包，你需要将你所有引用的包名称写到 <code class="highlighter-rouge">install_requires</code> 这个里面：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>install_requires = ["requests"]
+</code></pre></div></div>
+
+<p>当然 setup 还有很多可以选择的项可以填，你可以 python setup.py –help 查看，也可以去看 <a href="http://docs.python.org/distutils/setupscript.html#additional-meta-data">文档</a></p>
+
+<p>OK，看一下现在目录的结构：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ tree
+$ eds
+$ ├── edssdk
+$ │   ├── help.py
+$ │   └── __init__.py
+$ └── setup.py
+</code></pre></div></div>
+
+<p>这里面还需要说一下，setup 文件支持用配置文件来编写里面的参数</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat setup.cfg
+[metadata]
+name = edssdk
+version = 0.1.1
+zip_safe = False
+
+description = eds sdk
+author = xiaoh
+author_email = huoxingming@gmail.com
+
+license = MIT Licence
+platforms = any
+
+[files]
+packages = find_packages()
+</code></pre></div></div>
+
+<p>更多的帮助信息你可以查看 <a href="https://wiki.python.org/moin/CheeseShopTutorial#Package_Meta-Data">这篇文档</a></p>
+
+<h4 id="打包-package">[打包] (#package)</h4>
+
+<p>打包这一步我认为比较简单，目前比较流行的2中打包的方式:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python setup.py bdist_egg     # 生成类似 edssdk-0.0.1-py2.7.egg，支持 easy_install 
+$ python setup.py sdist         # 生成类似 edssdk-0.0.1.tar.gz，支持 pip
+</code></pre></div></div>
+
+<p>上面两条命令都会将文件生成到 dist 目录中</p>
+
+<p>当然还有其他非主流格式或者其他选项，可以通过下面这个命令查看：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python setup.py --help-commands
+</code></pre></div></div>
+
+<hr />
+
+<h1 id="部署到pypi-deploy">[部署到PyPI] (#deploy)</h1>
+
+<h4 id="注册pypi包-register">[注册PyPI包] (#register)</h4>
+
+<p>我是直接在 SSH 下面进行操作的，你也可以通过 <a href="http://pypi.python.org/pypi?%3Aaction=submit_form">网页</a> 来做，SSH 步骤：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python setup.py register
+running register
+running egg_info
+writing dependency_links to eds_sdk.egg-info/dependency_links.txt
+writing eds_sdk.egg-info/PKG-INFO
+writing top-level names to eds_sdk.egg-info/top_level.txt
+reading manifest file 'eds_sdk.egg-info/SOURCES.txt'
+writing manifest file 'eds_sdk.egg-info/SOURCES.txt'
+running check
+We need to know who you are, so please choose either:
+ 1. use your existing login,
+ 2. register as a new user,
+ 3. have the server generate a new password for you (and email it to you), or
+ 4. quit
+Your selection [default 1]:
+
+Username: xingming
+Password:
+Registering edssdk to https://pypi.python.org/pypi
+Server response (200): OK
+I can store your PyPI login so future submissions will be faster.
+(the login will be stored in /home/xingming/.pypirc)
+Save your login (y/N)?y
+</code></pre></div></div>
+
+<p>关于 register 更详细的内容可以看 <a href="http://docs.python.org/distutils/packageindex.html">PackageIndex</a></p>
+
+<h4 id="上传到pypi-upload">[上传到PyPI] (#upload)</h4>
+
+<p>上传文件也是有 SSH 和 网页两种方法。</p>
+
+<p>网页: 在浏览器登陆到 PyPI 点击 Your packages 中 Egg 的项目，然后选择某个版本的 files 即可看到上传界面。</p>
+
+<ul>
+  <li>下面这句话还是比较常用的，因为你的包以后更新的话，就不用再去注册了，直接使用下面的命令生成包并上传即可。</li>
+</ul>
+
+<p>SSH:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python setup.py sdist upload
+</code></pre></div></div>
+
+<p>这个又是一堆的输出信息，我就不罗列了。</p>
+
+<h4 id="安装测试"><a href="index.html#test">安装测试</a></h4>
+
+<p>用 pip 安装：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ pip install edssdk
+Downloading/unpacking edssdk
+Downloading edssdk-0.0.1.tar.gz
+Running setup.py (path:/home/huoxm/pyvirt/build/edssdk/setup.py) egg_info for package edssdk
+
+Installing collected packages: edssdk
+Running setup.py install for edssdk
+</code></pre></div></div>
+
+<p>测试：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python -c "from edssdk import help; help.sum(3,5);help.output();"
+8
+http://xiaoh.me
+</code></pre></div></div>
+
+<p>OK, 现在这个 sdk 大家都可以用到了~~~~~</p>
+
+<p>关于 upload 更详细的内容可以看 <a href="http://docs.python.org/distutils/uploading.html">Uploading</a></p>
+
+<hr />
+
+<h1 id="tips"><a href="index.html#tips">Tips</a></h1>
+
+<h6 id="setuppy-中调用当前目录的文件一定要加-manifestin-并将调用文件-include-进来">setup.py 中调用当前目录的文件一定要加 MANIFEST.in 并将调用文件 include 进来</h6>
+
+<p>使用 python setup.py sdist 打包时，如果 setup.py 调用了当前目录中的文件(如README.rst):</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ long_description = open('README.rst').read()
+</code></pre></div></div>
+
+<p>一定要在增加 MANIFEST.in 文件并将调用文件 include 进来，否则将导致用户在 pip install 时报文件找不到的错误，示例:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat MANIFEST.in
+include README.rst
+</code></pre></div></div>
+
+<p>更详情的可以看 <a href="http://docs.python.org/distutils/sourcedist.html#specifying-the-files-to-distribute">docs.python.org</a></p>
+
+<h6 id="项目逻辑内容如果直接在-__init__py-中完成的话那么引用就可以更简便了">项目逻辑内容如果直接在 ‘__init__.py’ 中完成的话，那么引用就可以更简便了。</h6>
+
+<hr />
+
+<h1 id="cli工具制作"><a href="index.html#cli">CLI工具制作</a></h1>
+
+<h4 id="cli命令行工具介绍"><a href="index.html#clicommand">CLI命令行工具介绍</a></h4>
+
+<p>CLI（command-line interface，命令行界面）是指可在用户提示符下键入可执行指令的界面，它通常不支持鼠标，用户通过键盘输入指令，计算机接收到指令后，予以执行。</p>
+
+<p>就我直观的理解就是，这就是给程序员使用的，可以在终端即使装XX的美妙工具。</p>
+
+<h4 id="cli制作"><a href="index.html#clisetup">CLI制作</a></h4>
+
+<p>由于是 CLI 的命令行工具，所以程序一定要有一个入口的位置，所以我在 help.py 里面添加了 main 函数：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>def main():
+    print 'this is main()'
+    print sys.argv[1:]
+
+if __name__ == "__main__":
+    main()
+</code></pre></div></div>
+
+<p>这个 main 下面会在 setup.py 中用到，下面说一下 setup.py 的相关修改。</p>
+
+<blockquote>
+  <p>看英文文档真的是头大，所以后来干脆到 github 上面去找 CLI 的源码来看。发现每个 CLI 工具的 setup.py 中都会有 entry_points 这个节点。</p>
+</blockquote>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>entry_points = {
+    'console_scripts': [
+        'edssdk = edssdk.help:main'
+    ]
+}
+</code></pre></div></div>
+
+<p>完整的 setup.py 为：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>from setuptools import setup, find_packages
+
+setup(
+    name = "edssdk",
+    version = "0.1.2",
+    keywords = ("pip", "datacanvas", "eds", "xiaoh"),
+    description = "eds sdk",
+    long_description = "eds sdk for python",
+    license = "MIT Licence",
+
+    url = "http://xiaoh.me",
+    author = "xiaoh",
+    author_email = "huoxingming@gmail.com",
+
+    packages = find_packages(),
+    include_package_data = True,
+    platforms = "any",
+    install_requires = [],
+
+    scripts = [],
+    entry_points = {
+        'console_scripts': [
+            'edssdk = edssdk.help:main'
+        ]
+    }
+)
+</code></pre></div></div>
+
+<p>这个里面多了一个 entry_points 节点，里面的 console_scripts 指明了命令行工具的名称：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>edssdk = edssdk.help:main
+</code></pre></div></div>
+
+<p>等号前面指明了工具包的名称，等号后面的内容指明了程序的入口地址，当然，这个可以有多条记录，这样一个项目就可以制作多个命令行工具了</p>
+
+<h4 id="制作pypi"><a href="index.html#clipypi">制作PyPI</a></h4>
+
+<p>制作包的过程和上面的是一样的</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ python setup.py sdist
+$ python setup.py register
+$ python setup.py sdist upload
+</code></pre></div></div>
+
+<h4 id="安装测试-1"><a href="index.html#clitest">安装测试</a></h4>
+
+<p>通过 pip 更新一下包：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ pip install -U edssdk
+</code></pre></div></div>
+
+<p>测试工具包：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ edssdk 2345
+this is main()
+['2345']
+</code></pre></div></div>
+
+<p>OK，方法已经找到了，CLI 工具也就好弄了。</p>
+
+<hr />
+
+<h1 id="setuppy"><a href="index.html#setuppy">setup.py</a></h1>
+
+<p>这里讲解一下 Setup.py 中的一些参数</p>
+
+<ul>
+  <li><code class="highlighter-rouge">packages</code> 告诉Distutils需要处理那些包（包含<code class="highlighter-rouge">__init__.py</code>的文件夹）</li>
+  <li><code class="highlighter-rouge">package_dir</code> 告诉Distutils哪些目录下的文件被映射到哪个源码包，感觉好像是一个相对路径的定义。一个例子：<code class="highlighter-rouge">package_dir = {'': 'lib'}</code>，表示以lib为主目录。</li>
+  <li><code class="highlighter-rouge">ext_modules</code> 是一个包含Extension实例的列表，Extension的定义也有一些参数。</li>
+  <li><code class="highlighter-rouge">ext_package</code> 定义extension的相对路径</li>
+  <li><code class="highlighter-rouge">requires</code> 定义依赖哪些模块</li>
+  <li><code class="highlighter-rouge">provides</code> 定义可以为哪些模块提供依赖</li>
+  <li><code class="highlighter-rouge">scripts</code> 指定python源码文件，可以从命令行执行。在安装时指定–install-script</li>
+  <li>
+    <p><code class="highlighter-rouge">package_data</code> 通常包含与包实现相关的一些数据文件或类似于readme的文件。</p>
+
+    <p>package_data = {‘’: [‘<em>.txt’], ‘mypkg’: [‘data/</em>.dat’],}</p>
+  </li>
+</ul>
+
+<p>表示包含所有目录下的txt文件和mypkg/data目录下的所有dat文件。</p>
+
+<ul>
+  <li>
+    <p><code class="highlighter-rouge">data_files</code> 指定其他的一些文件（如配置文件）</p>
+
+    <p>setup(…,
+        data_files=[(‘bitmaps’, [‘bm/b1.gif’, ‘bm/b2.gif’]),
+                    (‘config’, [‘cfg/data.cfg’]),
+                    (‘/etc/init.d’, [‘init-script’])]
+       )</p>
+  </li>
+</ul>
+
+<p>规定了哪些文件被安装到哪些目录中。如果目录名是相对路径，则是相对于 <code class="highlighter-rouge">sys.prefix</code> 或 <code class="highlighter-rouge">sys.exec_prefix</code> 的路径。如果没有提供模板，会被添加到MANIFEST文件中。</p>
+
+<h4 id="执行sdist命令时默认会打包哪些东西呢">执行sdist命令时，默认会打包哪些东西呢？</h4>
+
+<ul>
+  <li>所有由<code class="highlighter-rouge">py_modules</code>或<code class="highlighter-rouge">packages</code>指定的源码文件</li>
+  <li>所有由<code class="highlighter-rouge">ext_modules</code>或<code class="highlighter-rouge">libraries</code>指定的C源码文件</li>
+  <li>由scripts指定的脚本文件</li>
+  <li>类似于<code class="highlighter-rouge">test/test*.py</code>的文件</li>
+  <li><code class="highlighter-rouge">README.txt</code>或<code class="highlighter-rouge">README</code>，<code class="highlighter-rouge">setup.py</code>，<code class="highlighter-rouge">setup.cfg</code></li>
+  <li>所有<code class="highlighter-rouge">package_data</code>或<code class="highlighter-rouge">data_files</code>指定的文件</li>
+</ul>
+
+<p>还有一种方式是写一个manifest template，名为MANIFEST.in，定义如何生成MANIFEST文件，内容就是需要包含在分发包中的文件。一个MANIFEST.in文件如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>include *.txt
+recursive-include examples *.txt *.py
+prune examples/sample?/build
+</code></pre></div></div>
+
+<hr />
+
+<h1 id="记fcon模块的pypi打包过程"><a href="index.html#fcon">记FCON模块的pypi打包过程</a></h1>
+
+<p><code class="highlighter-rouge">fcon</code> 是刚刚完成的一个python模块，他可以查找指定目录下的符合一定规则文件名的内容中包含一定规则的行，并打印出来。说起来比较拗口，就是三个参数，文件目录，文件正则，字符正则，三个一综合就是输出结果了。</p>
+
+<p>这个工具主要帮我解决查找部分内容的功能，写的博客里面有好多用的是默认的背景图，有时间的时候我就会换一下，这时候我就需要查出来那些用到了默认的。</p>
+
+<p>你可以通过 <code class="highlighter-rouge">pip install fcon</code> 来安装使用。</p>
+
+<p>这次打包过程还挺烦的，一直有问题，是因为我用到了 <a href="http://www.xiaoh.me/2016/01/29/click-command/">Click模块</a> 之后就发现，我不用指定内置的运行函数(main)了，而且，我希望可以输出version，并且这个version在setup.py里面也可以使用，这就高出了好多问题。还好刚刚都解决了。</p>
+
+<p>首先说，看一下我所有文件的结构：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ tree
+.
+├── bin
+│   └── fcon
+├── fcon
+│   └── __init__.py
+├── README.md
+└── setup.py
+
+2 directories, 4 files
+</code></pre></div></div>
+
+<p>可以发现，我的 fcon 脚本放到了 bin 目录下，而 fcon 文件夹里面只有一个 <code class="highlighter-rouge">__init__.py</code> 文件，这是为了包含的时候不冲突，比如我在 fcon 脚本里面用到了这句话：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>try:
+    import fcon
+except:
+    sys.path.append(os.path.join(os.path.dirname(__file__), "../"))
+    import fcon
+
+def output_version(ctx, param, value):
+    if not value or ctx.resilient_parsing:
+        return
+    click.echo("Version: %s" % fcon.__version__)
+    ctx.exit()
+</code></pre></div></div>
+
+<p>这个就是通过引用来设置 version 的部分，这样就实现了，version一处改，大家起开怀的要求了。<code class="highlighter-rouge">__init__.py</code> 如下：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>__version__ = '0.0.17'
+</code></pre></div></div>
+
+<p>对的，就这么一句话。</p>
+
+<p>再看我的 setup.py 关键就是这个文件了：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat setup.py
+#!/usr/bin/env python
+#-*- coding:utf-8 -*-
+
+#############################################
+# File Name: setup.py
+# Author: xiaoh
+# Mail: p.mars@163.com
+# Created Time:  2015-12-11 01:25:34 AM
+#############################################
+
+from setuptools import setup, find_packages
+import fcon
+
+setup(
+    name = "fcon",
+    version = fcon.__version__,
+    keywords = ("find", "fcon", "xiaoh"),
+    description = "find content",
+    long_description = "print files which contain the content you want to search.",
+    license = "MIT Licence",
+
+    url = "http://xiaoh.me",
+    author = "xiaoh",
+    author_email = "xiaoh@about.me",
+
+    packages = ['fcon'],
+    package_data = {
+    },
+    include_package_data = True,
+    platforms = "any",
+    install_requires = ["click"],
+
+    scripts = ['bin/fcon']
+#    entry_points = {
+#        'console_scripts': [
+#            'fcon = bin/fcon'
+#        ]
+#    }
+)
+</code></pre></div></div>
+
+<p>注释的地方是我测试的过程。。。</p>
+
+<p>就说这么多，关键还得是看脚本，看写法。</p>
+
+<p>如果想看源码的话，可以去：<a href="https://github.com/pmars/tools/tree/master/fcon">https://github.com/pmars/tools/tree/master/fcon</a></p>
+
+<hr />
+
+<h3 id="end">END</h3>
+
+
+
+                <hr>
+
+                
+
+
+                <ul class="pager">
+                    
+                    <li class="previous">
+                        <a href="../../10/hello-world/index.html" data-toggle="tooltip" data-placement="top" title="Hello World">
+                        Previous<br>
+                        <span>Hello World</span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li class="next">
+                        <a href="../../12/ubuntu-init/index.html" data-toggle="tooltip" data-placement="top" title="Ubuntu系统的简单配置">
+                        Next<br>
+                        <span>Ubuntu系统的简单配置</span>
+                        </a>
+                    </li>
+                    
+                </ul>
+
+
+                
+
+                
+
+            </div>
+
+    <!-- Sidebar Container -->
+            <div class="
+                col-lg-8 col-lg-offset-2
+                col-md-10 col-md-offset-1
+                sidebar-container">
+
+                <!-- Featured Tags -->
+                
+                <section>
+                    <hr class="hidden-sm hidden-xs">
+                    <h5><a href="../../../../tags/index.html">FEATURED TAGS</a></h5>
+                    <div class="tags">
+        				
+                            
+                				<a href="../../../../tags/index.html#杂谈" title="杂谈" rel="4">
+                                    杂谈
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Python" title="Python" rel="17">
+                                    Python
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Ubuntu" title="Ubuntu" rel="3">
+                                    Ubuntu
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Flask" title="Flask" rel="3">
+                                    Flask
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Redis" title="Redis" rel="3">
+                                    Redis
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#数据库" title="数据库" rel="2">
+                                    数据库
+                                </a>
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Supervisor" title="Supervisor" rel="2">
+                                    Supervisor
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#服务器" title="服务器" rel="6">
+                                    服务器
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Lua" title="Lua" rel="2">
+                                    Lua
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Requests" title="Requests" rel="2">
+                                    Requests
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Django" title="Django" rel="2">
+                                    Django
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#AWK" title="AWK" rel="2">
+                                    AWK
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#HBase" title="HBase" rel="2">
+                                    HBase
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Thrift" title="Thrift" rel="2">
+                                    Thrift
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Spider" title="Spider" rel="4">
+                                    Spider
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#Selenium" title="Selenium" rel="2">
+                                    Selenium
+                                </a>
+                            
+        				
+                            
+                				<a href="../../../../tags/index.html#PhantomJS" title="PhantomJS" rel="2">
+                                    PhantomJS
+                                </a>
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+                            
+        				
+        			</div>
+                </section>
+                
+
+                <!-- Friends Blog -->
+                
+                <hr>
+                <h5>FRIENDS</h5>
+                <ul class="list-inline">
+                    
+                        <li><a href="http://pmars.cnblogs.com">pmars的博客</a></li>
+                    
+                        <li><a href="http://weibo.com/topmars">pmars的微博</a></li>
+                    
+                        <li><a href="http://github.com/pmars">我的项目</a></li>
+                    
+                </ul>
+                
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+
+
+
+
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading').remove('.sidebar-container h5');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+
+    <!-- Footer -->
+<!-- jQuery -->
+<script src="../../../../js/jquery.min.js"></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="../../../../js/bootstrap.min.js"></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="../../../../js/hux-blog.min.js"></script>
+
+
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    
+                    <li>
+                        <a href="../../../../feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+
+                    <!-- add Weibo, Zhihu by Hux, add target = "_blank" to <a> by Hux -->
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/xiaoh">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <li>
+                        <a target="_blank" href="http://weibo.com/topmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+
+                    
+                    
+                    <li>
+                        <a target="_blank" href="https://github.com/pmars">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                </ul>
+                <p class="copyright text-muted">
+                    Copyright &copy; Xiaoh's Blog 2020
+                    <!--br-->
+                    | Theme © <a href="../../../../index.html">Xiaoh</a> |
+                    Hosted by <a rel="nofollow" href="https://pages.coding.me" style="font-weight: bold">Coding Pages</a>
+                    <!--iframe
+                        style="margin-left: 2px; margin-bottom:-5px;"
+                        frameborder="0" scrolling="0" width="91px" height="20px"
+                        src="https://ghbtns.com/github-btn.html?user=pmars&repo=pmars.github.io&type=star&count=true" >
+                    </iframe-->
+                    <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+                    <span id="busuanzi_container_site_pv" style='display:none'> | View <span id="busuanzi_value_site_pv"></span> Times</span>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="actGotop" style="">
+        <div class="plane"></div>
+        <div class="back-info">返回顶部</div>
+    </div>
+    <script>
+        (function() {
+            $(window).scroll(function(){
+                if($(window).scrollTop()>500){
+                    $('.actGotop').fadeIn();
+                }else{
+                    $('.actGotop').fadeOut();
+                }
+            }) 
+            $('.actGotop').click(function(){
+                $(window).scrollTop(0);
+            });
+        })();
+    </script>
+</footer>
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js", function(){
+        hljs.initHighlightingOnLoad();
+    })
+    // only load tagcloud.js in tag.html
+    if($('#tag_cloud').length !== 0){
+        async("/js/jquery.tagcloud.js",function(){
+            $.fn.tagcloud.defaults = {
+                //size: {start: 1, end: 1, unit: 'em'},
+                color: {start: '#bbbbee', end: '#0085a1'},
+            };
+            $('#tag_cloud a').tagcloud();
+        })
+    }
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+<!--fastClick.js -->
+<script>
+    async("http://cdn.bootcss.com/fastclick/1.0.6/fastclick.min.js", function(){
+        // var $nav = document.querySelector("nav");
+        // if($nav) FastClick.attach($nav);
+
+        // global FastClick!!
+        FastClick.attach(document.body);    
+    })
+</script>
+
+
+<!-- Google Analytics -->
+
+<script>
+    // dynamic User by Hux
+    var _gaId = 'UA-73800419-1';
+    var _gaDomain = 'www.xiaoh.me';
+
+    // Originial
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', _gaId, _gaDomain);
+    ga('send', 'pageview');
+</script>
+
+
+
+<!-- Baidu Tongji -->
+
+<script>
+    // dynamic User by Hux
+    var _baId = 'eb09bda7042f7733bd1bcba14d69d750';
+
+    // Originial
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?" + _baId;
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+</script>
+
+
+
+
+<!-- Image to hack wechat -->
+<img src="../../../../img/icon_wechat.png" width="0" height="0" />
+<!-- Migrate from head to bottom, no longer block render and still work -->
+
+</body>
+
+</html>
